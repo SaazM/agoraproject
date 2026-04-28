@@ -59,9 +59,8 @@ export default async function handler(req, res) {
       .maybeSingle()
     if (pErr || !prof) return json(res, 403, { error: 'Not authorized' })
 
-    const isAdmin = prof.role === 'admin'
-      && String(prof.email || '').toLowerCase() === 'agora@admin.org'
-      && requesterEmail === 'agora@admin.org'
+    const isAdmin = String(prof.email || '').toLowerCase() === 'agora@admin.edu'
+      && requesterEmail === 'agora@admin.edu'
     if (!isAdmin) return json(res, 403, { error: 'Not authorized' })
 
     if (targetUserId === requesterId) {

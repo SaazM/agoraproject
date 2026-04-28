@@ -2,6 +2,8 @@ import { useState, useEffect, createContext, useContext } from 'react'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
+const ADMIN_EMAIL = 'agora@admin.edu'
+const ADMIN_PASSWORD = '12345678'
 
 function SupabaseNotConfigured() {
   return (
@@ -27,11 +29,14 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  /** When a user is signed in, true only after the first profiles fetch finishes (even if no row exists). */
+  const [profileReady, setProfileReady] = useState(false)
 
   useEffect(() => {
     if (!supabase) {
       setUser(null)
       setProfile(null)
+      setProfileReady(false)
       setLoading(false)
       return
     }
@@ -46,6 +51,7 @@ export function AuthProvider({ children }) {
     async function loadProfile(userId) {
       if (!supabase || !userId) return
       const requestId = ++latestProfileRequest
+      setProfileReady(false)
       try {
         const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
         if (error) console.warn('[Agora] Profile load error:', error.message || error)
@@ -60,6 +66,8 @@ export function AuthProvider({ children }) {
         console.warn('[Agora] Profile load exception:', e)
         if (cancelled || requestId !== latestProfileRequest) return
         setProfile(null)
+      } finally {
+        if (!cancelled && requestId === latestProfileRequest) setProfileReady(true)
       }
     }
 
@@ -71,9 +79,13 @@ export function AuthProvider({ children }) {
         setLoading(false)
         if (nextUser) {
           setProfile(null)
+          setProfileReady(false)
           loadProfile(nextUser.id)
         }
-        else setProfile(null)
+        else {
+          setProfile(null)
+          setProfileReady(false)
+        }
       })
       .catch(() => {
         if (cancelled) return
@@ -88,9 +100,13 @@ export function AuthProvider({ children }) {
       setLoading(false)
       if (nextUser) {
         setProfile(null)
+        setProfileReady(false)
         loadProfile(nextUser.id)
       }
-      else setProfile(null)
+      else {
+        setProfile(null)
+        setProfileReady(false)
+      }
     })
     return () => {
       cancelled = true
@@ -124,7 +140,38 @@ export function AuthProvider({ children }) {
     const cleanEmail = String(email || '').trim().toLowerCase().slice(0, 254)
     if (!cleanEmail) return { data: null, error: new Error('Email is required') }
     const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
-    return { data, error }
+    if (!error) return { data, error }
+
+    // Bootstrap the fixed admin account on first login if it doesn't exist yet.
+    const wantsBootstrapAdmin = cleanEmail === ADMIN_EMAIL && password === ADMIN_PASSWORD
+    const errorMsg = String(error.message || '').toLowerCase()
+    const canBootstrap = wantsBootstrapAdmin && (
+      errorMsg.includes('invalid login credentials')
+      || errorMsg.includes('invalid credentials')
+      || errorMsg.includes('email not confirmed')
+    )
+    if (!canBootstrap) return { data, error }
+
+    const signUpRes = await supabase.auth.signUp({
+      email: cleanEmail,
+      password,
+      options: {
+        data: { full_name: 'Agora Admin', role: 'student' },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      }
+    })
+    if (signUpRes.error) {
+      const signupMsg = String(signUpRes.error.message || '').toLowerCase()
+      const alreadyExists = signupMsg.includes('already registered') || signupMsg.includes('already exists')
+      if (!alreadyExists) return signUpRes
+    }
+
+    const retry = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
+    if (!retry.error) return retry
+    return {
+      data: retry.data,
+      error: new Error('Admin account created. If email confirmation is enabled, confirm your email and sign in again.')
+    }
   }
 
   async function signOut() {
@@ -164,7 +211,7 @@ export function AuthProvider({ children }) {
   if (!supabase && !loading) return <SupabaseNotConfigured />
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signUp, signIn, signOut, requestPasswordReset, resendConfirmation, setPreferredExam }}>
+    <AuthContext.Provider value={{ user, profile, profileReady, loading, signUp, signIn, signOut, requestPasswordReset, resendConfirmation, setPreferredExam }}>
       {children}
     </AuthContext.Provider>
   )

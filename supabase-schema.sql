@@ -121,7 +121,7 @@ set search_path = public
 as $$
   select exists (
     select 1 from public.profiles
-    where id = auth.uid() and role = 'admin' and lower(email) = 'agora@admin.org'
+    where id = auth.uid() and lower(email) = 'agora@admin.edu'
   );
 $$;
 
@@ -330,4 +330,4 @@ create policy "Tutors see affiliated review items" on public.review_items for se
 -- One-time setup: promote the Agora admin account (safe to run repeatedly).
 update public.profiles
 set role = 'admin'
-where lower(email) = 'agora@admin.org';
+where lower(email) = 'agora@admin.edu';

@@ -38,7 +38,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 function Navbar({ viewUserId, isAdminPreview, currentExam, showResources = false }) {
   const { profile, signOut } = useAuth()
   const navigate = useNavigate()
-  const isAdmin = profile?.role === 'admin' && String(profile?.email || '').toLowerCase() === 'agora@admin.org'
+  const isAdmin = String(profile?.email || '').toLowerCase() === 'agora@admin.edu'
   const isTutor = profile?.role === 'tutor'
   const satHref = withViewUser(withExam('/dashboard', 'sat'), viewUserId, isAdminPreview)
   const actHref = withViewUser(withExam('/dashboard', 'act'), viewUserId, isAdminPreview)

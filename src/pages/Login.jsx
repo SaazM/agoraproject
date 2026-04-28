@@ -1,14 +1,20 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth.jsx'
 import PasswordInput from '../components/PasswordInput.jsx'
 
 export default function Login() {
   const navigate = useNavigate()
+  const [, setSearchParams] = useSearchParams()
+  const [skipIntro] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const p = new URLSearchParams(window.location.search)
+    return p.get('signup') === '1' || p.get('signup') === 'true'
+  })
   const finalBrandRef = useRef(null)
   const brandInnerRef = useRef(null)
-  const [mode, setMode] = useState('signin') // 'signin' | 'signup'
+  const [mode, setMode] = useState(skipIntro ? 'signup' : 'signin') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -17,7 +23,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
-  const [introPhase, setIntroPhase] = useState('center')
+  const [introPhase, setIntroPhase] = useState(skipIntro ? 'done' : 'center')
   const [introMetrics, setIntroMetrics] = useState({
     left: 0,
     top: 0,
@@ -56,6 +62,10 @@ export default function Login() {
   }, [])
 
   useEffect(() => {
+    if (skipIntro) {
+      setSearchParams({}, { replace: true })
+      return
+    }
     const moveTimer = window.setTimeout(() => setIntroPhase('move'), 4200)
     const revealTimer = window.setTimeout(() => setIntroPhase('reveal'), 6100)
     const doneTimer = window.setTimeout(() => setIntroPhase('done'), 6500)
@@ -64,7 +74,7 @@ export default function Login() {
       window.clearTimeout(revealTimer)
       window.clearTimeout(doneTimer)
     }
-  }, [])
+  }, [skipIntro, setSearchParams])
 
   const showLoginContent = introPhase === 'reveal' || introPhase === 'done'
   const introOverlayStyle = {

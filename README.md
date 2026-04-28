@@ -82,10 +82,10 @@ Every time you push to the `main` branch, Vercel automatically rebuilds and depl
 
 The admin panel lets you manage students, view all test data, and extract answer keys from PDFs.
 
-1. Sign up through the app with the email `agora@admin.org`
+1. Sign up through the app with the email `agora@admin.edu`
 2. In Supabase SQL Editor, run:
 ```sql
-UPDATE public.profiles SET role = 'admin' WHERE email = 'agora@admin.org';
+UPDATE public.profiles SET role = 'admin' WHERE email = 'agora@admin.edu';
 ```
 3. Log out and back in. You will now see the admin panel.
 
@@ -284,7 +284,7 @@ Full system access:
 - Manage test answer keys
 - Extract answer keys from PDFs
 - User statistics and data analysis
-- Create admin account with email `agora@admin.org`, then set role in Supabase SQL
+- Create admin account with email `agora@admin.edu`, then set role in Supabase SQL
 
 ---
 

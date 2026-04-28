@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react'
+import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Analytics } from '@vercel/analytics/react'
@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
 import AppErrorBoundary from './components/AppErrorBoundary.jsx'
 import { ToastProvider } from './components/Toast.jsx'
 import Login from './pages/Login.jsx'
+const ADMIN_EMAIL = 'agora@admin.edu'
 
 const loadDashboard = () => import('./pages/Dashboard.jsx')
 const loadTestTaking = () => import('./pages/TestTaking.jsx')
@@ -85,15 +86,77 @@ function ProtectedRoute({ children }) {
   return children
 }
 
+function MissingProfileNotice() {
+  const { signOut } = useAuth()
+  const [signingOut, setSigningOut] = useState(false)
+  const sql = `insert into public.profiles (id, email, full_name, role, affiliation)
+select u.id, u.email,
+  coalesce(u.raw_user_meta_data->>'full_name', ''),
+  case when coalesce(u.raw_user_meta_data->>'role','student') in ('student','tutor')
+    then coalesce(u.raw_user_meta_data->>'role','student') else 'student' end,
+  nullif(trim(coalesce(u.raw_user_meta_data->>'affiliation', '')), '')
+from auth.users u
+where not exists (select 1 from public.profiles p where p.id = u.id);`
+  async function handleSignOut() {
+    setSigningOut(true)
+    try {
+      await signOut()
+    } finally {
+      setSigningOut(false)
+    }
+  }
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Sora,sans-serif', background: '#f8fafc', padding: 24 }}>
+      <div style={{ maxWidth: 560, background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: 24, boxShadow: '0 2px 16px rgba(15,31,61,.09)' }}>
+        <div style={{ fontSize: 18, fontWeight: 800, color: '#0f1f3d', marginBottom: 10 }}>Account setup incomplete</div>
+        <div style={{ color: '#475569', fontSize: 14, lineHeight: 1.65, marginBottom: 14 }}>
+          You’re signed in, but there is no row in <code style={{ fontSize: 12, background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>public.profiles</code>. Common causes: signing up before running{' '}
+          <code style={{ fontSize: 12, background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>supabase-schema.sql</code>, or the new-user trigger not installed yet.
+        </div>
+        <div style={{ color: '#334155', fontSize: 13, lineHeight: 1.6, marginBottom: 14, padding: '12px 14px', background: '#f1f5f9', borderRadius: 10 }}>
+          <strong>Deleted the user in Supabase?</strong> This browser can still be holding an old session. Use <strong>Sign out</strong> below (or clear site data for localhost) — then sign up again.
+        </div>
+        <div style={{ color: '#0f1f3d', fontSize: 13, lineHeight: 1.6, marginBottom: 10 }}>
+          <strong>Otherwise fix:</strong> Supabase → <strong>SQL Editor</strong> → paste and run:
+        </div>
+        <pre style={{ background: '#0b1220', color: '#e2e8f0', padding: 14, borderRadius: 10, overflowX: 'auto', fontSize: 11, lineHeight: 1.5, margin: '0 0 14px' }}>{sql}</pre>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={signingOut}
+            style={{
+              fontFamily: 'Sora,sans-serif',
+              fontWeight: 700,
+              fontSize: 14,
+              padding: '10px 18px',
+              borderRadius: 10,
+              border: 'none',
+              cursor: signingOut ? 'wait' : 'pointer',
+              background: '#0f1f3d',
+              color: 'white',
+            }}
+          >
+            {signingOut ? 'Signing out…' : 'Sign out'}
+          </button>
+          <span style={{ fontSize: 12, color: '#64748b' }}>Then refresh if needed and sign in again.</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PublicRoute({ children }) {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, profileReady, loading } = useAuth()
   if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
   if (user) {
-    // Wait for profile to load before redirecting so we route to the correct page
-    if (!profile) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+    // Wait for profile fetch to finish before redirecting (avoid infinite spinner when profile row is missing)
+    if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+    if (!profile) return <MissingProfileNotice />
     const role = profile?.role
+    const isAdminEmail = String(profile?.email || '').toLowerCase() === ADMIN_EMAIL
     if (role === 'tutor') return <Navigate to="/tutor" replace />
-    if (role === 'admin') return <Navigate to="/admin" replace />
+    if (role === 'admin' || isAdminEmail) return <Navigate to="/admin" replace />
     // New students who haven't chosen an exam go to choose-test
     const hasChosenExam = user?.user_metadata?.preferred_exam
     if (!hasChosenExam) return <Navigate to="/choose-test" replace />
@@ -103,11 +166,13 @@ function PublicRoute({ children }) {
 }
 
 function RoleRedirect() {
-  const { profile } = useAuth()
-  if (!profile) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+  const { profile, profileReady } = useAuth()
+  if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+  if (!profile) return <MissingProfileNotice />
   const role = profile?.role
+  const isAdminEmail = String(profile?.email || '').toLowerCase() === ADMIN_EMAIL
   if (role === 'tutor') return <Navigate to="/tutor" replace />
-  if (role === 'admin') return <Navigate to="/admin" replace />
+  if (role === 'admin' || isAdminEmail) return <Navigate to="/admin" replace />
   return <Navigate to="/dashboard" replace />
 }
 

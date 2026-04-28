@@ -331,7 +331,7 @@ export default function Landing() {
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Link to="/login" style={{ padding: '8px 18px', color: C.lightGray, textDecoration: 'none', fontSize: 14, fontWeight: 500, fontFamily: "'DM Sans'", borderRadius: 9, border: '1px solid rgba(255,255,255,0.08)' }}>Sign In</Link>
-            <Link to="/login" style={{ padding: '8px 22px', background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 600, fontFamily: "'Sora'", borderRadius: 9, boxShadow: '0 3px 12px rgba(14,165,233,.2)' }}>Get Started</Link>
+            <Link to="/login?signup=1" style={{ padding: '8px 22px', background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 600, fontFamily: "'Sora'", borderRadius: 9, boxShadow: '0 3px 12px rgba(14,165,233,.2)' }}>Get Started</Link>
           </div>
         </div>
       </nav>
@@ -358,7 +358,7 @@ export default function Landing() {
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.55 }}
             style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/login" style={{ padding: '14px 34px', background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)', color: 'white', textDecoration: 'none', fontSize: 15, fontWeight: 600, fontFamily: "'Sora'", borderRadius: 11, boxShadow: '0 6px 24px rgba(14,165,233,.25)' }}>
+            <Link to="/login?signup=1" style={{ padding: '14px 34px', background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)', color: 'white', textDecoration: 'none', fontSize: 15, fontWeight: 600, fontFamily: "'Sora'", borderRadius: 11, boxShadow: '0 6px 24px rgba(14,165,233,.25)' }}>
               Start Free
             </Link>
             <a href="#how-it-works" style={{ padding: '14px 28px', color: C.lightGray, textDecoration: 'none', fontSize: 14, fontWeight: 500, fontFamily: "'DM Sans'", borderRadius: 11, border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -540,7 +540,7 @@ export default function Landing() {
                     <div key={line} style={{ color: C.gray, fontSize: 14, padding: '6px 0', borderBottom: `1px solid ${C.cardBorder}` }}>{line}</div>
                   ))}
                 </div>
-                <Link to="/login" style={{ display: 'inline-block', marginTop: 20, padding: '10px 24px', background: t.color === C.primary ? 'linear-gradient(135deg, #0ea5e9, #38bdf8)' : 'linear-gradient(135deg, #f59e0b, #fbbf24)', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 600, fontFamily: "'Sora'", borderRadius: 9 }}>
+                <Link to="/login?signup=1" style={{ display: 'inline-block', marginTop: 20, padding: '10px 24px', background: t.color === C.primary ? 'linear-gradient(135deg, #0ea5e9, #38bdf8)' : 'linear-gradient(135deg, #f59e0b, #fbbf24)', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 600, fontFamily: "'Sora'", borderRadius: 9 }}>
                   Try {t.name}
                 </Link>
               </div>
@@ -580,7 +580,7 @@ export default function Landing() {
           <p style={{ color: C.lightGray, fontSize: 16, maxWidth: 400, margin: '0 auto 32px', lineHeight: 1.7 }}>
             Find out where you stand, get a personalized study plan, and start improving.
           </p>
-          <Link to="/login" style={{
+          <Link to="/login?signup=1" style={{
             display: 'inline-block', padding: '14px 40px',
             background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)', color: 'white',
             textDecoration: 'none', fontSize: 16, fontWeight: 600, fontFamily: "'Sora'", borderRadius: 12,

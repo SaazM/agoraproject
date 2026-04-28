@@ -1,7 +1,7 @@
 import { isValidUUID, isValidExam } from './validate.js'
 
 export function isAgoraAdmin(profile) {
-  return profile?.role === 'admin' && String(profile?.email || '').toLowerCase() === 'agora@admin.org'
+  return String(profile?.email || '').toLowerCase() === 'agora@admin.edu'
 }
 
 export function isTutorRole(profile) {

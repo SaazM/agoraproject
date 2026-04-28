@@ -22,6 +22,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
 /* ── constants ── */
 const FINAL_TEST_ID = 'final_test'
 const REGRADER_VERSION = '2026-03-18-01'
+const ADMIN_EMAIL = 'agora@admin.edu'
 
 /* ── style tokens ── */
 const cardStyle = {
@@ -344,7 +345,7 @@ function lineOpts() {
 export default function Admin() {
   const { profile, signOut } = useAuth()
   const navigate = useNavigate()
-  const isAdmin = profile?.role === 'admin' && String(profile?.email || '').toLowerCase() === 'agora@admin.org'
+  const isAdmin = String(profile?.email || '').toLowerCase() === ADMIN_EMAIL
 
   const [students, setStudents] = useState([])
   const [attempts, setAttempts] = useState([])
@@ -365,7 +366,7 @@ export default function Admin() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { students: [], attempts: [], postScores: [], keysByTest: {} }
     const { data: currentProfile } = await supabase.from('profiles').select('role,email').eq('id', user.id).maybeSingle()
-    if (!currentProfile || currentProfile.role !== 'admin' || String(currentProfile.email || '').toLowerCase() !== 'agora@admin.org') {
+    if (!currentProfile || String(currentProfile.email || '').toLowerCase() !== ADMIN_EMAIL) {
       return { students: [], attempts: [], postScores: [], keysByTest: {} }
     }
 
@@ -1650,7 +1651,7 @@ export default function Admin() {
                               } catch (e) {
                                 const msg = String(e?.message || 'Import failed')
                                 const hint = msg.toLowerCase().includes('row-level security') || msg.toLowerCase().includes('not authorized')
-                                  ? ' (Tip: run the Supabase schema + make sure agora@admin.org has role=admin in profiles.)'
+                                  ? ' (Tip: run the Supabase schema + make sure agora@admin.edu exists in profiles.)'
                                   : ''
                                 setTestKeyStatus({ loading: false, msg: `Error: ${msg}${hint}` })
                               }
@@ -1678,7 +1679,7 @@ export default function Admin() {
                               } catch (err) {
                                 const msg = String(err?.message || 'Could not parse PDF')
                                 const hint = msg.toLowerCase().includes('row-level security') || msg.toLowerCase().includes('not authorized')
-                                  ? ' (Tip: run the Supabase schema + make sure agora@admin.org has role=admin in profiles.)'
+                                  ? ' (Tip: run the Supabase schema + make sure agora@admin.edu exists in profiles.)'
                                   : ''
                                 setTestKeyStatus({ loading: false, msg: `Error: ${msg}${hint}` })
                               } finally {

@@ -3,7 +3,7 @@ import { getAnswerKeyBySection } from '../../src/data/answerKeys.js'
 import { calcWeakTopicsForTest, scoreAttemptFromKey } from '../../src/data/examData.js'
 import { rateLimit } from '../lib/rateLimit.js'
 
-const ADMIN_EMAIL = 'agora@admin.org'
+const ADMIN_EMAIL = 'agora@admin.edu'
 
 function json(res, status, body) {
   res.setHeader('Content-Type', 'application/json')
@@ -67,8 +67,7 @@ export default async function handler(req, res) {
 
     if (profileErr || !profile) return json(res, 403, { error: 'Not authorized' })
 
-    const isAdmin = profile.role === 'admin'
-      && String(profile.email || '').toLowerCase() === ADMIN_EMAIL
+    const isAdmin = String(profile.email || '').toLowerCase() === ADMIN_EMAIL
       && requesterEmail === ADMIN_EMAIL
     if (!isAdmin) return json(res, 403, { error: 'Not authorized' })
 
