@@ -22,7 +22,7 @@ const CSS = `
     -webkit-backdrop-filter: blur(10px); border-bottom-color: #e4e0d5; }
   .ed-nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
   .ed-wordmark { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #16181d; }
-  .ed-wordmark span { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 17px; letter-spacing: .2px; }
+  .ed-wordmark span { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 20px; letter-spacing: .2px; }
 
   .ed-btn { display: inline-flex; align-items: center; gap: 8px; background: #16181d; color: #fff;
     text-decoration: none; font-weight: 600; font-size: 14px; padding: 10px 22px; border-radius: 8px;
@@ -205,7 +205,7 @@ export default function Landing() {
       <nav className={`ed-nav ${scrolled ? 'scrolled' : ''}`}>
         <div className="ed-container ed-nav-inner">
           <Link to="/" className="ed-wordmark">
-            <img src="/logo.png" alt="" style={{ width: 28, height: 28, borderRadius: 7 }} />
+            <img src="/logo.png" alt="" style={{ width: 34, height: 34, borderRadius: 8 }} />
             <span>The Agora Project</span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -226,7 +226,7 @@ export default function Landing() {
             Take a diagnostic. Get a study plan. Practice the topics where you actually lose points. Track everything.
           </p>
           <div className="ed-hero-cta ed-rise ed-rise-4">
-            <Link to="/login?signup=1" className="ed-btn ed-btn-lg">Start free</Link>
+            <Link to="/login?signup=1" className="ed-btn ed-btn-lg">Start now</Link>
             <a href="#how-it-works" className="ed-textlink">How it works ↓</a>
           </div>
           <div className="ed-statrow ed-rise ed-rise-5">
@@ -360,7 +360,7 @@ export default function Landing() {
               In the 6th century BCE, Athens first created its Agora. A place where citizens gathered to discuss philosophy and trade, and to foster one of the earliest democracies in the world. Its existence gave individuals a sense of empowerment and agency to act as active participants in the history they were creating.
             </p>
             <p>
-              Today our American Agora is not necessarily a place or a platform, but the institutional checkmark of a college degree. Whether it be financial well-being, retirement capacity, or likelihood of imprisonment, the societal cushion of a college degree remains an important consideration in the pursuit to expand our Agora.
+              Today our American Agora is not necessarily a place or a platform, but the institutional checkmark of a college degree. Whether it be financial well-being, retirement capacity, or career outlook, the societal cushion of a college degree remains an important consideration in the pursuit to expand our Agora.
             </p>
             <p>
               This project aids in that endeavor by leveraging AI algorithms to improve students' SAT scores, making them more competitive for college admission.

@@ -83,7 +83,7 @@ const STORY_FIRST_LINE = 'In the 6th century BCE, Athens first created its Agora
 const STORY_AFTER_FIRST_LINE =
   'A place where citizens gathered to discuss philosophy and trade, and to foster one of the earliest democracies in the world. Its existence gave individuals a sense of empowerment and agency to act as active participants in the history they were creating.'
 const STORY_P2 =
-  'Today, our American Agora is not necessarily a place or a platform, but the institutional checkmark of a college degree. Whether it be financial well-being, retirement capacity, or likelihood of imprisonment, the societal cushion of a college degree remains an important consideration in the pursuit to expand our Agora. This project aids in that endeavor by leveraging AI algorithms to improve students’ SAT scores, making them more competitive for college admission.'
+  'Today, our American Agora is not necessarily a place or a platform, but the institutional checkmark of a college degree. Whether it be financial well-being, retirement capacity, or career outlook, the societal cushion of a college degree remains an important consideration in the pursuit to expand our Agora. This project aids in that endeavor by leveraging AI algorithms to improve students’ SAT scores, making them more competitive for college admission.'
 
 const STORY_VARIANTS = [
   { id: 'ink-line', label: '1 · Real ink, first line', note: 'His actual handwriting, cropped from the note. Rest in type.' },
