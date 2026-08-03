@@ -94,23 +94,23 @@ export default function UserMenu({ profile }) {
           top: 'calc(100% + 10px)',
           width: 340,
           background: 'white',
-          border: '1px solid #e2e8f0',
-          borderRadius: 14,
-          boxShadow: '0 12px 40px rgba(15,31,61,.18)',
+          border: '1px solid #e4e0d5',
+          borderRadius: 12,
+          boxShadow: '0 1px 3px rgba(22,24,29,.06)',
           padding: 16,
           zIndex: 50,
           maxHeight: 'calc(100vh - 80px)',
           overflowY: 'auto',
         }}>
           {/* Account info */}
-          <div style={{ fontWeight: 900, fontSize: 14, color: '#0f172a', marginBottom: 6 }}>Account</div>
-          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 14, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            Signed in as <span style={{ fontWeight: 800, color: '#1a2744' }}>{profile?.email || '—'}</span>
+          <div style={{ fontWeight: 600, fontSize: 14, color: '#16181d', marginBottom: 6 }}>Account</div>
+          <div style={{ fontSize: 12, color: '#565a63', marginBottom: 14, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            Signed in as <span style={{ fontWeight: 600, color: '#16181d' }}>{profile?.email || '—'}</span>
           </div>
 
           {/* School / Affiliation */}
-          <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 12, marginBottom: 14 }}>
-            <div style={{ fontWeight: 900, fontSize: 13, color: '#0f172a', marginBottom: 8 }}>School / Affiliation</div>
+          <div style={{ borderTop: '1px solid #f3f0e9', paddingTop: 12, marginBottom: 14 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#16181d', marginBottom: 8 }}>School / Affiliation</div>
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 type="text"
@@ -122,11 +122,11 @@ export default function UserMenu({ profile }) {
                   flex: 1,
                   padding: '8px 10px',
                   fontSize: 13,
-                  border: '1.5px solid #e2e8f0',
+                  border: '1.5px solid #e4e0d5',
                   borderRadius: 8,
                   outline: 'none',
-                  color: '#0f172a',
-                  background: '#f8fafc',
+                  color: '#16181d',
+                  background: '#f7f5ef',
                 }}
               />
               <button
@@ -147,8 +147,8 @@ export default function UserMenu({ profile }) {
           </div>
 
           {/* Change password */}
-          <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 12 }}>
-            <div style={{ fontWeight: 900, fontSize: 13, color: '#0f172a', marginBottom: 8 }}>Change Password</div>
+          <div style={{ borderTop: '1px solid #f3f0e9', paddingTop: 12 }}>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#16181d', marginBottom: 8 }}>Change Password</div>
             <div style={{ display: 'grid', gap: 8 }}>
               <PasswordInput
                 value={pw1}
@@ -173,7 +173,7 @@ export default function UserMenu({ profile }) {
                 </div>
               )}
             </div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 10, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 11, color: '#8a8f98', marginTop: 10, lineHeight: 1.5 }}>
               If you see a "reauthenticate" error, sign out and sign back in, then try again.
             </div>
           </div>

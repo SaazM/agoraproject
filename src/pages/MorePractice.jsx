@@ -6,20 +6,15 @@ import Icon from '../components/AppIcons.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getChaptersForExam } from '../data/examData.js'
 import { getInitialPreferredExam } from '../lib/examChoice.js'
-import { SAT_QUESTION_BANK, ACT_QUESTION_BANK } from '../data/practiceQuestionBank.js'
+import { SAT_QUESTION_BANK } from '../data/practiceQuestionBank.js'
 
 /* ─── optional supplemental question banks (lazy-loaded, may not exist yet) ─── */
 let _extraBanksLoaded = false
-let ACT_EXTRA_BANK = {}
 let SAT_RW_EXTRA_BANK = {}
 
 async function loadExtraBanks() {
   if (_extraBanksLoaded) return
   _extraBanksLoaded = true
-  try {
-    const m = await import('../data/actPracticeQuestions.js')
-    ACT_EXTRA_BANK = m.ACT_PRACTICE_QUESTIONS || m.default || {}
-  } catch { /* file may not exist yet */ }
   try {
     const m = await import('../data/satRWPracticeQuestions.js')
     SAT_RW_EXTRA_BANK = m.SAT_RW_PRACTICE_QUESTIONS || m.default || {}
@@ -62,8 +57,8 @@ function resolveChapter(bq, chId, chapters) {
 
 /* ─── build the question list from all curated question banks ─── */
 function buildQuestions(chapters, exam) {
-  const primaryBank = exam === 'act' ? ACT_QUESTION_BANK : SAT_QUESTION_BANK
-  const extraBank = exam === 'act' ? ACT_EXTRA_BANK : SAT_RW_EXTRA_BANK
+  const primaryBank = SAT_QUESTION_BANK
+  const extraBank = SAT_RW_EXTRA_BANK
   const bank = mergeBank(primaryBank, extraBank)
   const chapterEntries = Object.entries(chapters)
   if (!chapterEntries.length) return []
@@ -94,7 +89,7 @@ function buildQuestions(chapters, exam) {
         chapterCode: code,
         chapterName: topicName,
         domain: ch.domain || bq.domain || 'General',
-        color: ch.color || '#0ea5e9',
+        color: ch.color || '#0284c7',
         stem: bq.stem,
         choices: bq.choices.map((text, ci) => ({
           label: String.fromCharCode(65 + ci),
@@ -133,7 +128,7 @@ export default function MorePractice() {
     () => String(new URLSearchParams(location.search).get('exam') || '').toLowerCase(),
     [location.search],
   )
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
   const chapters = useMemo(() => getChaptersForExam(exam), [exam])
 
   /* ─── load supplemental question banks ─── */
@@ -270,21 +265,21 @@ export default function MorePractice() {
                 transition={{ duration: 0.4, delay: 0.15, ease: 'easeOut' }}
                 style={{
                   width: 44, height: 44, borderRadius: 12,
-                  background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+                  background: '#d97706',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 14px rgba(245,158,11,.3)',
+                  boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                 }}
               >
                 <Icon name="star" size={22} style={{ color: '#fff' }} />
               </motion.div>
               <div>
                 <h1 style={{
-                  fontFamily: "'Sora', sans-serif", fontWeight: 900, fontSize: 28,
-                  color: '#0f172a', margin: 0, lineHeight: 1.2,
+                  fontFamily: "Fraunces, Georgia, serif", fontWeight: 600, fontSize: 28,
+                  color: '#16181d', margin: 0, lineHeight: 1.2,
                 }}>
                   More Practice
                 </h1>
-                <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>
+                <div style={{ fontSize: 13, color: '#565a63', marginTop: 2 }}>
                   {exam.toUpperCase()} &middot; {totalQuestions} realistic practice questions across every topic
                 </div>
               </div>
@@ -295,8 +290,8 @@ export default function MorePractice() {
           <div style={{
             position: 'sticky', top: 0, zIndex: 10,
             background: '#fff',
-            boxShadow: '0 2px 12px rgba(14,165,233,.08)',
-            borderRadius: '0 0 16px 16px',
+            boxShadow: '0 1px 3px rgba(22,24,29,.06)',
+            borderRadius: '0 0 12px 12px',
             padding: '16px 0 12px',
             marginLeft: -4, marginRight: -4, paddingLeft: 4, paddingRight: 4,
           }}>
@@ -306,9 +301,9 @@ export default function MorePractice() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.05 }}
               style={{
-                background: '#fff', borderRadius: 16, padding: '20px 24px',
-                border: '1px solid rgba(14,165,233,.12)',
-                boxShadow: '0 2px 8px rgba(14,165,233,.06)',
+                background: '#fff', borderRadius: 12, padding: '20px 24px',
+                border: '1px solid rgba(2,132,199,.12)',
+                boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                 marginBottom: 12,
               }}
             >
@@ -318,11 +313,11 @@ export default function MorePractice() {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.4, delay: 0.15 }}
-                    style={{ fontWeight: 900, fontSize: 22, color: '#0ea5e9', fontFamily: "'Sora', sans-serif" }}
+                    style={{ fontWeight: 600, fontSize: 22, color: '#0284c7', fontFamily: "Fraunces, Georgia, serif" }}
                   >
                     {answeredCount}
                   </motion.span>
-                  <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>
+                  <span style={{ fontSize: 13, color: '#8a8f98', fontWeight: 600 }}>
                     / {totalQuestions} answered
                   </span>
                 </div>
@@ -333,7 +328,7 @@ export default function MorePractice() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.35, delay: 0.2 }}
                       style={{
-                        fontSize: 12, fontWeight: 800, color: '#10b981',
+                        fontSize: 12, fontWeight: 600, color: '#10b981',
                         background: 'rgba(16,185,129,.1)', padding: '3px 10px', borderRadius: 999,
                       }}
                     >
@@ -345,8 +340,8 @@ export default function MorePractice() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.35, delay: 0.25 }}
                     style={{
-                      fontSize: 12, fontWeight: 800, color: '#0ea5e9',
-                      background: 'rgba(14,165,233,.08)', padding: '3px 10px', borderRadius: 999,
+                      fontSize: 12, fontWeight: 600, color: '#0284c7',
+                      background: 'rgba(2,132,199,.08)', padding: '3px 10px', borderRadius: 999,
                     }}
                   >
                     {progressPct}%
@@ -354,7 +349,7 @@ export default function MorePractice() {
                 </div>
               </div>
               <div style={{
-                height: 8, borderRadius: 99, background: 'rgba(14,165,233,.1)', overflow: 'hidden',
+                height: 8, borderRadius: 99, background: 'rgba(2,132,199,.1)', overflow: 'hidden',
               }}>
                 <motion.div
                   initial={{ width: 0 }}
@@ -362,7 +357,7 @@ export default function MorePractice() {
                   transition={{ duration: 0.6, ease: 'easeOut' }}
                   style={{
                     height: '100%', borderRadius: 99,
-                    background: 'linear-gradient(90deg, #0ea5e9, #38bdf8)',
+                    background: '#0284c7',
                   }}
                 />
               </div>
@@ -372,7 +367,7 @@ export default function MorePractice() {
                     onClick={handleReset}
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer',
-                      fontSize: 11, color: '#94a3b8', fontWeight: 700,
+                      fontSize: 11, color: '#8a8f98', fontWeight: 700,
                       textDecoration: 'underline', textUnderlineOffset: 2,
                     }}
                   >
@@ -399,12 +394,12 @@ export default function MorePractice() {
                     onClick={() => { setActiveDomain(d); setVisibleCount(PAGE_SIZE) }}
                     style={{
                       padding: '6px 16px', borderRadius: 999, border: 'none', cursor: 'pointer',
-                      fontSize: 12, fontWeight: 800, transition: 'all .2s ease',
+                      fontSize: 12, fontWeight: 600, transition: 'all .2s ease',
                       background: active
-                        ? 'linear-gradient(135deg, #0ea5e9, #0369a1)'
-                        : 'rgba(14,165,233,.07)',
-                      color: active ? '#fff' : '#475569',
-                      boxShadow: active ? '0 3px 10px rgba(14,165,233,.25)' : 'none',
+                        ? '#0284c7'
+                        : 'rgba(2,132,199,.07)',
+                      color: active ? '#fff' : '#3f434b',
+                      boxShadow: active ? '0 1px 3px rgba(22,24,29,.06)' : 'none',
                     }}
                   >
                     {d}
@@ -440,14 +435,14 @@ export default function MorePractice() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(vi * 0.02, 0.4) }}
                   style={{
-                    background: '#fff', borderRadius: 16,
+                    background: '#fff', borderRadius: 12,
                     border: isAnswered
                       ? result?.correct
                         ? '1.5px solid rgba(16,185,129,.3)'
                         : '1.5px solid rgba(239,68,68,.25)'
-                      : '1px solid rgba(14,165,233,.12)',
+                      : '1px solid rgba(2,132,199,.12)',
                     padding: '22px 26px',
-                    boxShadow: '0 2px 8px rgba(14,165,233,.05)',
+                    boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                     transition: 'border-color .25s, box-shadow .25s',
                     opacity: isAnswered ? 0.88 : 1,
                   }}
@@ -459,13 +454,13 @@ export default function MorePractice() {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{
-                        fontFamily: "'Sora', sans-serif", fontWeight: 900, fontSize: 20,
-                        color: '#0ea5e9', minWidth: 36,
+                        fontFamily: "Fraunces, Georgia, serif", fontWeight: 600, fontSize: 20,
+                        color: '#0284c7', minWidth: 36,
                       }}>
                         #{q.num}
                       </span>
                       <span style={{
-                        fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999,
+                        fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999,
                         background: `${q.color}18`, color: q.color, border: `1px solid ${q.color}30`,
                         whiteSpace: 'nowrap',
                       }}>
@@ -473,7 +468,7 @@ export default function MorePractice() {
                       </span>
                       {isAnswered && (
                         <span style={{
-                          fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999,
+                          fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999,
                           background: result?.correct ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)',
                           color: result?.correct ? '#10b981' : '#ef4444',
                         }}>
@@ -484,9 +479,9 @@ export default function MorePractice() {
                         <button
                           onClick={() => handleRetry(q.id)}
                           style={{
-                            fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 999,
-                            background: 'rgba(14,165,233,.08)', color: '#0ea5e9',
-                            border: '1px solid rgba(14,165,233,.2)', cursor: 'pointer',
+                            fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999,
+                            background: 'rgba(2,132,199,.08)', color: '#0284c7',
+                            border: '1px solid rgba(2,132,199,.2)', cursor: 'pointer',
                             display: 'inline-flex', alignItems: 'center', gap: 4,
                             transition: 'all .2s ease',
                           }}
@@ -495,14 +490,14 @@ export default function MorePractice() {
                         </button>
                       )}
                     </div>
-                    <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                    <div style={{ fontSize: 11, color: '#8a8f98', fontWeight: 600 }}>
                       {q.chapterCode} &middot; {q.chapterName}
                     </div>
                   </div>
 
                   {/* question stem */}
                   <div style={{
-                    fontSize: 15, lineHeight: 1.65, color: '#1e293b', fontWeight: 500,
+                    fontSize: 15, lineHeight: 1.65, color: '#16181d', fontWeight: 500,
                     marginBottom: 18, whiteSpace: 'pre-line',
                   }}>
                     {q.stem}
@@ -515,9 +510,9 @@ export default function MorePractice() {
                       const wasChosen = isAnswered && result?.choice === ci
                       const isCorrectChoice = ci === q.correctIndex
 
-                      let bg = 'rgba(14,165,233,.04)'
-                      let borderColor = 'rgba(14,165,233,.12)'
-                      let textColor = '#334155'
+                      let bg = 'rgba(2,132,199,.04)'
+                      let borderColor = 'rgba(2,132,199,.12)'
+                      let textColor = '#3f434b'
 
                       if (isAnswered) {
                         if (isCorrectChoice) {
@@ -529,14 +524,14 @@ export default function MorePractice() {
                           borderColor = 'rgba(239,68,68,.35)'
                           textColor = '#b91c1c'
                         } else {
-                          bg = 'rgba(148,163,184,.05)'
-                          borderColor = 'rgba(148,163,184,.15)'
-                          textColor = '#94a3b8'
+                          bg = 'rgba(138,143,152,.05)'
+                          borderColor = 'rgba(138,143,152,.15)'
+                          textColor = '#8a8f98'
                         }
                       } else if (isSelected) {
-                        bg = 'rgba(14,165,233,.10)'
-                        borderColor = '#0ea5e9'
-                        textColor = '#0c4a6e'
+                        bg = 'rgba(2,132,199,.10)'
+                        borderColor = '#0284c7'
+                        textColor = '#0284c7'
                       }
 
                       return (
@@ -556,17 +551,17 @@ export default function MorePractice() {
                           <span style={{
                             width: 28, height: 28, borderRadius: 999, flexShrink: 0,
                             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                            fontWeight: 900, fontSize: 13,
+                            fontWeight: 600, fontSize: 13,
                             background: isAnswered && isCorrectChoice
                               ? '#10b981'
                               : isAnswered && wasChosen && !result?.correct
                                 ? '#ef4444'
                                 : isSelected
-                                  ? '#0ea5e9'
-                                  : 'rgba(14,165,233,.1)',
+                                  ? '#0284c7'
+                                  : 'rgba(2,132,199,.1)',
                             color: (isSelected || (isAnswered && (isCorrectChoice || wasChosen)))
                               ? '#fff'
-                              : '#64748b',
+                              : '#565a63',
                           }}>
                             {c.label}
                           </span>
@@ -590,12 +585,12 @@ export default function MorePractice() {
                         className="btn-primary"
                         style={{
                           padding: '8px 22px', borderRadius: 10, border: 'none',
-                          fontSize: 13, fontWeight: 800, cursor: selectedIdx == null ? 'default' : 'pointer',
+                          fontSize: 13, fontWeight: 600, cursor: selectedIdx == null ? 'default' : 'pointer',
                           background: selectedIdx == null
-                            ? 'rgba(14,165,233,.25)'
-                            : 'linear-gradient(135deg, #0ea5e9, #0369a1)',
+                            ? 'rgba(2,132,199,.25)'
+                            : '#0284c7',
                           color: '#fff',
-                          boxShadow: selectedIdx != null ? '0 3px 12px rgba(14,165,233,.3)' : 'none',
+                          boxShadow: selectedIdx != null ? '0 1px 3px rgba(22,24,29,.06)' : 'none',
                           transition: 'all .2s ease',
                           opacity: selectedIdx == null ? 0.6 : 1,
                         }}
@@ -613,17 +608,17 @@ export default function MorePractice() {
                       transition={{ duration: 0.3 }}
                       style={{
                         padding: '14px 16px', borderRadius: 12,
-                        background: 'rgba(14,165,233,.04)',
-                        border: '1px solid rgba(14,165,233,.1)',
+                        background: 'rgba(2,132,199,.04)',
+                        border: '1px solid rgba(2,132,199,.1)',
                       }}
                     >
                       <div style={{
-                        fontSize: 11, fontWeight: 800, color: '#0ea5e9',
+                        fontSize: 11, fontWeight: 600, color: '#0284c7',
                         textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6,
                       }}>
                         Explanation
                       </div>
-                      <div style={{ fontSize: 13, lineHeight: 1.6, color: '#475569' }}>
+                      <div style={{ fontSize: 13, lineHeight: 1.6, color: '#3f434b' }}>
                         {q.explanation}
                       </div>
                     </motion.div>
@@ -641,8 +636,8 @@ export default function MorePractice() {
                 onClick={handleLoadMore}
                 className="btn-outline"
                 style={{
-                  padding: '10px 32px', borderRadius: 12, fontSize: 14, fontWeight: 800,
-                  background: '#fff', border: '2px solid #0ea5e9', color: '#0ea5e9',
+                  padding: '10px 32px', borderRadius: 12, fontSize: 14, fontWeight: 600,
+                  background: '#fff', border: '2px solid #0284c7', color: '#0284c7',
                   cursor: 'pointer', transition: 'all .2s ease',
                 }}
               >
@@ -655,10 +650,10 @@ export default function MorePractice() {
           {visibleCount >= filtered.length && filtered.length > 0 && (
             <div style={{
               textAlign: 'center', marginTop: 40, padding: '24px 20px',
-              background: 'rgba(14,165,233,.04)', borderRadius: 16,
-              border: '1px dashed rgba(14,165,233,.2)',
+              background: 'rgba(2,132,199,.04)', borderRadius: 12,
+              border: '1px dashed rgba(2,132,199,.2)',
             }}>
-              <div style={{ fontSize: 14, color: '#64748b', fontWeight: 600 }}>
+              <div style={{ fontSize: 14, color: '#565a63', fontWeight: 600 }}>
                 {activeDomain === 'All'
                   ? `All ${totalQuestions} questions loaded`
                   : `All ${filtered.length} questions in "${activeDomain}" loaded`
@@ -671,11 +666,11 @@ export default function MorePractice() {
           {filtered.length === 0 && (
             <div style={{
               textAlign: 'center', marginTop: 60, padding: '40px 20px',
-              background: 'rgba(14,165,233,.03)', borderRadius: 16,
-              border: '1px dashed rgba(14,165,233,.15)',
+              background: 'rgba(2,132,199,.03)', borderRadius: 12,
+              border: '1px dashed rgba(2,132,199,.15)',
             }}>
-              <Icon name="star" size={32} style={{ color: '#94a3b8', marginBottom: 12 }} />
-              <div style={{ fontSize: 15, color: '#64748b', fontWeight: 600 }}>
+              <Icon name="star" size={32} style={{ color: '#8a8f98', marginBottom: 12 }} />
+              <div style={{ fontSize: 15, color: '#565a63', fontWeight: 600 }}>
                 No questions available for this filter.
               </div>
             </div>

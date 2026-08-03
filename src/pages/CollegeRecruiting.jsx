@@ -957,9 +957,9 @@ function CollegeLogo({ college, size = 36 }) {
     return (
       <div style={{
         width: size, height: size, borderRadius: 10, flexShrink: 0,
-        background: 'linear-gradient(135deg, #1e3a8a, #0ea5e9)',
+        background: '#0284c7',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'white', fontFamily: 'Sora, sans-serif', fontWeight: 800,
+        color: 'white', fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600,
         fontSize: size * 0.35, letterSpacing: '-0.02em',
       }}>
         {initials}
@@ -989,7 +989,7 @@ export default function CollegeRecruiting() {
   const { user, profile } = useAuth()
   const location = useLocation()
   const requestedExam = new URLSearchParams(location.search).get('exam')
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
 
   /* ── State ── */
   const [attempts, setAttempts] = useState([])
@@ -1012,9 +1012,8 @@ export default function CollegeRecruiting() {
   const [majorFilter, setMajorFilter] = useState('')         // single major string
   const [selectedCollege, setSelectedCollege] = useState(null) // college object for detail modal
 
-  const isAct = exam === 'act'
-  const scoreMin = isAct ? 1 : 400
-  const scoreMax = isAct ? 36 : 1600
+  const scoreMin = 400
+  const scoreMax = 1600
 
   /* ── Fetch attempts ── */
   useEffect(() => {
@@ -1039,25 +1038,12 @@ export default function CollegeRecruiting() {
     // Superscore
     let ss = null
     if (completedWithScores.length) {
-      if (isAct) {
-        let bestEng = 0, bestMath = 0, bestRead = 0, bestSci = 0
-        for (const { scores } of completedWithScores) {
-          bestEng = Math.max(bestEng, Number(scores.english || 0))
-          bestMath = Math.max(bestMath, Number(scores.math || 0))
-          bestRead = Math.max(bestRead, Number(scores.reading || 0))
-          bestSci = Math.max(bestSci, Number(scores.science || 0))
-        }
-        if (bestEng || bestMath || bestRead || bestSci) {
-          ss = Math.round((bestEng + bestMath + bestRead + bestSci) / 4)
-        }
-      } else {
-        let bestRW = 0, bestMath = 0
-        for (const { scores } of completedWithScores) {
-          bestRW = Math.max(bestRW, Number(scores.rw || 0))
-          bestMath = Math.max(bestMath, Number(scores.math || 0))
-        }
-        if (bestRW || bestMath) ss = bestRW + bestMath
+      let bestRW = 0, bestMath = 0
+      for (const { scores } of completedWithScores) {
+        bestRW = Math.max(bestRW, Number(scores.rw || 0))
+        bestMath = Math.max(bestMath, Number(scores.math || 0))
       }
+      if (bestRW || bestMath) ss = bestRW + bestMath
     }
 
     // Highest single-test score
@@ -1068,7 +1054,7 @@ export default function CollegeRecruiting() {
     }
 
     return { superscore: ss, highestScore: hs }
-  }, [attempts, exam, isAct])
+  }, [attempts, exam])
 
   /* ── Active score ── */
   const activeScore = useMemo(() => {
@@ -1220,8 +1206,8 @@ export default function CollegeRecruiting() {
       <div className="page fade-up">
         {/* ── Hero ── */}
         <div style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1a2744 50%, #1e3a5f 100%)',
-          borderRadius: 20,
+          background: '#16181d',
+          borderRadius: 12,
           padding: '48px 40px 40px',
           marginBottom: 28,
           position: 'relative',
@@ -1230,17 +1216,17 @@ export default function CollegeRecruiting() {
           <div style={{
             position: 'absolute', top: -60, right: -60,
             width: 200, height: 200, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(14,165,233,.15), transparent 70%)',
+            background: 'radial-gradient(circle, rgba(2,132,199,.15), transparent 70%)',
           }} />
           <div style={{
             position: 'absolute', bottom: -40, left: '30%',
             width: 300, height: 150, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(59,130,246,.1), transparent 70%)',
+            background: 'radial-gradient(circle, rgba(2,132,199,.1), transparent 70%)',
           }} />
           <h1 style={{
-            fontFamily: 'Sora, sans-serif',
+            fontFamily: 'Fraunces, Georgia, serif',
             fontSize: 32,
-            fontWeight: 900,
+            fontWeight: 600,
             color: 'white',
             margin: 0,
             position: 'relative',
@@ -1249,14 +1235,14 @@ export default function CollegeRecruiting() {
             College Recruiting
           </h1>
           <p style={{
-            color: '#94a3b8',
+            color: '#8a8f98',
             fontSize: 15,
             marginTop: 8,
             position: 'relative',
             maxWidth: 600,
             lineHeight: 1.6,
           }}>
-            See how you compare against colleges based strictly on your {isAct ? 'ACT' : 'SAT'} test score.
+            See how you compare against colleges based strictly on your SAT test score.
             Our algorithm only factors in test scores — since most schools also consider GPA, extracurriculars,
             essays, and other factors, your actual admission chances may be higher or lower than shown.
           </p>
@@ -1265,11 +1251,11 @@ export default function CollegeRecruiting() {
         {/* ── Score Selector ── */}
         <div className="card" style={{ padding: '20px 24px', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 14, color: '#0f172a' }}>
+            <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, fontSize: 14, color: '#16181d' }}>
               Your Score
             </span>
-            <span style={{ fontSize: 12, color: '#64748b' }}>
-              ({isAct ? 'ACT' : 'SAT'} — used to estimate admission chances)
+            <span style={{ fontSize: 12, color: '#565a63' }}>
+              (SAT — used to estimate admission chances)
             </span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1288,12 +1274,12 @@ export default function CollegeRecruiting() {
                   style={{
                     padding: '10px 18px',
                     borderRadius: 12,
-                    border: active ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0',
-                    background: active ? 'linear-gradient(135deg, rgba(14,165,233,.08), rgba(59,130,246,.05))' : 'white',
-                    color: active ? '#0ea5e9' : '#334155',
+                    border: active ? '2px solid #0284c7' : '1.5px solid #e4e0d5',
+                    background: active ? '#faf9f6' : 'white',
+                    color: active ? '#0284c7' : '#3f434b',
                     fontWeight: 700,
                     fontSize: 13,
-                    fontFamily: 'Sora, sans-serif',
+                    fontFamily: 'Fraunces, Georgia, serif',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -1304,12 +1290,12 @@ export default function CollegeRecruiting() {
                   {opt.label}
                   {opt.value != null && (
                     <span style={{
-                      background: active ? '#0ea5e9' : '#e2e8f0',
-                      color: active ? 'white' : '#475569',
+                      background: active ? '#0284c7' : '#e4e0d5',
+                      color: active ? 'white' : '#3f434b',
                       padding: '2px 8px',
                       borderRadius: 6,
                       fontSize: 12,
-                      fontWeight: 800,
+                      fontWeight: 600,
                     }}>
                       {opt.value}
                     </span>
@@ -1330,11 +1316,11 @@ export default function CollegeRecruiting() {
                   width: 120,
                   padding: '10px 14px',
                   borderRadius: 12,
-                  border: '1.5px solid #e2e8f0',
+                  border: '1.5px solid #e4e0d5',
                   fontSize: 14,
                   fontWeight: 700,
-                  fontFamily: 'Sora, sans-serif',
-                  color: '#0f172a',
+                  fontFamily: 'Fraunces, Georgia, serif',
+                  color: '#16181d',
                   outline: 'none',
                 }}
               />
@@ -1345,19 +1331,19 @@ export default function CollegeRecruiting() {
                 marginLeft: 8,
                 padding: '8px 16px',
                 borderRadius: 10,
-                background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                background: '#0284c7',
                 color: 'white',
-                fontWeight: 800,
+                fontWeight: 600,
                 fontSize: 16,
-                fontFamily: 'Sora, sans-serif',
-                boxShadow: '0 3px 12px rgba(14,165,233,.3)',
+                fontFamily: 'Fraunces, Georgia, serif',
+                boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               }}>
                 {activeScore}
               </div>
             )}
 
             {!activeScore && (
-              <span style={{ fontSize: 12, color: '#94a3b8', marginLeft: 8 }}>
+              <span style={{ fontSize: 12, color: '#8a8f98', marginLeft: 8 }}>
                 {scoreMode === 'custom'
                   ? `Enter a score between ${scoreMin} and ${scoreMax}`
                   : 'Complete a practice test to see your score'}
@@ -1369,7 +1355,7 @@ export default function CollegeRecruiting() {
         {/* ── Search + Sort bar ── */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-            <Icon name="search" size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <Icon name="search" size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#8a8f98' }} />
             <input
               type="text"
               placeholder="Search colleges by name or alias..."
@@ -1379,9 +1365,9 @@ export default function CollegeRecruiting() {
                 width: '100%',
                 padding: '12px 14px 12px 40px',
                 borderRadius: 12,
-                border: '1.5px solid #e2e8f0',
+                border: '1.5px solid #e4e0d5',
                 fontSize: 14,
-                color: '#0f172a',
+                color: '#16181d',
                 outline: 'none',
                 background: 'white',
                 boxSizing: 'border-box',
@@ -1395,10 +1381,10 @@ export default function CollegeRecruiting() {
             style={{
               padding: '12px 14px',
               borderRadius: 12,
-              border: '1.5px solid #e2e8f0',
+              border: '1.5px solid #e4e0d5',
               fontSize: 13,
               fontWeight: 600,
-              color: '#334155',
+              color: '#3f434b',
               background: 'white',
               cursor: 'pointer',
               outline: 'none',
@@ -1427,9 +1413,9 @@ export default function CollegeRecruiting() {
             style={{
               padding: '12px 18px',
               borderRadius: 12,
-              border: filtersOpen ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0',
-              background: filtersOpen ? 'rgba(14,165,233,.06)' : 'white',
-              color: filtersOpen ? '#0ea5e9' : '#334155',
+              border: filtersOpen ? '2px solid #0284c7' : '1.5px solid #e4e0d5',
+              background: filtersOpen ? 'rgba(2,132,199,.06)' : 'white',
+              color: filtersOpen ? '#0284c7' : '#3f434b',
               fontWeight: 700,
               fontSize: 13,
               cursor: 'pointer',
@@ -1442,7 +1428,7 @@ export default function CollegeRecruiting() {
             Filters
             {activeFilterCount > 0 && (
               <span style={{
-                background: '#0ea5e9',
+                background: '#0284c7',
                 color: 'white',
                 width: 20,
                 height: 20,
@@ -1451,7 +1437,7 @@ export default function CollegeRecruiting() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 600,
               }}>
                 {activeFilterCount}
               </span>
@@ -1469,7 +1455,7 @@ export default function CollegeRecruiting() {
             style={{ padding: '20px 24px', marginBottom: 20, overflow: 'hidden' }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 14, color: '#0f172a' }}>
+              <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, fontSize: 14, color: '#16181d' }}>
                 Filters
               </span>
               {activeFilterCount > 0 && (
@@ -1549,9 +1535,9 @@ export default function CollegeRecruiting() {
                         minWidth: 200,
                         padding: '10px 14px',
                         borderRadius: 10,
-                        border: '1.5px solid #e2e8f0',
+                        border: '1.5px solid #e4e0d5',
                         fontSize: 13,
-                        color: majorFilter ? '#0f172a' : '#94a3b8',
+                        color: majorFilter ? '#16181d' : '#8a8f98',
                         fontWeight: majorFilter ? 700 : 400,
                         background: 'white',
                         cursor: 'pointer',
@@ -1611,10 +1597,10 @@ export default function CollegeRecruiting() {
                       minHeight: 80,
                       maxHeight: 140,
                       borderRadius: 10,
-                      border: '1.5px solid #e2e8f0',
+                      border: '1.5px solid #e4e0d5',
                       padding: 6,
                       fontSize: 12,
-                      color: '#334155',
+                      color: '#3f434b',
                       outline: 'none',
                     }}
                   >
@@ -1628,8 +1614,8 @@ export default function CollegeRecruiting() {
                         <span key={s} onClick={() => setStateFilter(prev => prev.filter(x => x !== s))} style={{
                           padding: '3px 10px',
                           borderRadius: 6,
-                          background: 'rgba(14,165,233,.1)',
-                          color: '#0ea5e9',
+                          background: 'rgba(2,132,199,.1)',
+                          color: '#0284c7',
                           fontSize: 11,
                           fontWeight: 700,
                           cursor: 'pointer',
@@ -1647,12 +1633,12 @@ export default function CollegeRecruiting() {
 
         {/* ── Results count ── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>
+          <span style={{ fontSize: 13, color: '#565a63', fontWeight: 600 }}>
             {filteredColleges.length} college{filteredColleges.length !== 1 ? 's' : ''} found
           </span>
           {activeFilterCount > 0 && (
             <button onClick={clearAllFilters} style={{
-              fontSize: 12, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 12, color: '#8a8f98', background: 'none', border: 'none', cursor: 'pointer',
               textDecoration: 'underline',
             }}>
               Reset filters
@@ -1669,10 +1655,10 @@ export default function CollegeRecruiting() {
             <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>
               <Icon name="search" size={48} />
             </div>
-            <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 800, fontSize: 18, color: '#0f172a', margin: '0 0 8px' }}>
+            <h3 style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, fontSize: 18, color: '#16181d', margin: '0 0 8px' }}>
               No colleges match{search.trim() ? ` "${search.trim()}"` : ' your filters'}
             </h3>
-            <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>
+            <p style={{ color: '#565a63', fontSize: 14, margin: 0 }}>
               {search.trim() && activeFilterCount > 0
                 ? `You have ${activeFilterCount} filter${activeFilterCount > 1 ? 's' : ''} active that may be hiding results. Try clearing filters.`
                 : 'Try adjusting your search or filters to see more results.'}
@@ -1685,7 +1671,7 @@ export default function CollegeRecruiting() {
                     padding: '10px 24px',
                     borderRadius: 10,
                     border: 'none',
-                    background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                    background: '#0284c7',
                     color: 'white',
                     fontWeight: 700,
                     fontSize: 13,
@@ -1700,9 +1686,9 @@ export default function CollegeRecruiting() {
                 style={{
                   padding: '10px 24px',
                   borderRadius: 10,
-                  border: search.trim() && activeFilterCount > 0 ? '1.5px solid #e2e8f0' : 'none',
-                  background: search.trim() && activeFilterCount > 0 ? 'white' : 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-                  color: search.trim() && activeFilterCount > 0 ? '#334155' : 'white',
+                  border: search.trim() && activeFilterCount > 0 ? '1.5px solid #e4e0d5' : 'none',
+                  background: search.trim() && activeFilterCount > 0 ? 'white' : '#0284c7',
+                  color: search.trim() && activeFilterCount > 0 ? '#3f434b' : 'white',
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: 'pointer',
@@ -1734,9 +1720,9 @@ export default function CollegeRecruiting() {
               style={{
                 padding: '12px 32px',
                 borderRadius: 12,
-                border: '1.5px solid #e2e8f0',
+                border: '1.5px solid #e4e0d5',
                 background: 'white',
-                color: '#334155',
+                color: '#3f434b',
                 fontWeight: 700,
                 fontSize: 14,
                 cursor: 'pointer',
@@ -1773,10 +1759,10 @@ function FilterGroup({ label, children }) {
     <div>
       <div style={{
         fontSize: 11,
-        fontWeight: 800,
+        fontWeight: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
-        color: '#64748b',
+        color: '#565a63',
         marginBottom: 8,
       }}>
         {label}
@@ -1794,9 +1780,9 @@ function FilterCheckbox({ label, checked, onChange, color, pill }) {
         style={{
           padding: '5px 12px',
           borderRadius: 8,
-          border: checked ? '1.5px solid #0ea5e9' : '1.5px solid #e2e8f0',
-          background: checked ? 'rgba(14,165,233,.08)' : 'white',
-          color: checked ? '#0ea5e9' : '#64748b',
+          border: checked ? '1.5px solid #0284c7' : '1.5px solid #e4e0d5',
+          background: checked ? 'rgba(2,132,199,.08)' : 'white',
+          color: checked ? '#0284c7' : '#565a63',
           fontSize: 12,
           fontWeight: 600,
           cursor: 'pointer',
@@ -1814,16 +1800,16 @@ function FilterCheckbox({ label, checked, onChange, color, pill }) {
       gap: 8,
       cursor: 'pointer',
       fontSize: 13,
-      color: '#334155',
+      color: '#3f434b',
       padding: '3px 0',
     }}>
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        style={{ accentColor: color || '#0ea5e9', width: 15, height: 15 }}
+        style={{ accentColor: color || '#0284c7', width: 15, height: 15 }}
       />
-      <span style={{ fontWeight: checked ? 700 : 500, color: checked ? (color || '#0f172a') : '#64748b' }}>
+      <span style={{ fontWeight: checked ? 700 : 500, color: checked ? (color || '#16181d') : '#565a63' }}>
         {label}
       </span>
     </label>
@@ -1831,9 +1817,8 @@ function FilterCheckbox({ label, checked, onChange, color, pill }) {
 }
 
 function CollegeCard({ college, exam, index, onClick }) {
-  const isAct = exam === 'act'
-  const low = isAct ? college.act25 : college.sat25
-  const high = isAct ? college.act75 : college.sat75
+  const low = college.sat25
+  const high = college.sat75
   const tier = college.tier
   const chance = college.chance
 
@@ -1854,7 +1839,7 @@ function CollegeCard({ college, exam, index, onClick }) {
         cursor: 'pointer',
         transition: 'box-shadow .2s ease, transform .2s ease',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,.1)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 1px 3px rgba(22,24,29,.06)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
       onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.transform = '' }}
     >
       {/* Tier stripe */}
@@ -1875,19 +1860,19 @@ function CollegeCard({ college, exam, index, onClick }) {
           <CollegeLogo college={college} size={40} />
           <div style={{ minWidth: 0 }}>
             <h3 style={{
-              fontFamily: 'Sora, sans-serif',
-              fontWeight: 800,
+              fontFamily: 'Fraunces, Georgia, serif',
+              fontWeight: 600,
               fontSize: 15,
-              color: '#0f172a',
+              color: '#16181d',
               margin: 0,
               lineHeight: 1.3,
             }}>
               {college.name}
             </h3>
             {college.alias !== college.name && (
-              <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>{college.alias}</div>
+              <div style={{ fontSize: 12, color: '#8a8f98', marginTop: 2 }}>{college.alias}</div>
             )}
-            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+            <div style={{ fontSize: 12, color: '#565a63', marginTop: 4 }}>
               {college.city}, {STATE_NAMES[college.state] || college.state}
             </div>
           </div>
@@ -1903,7 +1888,7 @@ function CollegeCard({ college, exam, index, onClick }) {
               background: tier.bg,
               color: tier.color,
               fontSize: 11,
-              fontWeight: 800,
+              fontWeight: 600,
               border: `1px solid ${tier.color}22`,
             }}>
               {tier.label}
@@ -1912,9 +1897,9 @@ function CollegeCard({ college, exam, index, onClick }) {
           {chance !== null && (
             <div style={{
               fontSize: 22,
-              fontWeight: 900,
-              fontFamily: 'Sora, sans-serif',
-              color: tier?.color || '#334155',
+              fontWeight: 600,
+              fontFamily: 'Fraunces, Georgia, serif',
+              color: tier?.color || '#3f434b',
               marginTop: 4,
             }}>
               {chance}%
@@ -1932,18 +1917,18 @@ function CollegeCard({ college, exam, index, onClick }) {
         />
         <Badge
           label={`${formatEnrollment(college.enrollment)} students`}
-          color="#64748b"
-          bg="rgba(100,116,139,.08)"
+          color="#565a63"
+          bg="rgba(86,90,99,.08)"
         />
         <Badge
           label={college.size === 'small' ? 'Small' : college.size === 'medium' ? 'Medium' : 'Large'}
-          color="#475569"
-          bg="rgba(71,85,105,.08)"
+          color="#3f434b"
+          bg="rgba(63,67,75,.08)"
         />
         <Badge
           label={`${(college.acceptance * 100).toFixed(college.acceptance < 0.1 ? 1 : 0)}% acceptance`}
-          color="#0ea5e9"
-          bg="rgba(14,165,233,.08)"
+          color="#0284c7"
+          bg="rgba(2,132,199,.08)"
         />
         <Badge
           label={`#${college.rank}`}
@@ -1958,12 +1943,12 @@ function CollegeCard({ college, exam, index, onClick }) {
         gridTemplateColumns: '1fr 1fr',
         gap: 8,
         padding: '10px 0 0',
-        borderTop: '1px solid #f1f5f9',
+        borderTop: '1px solid #f3f0e9',
       }}>
         <StatCell label="In-State" value={formatCost(college.costIn)} />
         <StatCell label="Out-of-State" value={formatCost(college.costOut)} />
-        <StatCell label={`${isAct ? 'ACT' : 'SAT'} 25th`} value={low || '—'} />
-        <StatCell label={`${isAct ? 'ACT' : 'SAT'} 75th`} value={high || '—'} />
+        <StatCell label="SAT 25th" value={low || '—'} />
+        <StatCell label="SAT 75th" value={high || '—'} />
       </div>
 
       {/* Tags */}
@@ -1973,8 +1958,8 @@ function CollegeCard({ college, exam, index, onClick }) {
             <span key={tag} style={{
               padding: '2px 8px',
               borderRadius: 6,
-              background: '#f1f5f9',
-              color: '#64748b',
+              background: '#f3f0e9',
+              color: '#565a63',
               fontSize: 10,
               fontWeight: 700,
               textTransform: 'capitalize',
@@ -2006,10 +1991,10 @@ function Badge({ label, color, bg }) {
 function StatCell({ label, value }) {
   return (
     <div>
-      <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+      <div style={{ fontSize: 10, color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
         {label}
       </div>
-      <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', fontFamily: 'Sora, sans-serif' }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: '#16181d', fontFamily: 'Fraunces, Georgia, serif' }}>
         {value}
       </div>
     </div>
@@ -2020,7 +2005,6 @@ function StatCell({ label, value }) {
 /* ── College Detail Modal ── */
 /* ═══════════════════════════════════════════════════════════ */
 function CollegeDetailModal({ college, exam, activeScore, onClose }) {
-  const isAct = exam === 'act'
   const chance = activeScore ? computeAdmissionChance(activeScore, college, exam) : null
   const tier = chance !== null ? getMatchTier(chance) : null
   const majors = getMajorsForCollege(college)
@@ -2049,7 +2033,7 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(15,23,42,.6)', backdropFilter: 'blur(4px)',
+        background: 'rgba(22,24,29,.6)', backdropFilter: 'blur(4px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 20,
       }}
@@ -2060,9 +2044,9 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: 'white', borderRadius: 20, width: '100%', maxWidth: 720,
+          background: 'white', borderRadius: 12, width: '100%', maxWidth: 720,
           maxHeight: '90vh', overflow: 'auto', position: 'relative',
-          boxShadow: '0 25px 60px rgba(0,0,0,.3)',
+          boxShadow: '0 1px 3px rgba(22,24,29,.06)',
         }}
       >
         {/* Close button */}
@@ -2073,7 +2057,7 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
             width: 36, height: 36, borderRadius: 12, border: 'none',
             background: 'rgba(0,0,0,.06)', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, color: '#64748b', zIndex: 2,
+            fontSize: 18, color: '#565a63', zIndex: 2,
           }}
         >
           &times;
@@ -2081,14 +2065,14 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
 
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-          padding: '32px 32px 28px', borderRadius: '20px 20px 0 0',
+          background: '#16181d',
+          padding: '32px 32px 28px', borderRadius: '12px 12px 0 0',
         }}>
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
             <CollegeLogo college={college} size={56} />
             <div>
               <h2 style={{
-                fontFamily: 'Sora, sans-serif', fontWeight: 900, fontSize: 24,
+                fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, fontSize: 24,
                 color: 'white', margin: 0, lineHeight: 1.2,
               }}>
                 {college.name}
@@ -2106,21 +2090,21 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
           {tier && (
             <div style={{
               marginTop: 20, display: 'flex', alignItems: 'center', gap: 16,
-              background: 'rgba(255,255,255,.1)', borderRadius: 14, padding: '14px 20px',
+              background: 'rgba(255,255,255,.1)', borderRadius: 12, padding: '14px 20px',
             }}>
-              <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 36, fontWeight: 900, color: tier.color }}>
+              <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 36, fontWeight: 600, color: tier.color }}>
                 {chance}%
               </div>
               <div>
                 <div style={{
                   display: 'inline-block', padding: '4px 12px', borderRadius: 8,
-                  background: tier.bg, color: tier.color, fontSize: 12, fontWeight: 800,
+                  background: tier.bg, color: tier.color, fontSize: 12, fontWeight: 600,
                   border: `1px solid ${tier.color}33`, marginBottom: 4,
                 }}>
                   {tier.label}
                 </div>
                 <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 12 }}>
-                  Estimated admission chance based on your {isAct ? 'ACT' : 'SAT'} score of {activeScore}
+                  Estimated admission chance based on your SAT score of {activeScore}
                 </div>
               </div>
             </div>
@@ -2135,65 +2119,48 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
             gap: 12, marginBottom: 24,
           }}>
             <DetailStat label="National Rank" value={`#${college.rank}`} icon="star" color="#f59e0b" />
-            <DetailStat label="Acceptance Rate" value={`${(college.acceptance * 100).toFixed(college.acceptance < 0.1 ? 1 : 0)}%`} icon="target" color="#0ea5e9" />
+            <DetailStat label="Acceptance Rate" value={`${(college.acceptance * 100).toFixed(college.acceptance < 0.1 ? 1 : 0)}%`} icon="target" color="#0284c7" />
             <DetailStat label="Enrollment" value={college.enrollment.toLocaleString()} icon="students" color="#8b5cf6" />
-            <DetailStat label="School Size" value={college.size === 'small' ? 'Small (<5k)' : college.size === 'medium' ? 'Medium (5k-15k)' : 'Large (15k+)'} icon="info" color="#64748b" />
+            <DetailStat label="School Size" value={college.size === 'small' ? 'Small (<5k)' : college.size === 'medium' ? 'Medium (5k-15k)' : 'Large (15k+)'} icon="info" color="#565a63" />
           </div>
 
           {/* Cost */}
           <DetailSection title="Cost & Tuition" icon="chart">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div style={{ padding: 16, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>In-State Tuition</div>
-                <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 22, fontWeight: 900, color: '#0f172a' }}>
+              <div style={{ padding: 16, background: '#f7f5ef', borderRadius: 12, border: '1px solid #e4e0d5' }}>
+                <div style={{ fontSize: 11, color: '#565a63', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>In-State Tuition</div>
+                <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 22, fontWeight: 600, color: '#16181d' }}>
                   {college.costIn === 0 ? 'Free' : `$${college.costIn.toLocaleString()}`}
                 </div>
-                <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>per year</div>
+                <div style={{ fontSize: 12, color: '#8a8f98', marginTop: 2 }}>per year</div>
               </div>
-              <div style={{ padding: 16, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>Out-of-State Tuition</div>
-                <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 22, fontWeight: 900, color: '#0f172a' }}>
+              <div style={{ padding: 16, background: '#f7f5ef', borderRadius: 12, border: '1px solid #e4e0d5' }}>
+                <div style={{ fontSize: 11, color: '#565a63', fontWeight: 700, textTransform: 'uppercase', marginBottom: 4 }}>Out-of-State Tuition</div>
+                <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 22, fontWeight: 600, color: '#16181d' }}>
                   {college.costOut === 0 ? 'Free' : `$${college.costOut.toLocaleString()}`}
                 </div>
-                <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>per year</div>
+                <div style={{ fontSize: 12, color: '#8a8f98', marginTop: 2 }}>per year</div>
               </div>
             </div>
           </DetailSection>
 
           {/* Test Scores */}
           <DetailSection title="Test Score Ranges" icon="test">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div style={{ padding: 16, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>SAT Range</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
+              <div style={{ padding: 16, background: '#f7f5ef', borderRadius: 12, border: '1px solid #e4e0d5' }}>
+                <div style={{ fontSize: 11, color: '#565a63', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>SAT Range</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                  <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>{college.sat25}</span>
-                  <span style={{ color: '#94a3b8', fontSize: 13 }}>–</span>
-                  <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>{college.sat75}</span>
+                  <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 20, fontWeight: 600, color: '#16181d' }}>{college.sat25}</span>
+                  <span style={{ color: '#8a8f98', fontSize: 13 }}>–</span>
+                  <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 20, fontWeight: 600, color: '#16181d' }}>{college.sat75}</span>
                 </div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>25th – 75th percentile</div>
-                {activeScore && !isAct && (
+                <div style={{ fontSize: 11, color: '#8a8f98', marginTop: 2 }}>25th – 75th percentile</div>
+                {activeScore && (
                   <div style={{
                     marginTop: 8, fontSize: 12, fontWeight: 700,
                     color: activeScore >= college.sat75 ? '#059669' : activeScore >= college.sat25 ? '#f59e0b' : '#ef4444',
                   }}>
                     Your score: {activeScore} ({activeScore >= college.sat75 ? 'Above 75th' : activeScore >= college.sat25 ? 'In range' : 'Below 25th'})
-                  </div>
-                )}
-              </div>
-              <div style={{ padding: 16, background: '#f8fafc', borderRadius: 12, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 11, color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: 8 }}>ACT Range</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                  <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>{college.act25}</span>
-                  <span style={{ color: '#94a3b8', fontSize: 13 }}>–</span>
-                  <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>{college.act75}</span>
-                </div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>25th – 75th percentile</div>
-                {activeScore && isAct && (
-                  <div style={{
-                    marginTop: 8, fontSize: 12, fontWeight: 700,
-                    color: activeScore >= college.act75 ? '#059669' : activeScore >= college.act25 ? '#f59e0b' : '#ef4444',
-                  }}>
-                    Your score: {activeScore} ({activeScore >= college.act75 ? 'Above 75th' : activeScore >= college.act25 ? 'In range' : 'Below 25th'})
                   </div>
                 )}
               </div>
@@ -2219,7 +2186,7 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
                 {college.tags.map(tag => (
                   <span key={tag} style={{
                     padding: '6px 14px', borderRadius: 10,
-                    background: '#f1f5f9', color: '#334155',
+                    background: '#f3f0e9', color: '#3f434b',
                     fontSize: 13, fontWeight: 700,
                   }}>
                     {TAG_LABELS[tag] || tag}
@@ -2235,8 +2202,8 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
               {majors.map(m => (
                 <span key={m} style={{
                   padding: '5px 12px', borderRadius: 8,
-                  background: 'rgba(14,165,233,.06)', border: '1px solid rgba(14,165,233,.12)',
-                  color: '#0369a1', fontSize: 12, fontWeight: 600,
+                  background: 'rgba(2,132,199,.06)', border: '1px solid rgba(2,132,199,.12)',
+                  color: '#0284c7', fontSize: 12, fontWeight: 600,
                 }}>
                   {m}
                 </span>
@@ -2258,7 +2225,7 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
               {/* Deadlines */}
               {(college.app.deadlineED || college.app.deadlineEA || college.app.deadlineRD) && (
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>Application Deadlines</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#3f434b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>Application Deadlines</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                     {college.app.deadlineED && (
                       <span style={{ padding: '8px 14px', borderRadius: 10, background: 'rgba(139,92,246,.08)', border: '1px solid rgba(139,92,246,.15)', color: '#7c3aed', fontSize: 13, fontWeight: 700 }}>
@@ -2271,12 +2238,12 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
                       </span>
                     )}
                     {college.app.deadlineEA && (
-                      <span style={{ padding: '8px 14px', borderRadius: 10, background: 'rgba(14,165,233,.08)', border: '1px solid rgba(14,165,233,.15)', color: '#0369a1', fontSize: 13, fontWeight: 700 }}>
+                      <span style={{ padding: '8px 14px', borderRadius: 10, background: 'rgba(2,132,199,.08)', border: '1px solid rgba(2,132,199,.15)', color: '#0284c7', fontSize: 13, fontWeight: 700 }}>
                         EA: {college.app.deadlineEA}
                       </span>
                     )}
                     {college.app.deadlineRD && (
-                      <span style={{ padding: '8px 14px', borderRadius: 10, background: 'rgba(71,85,105,.08)', border: '1px solid rgba(71,85,105,.15)', color: '#334155', fontSize: 13, fontWeight: 700 }}>
+                      <span style={{ padding: '8px 14px', borderRadius: 10, background: 'rgba(63,67,75,.08)', border: '1px solid rgba(63,67,75,.15)', color: '#3f434b', fontSize: 13, fontWeight: 700 }}>
                         RD: {college.app.deadlineRD}
                       </span>
                     )}
@@ -2292,11 +2259,11 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
               {/* Special Requirements */}
               {college.app.specialReqs && college.app.specialReqs.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>Special Requirements</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#3f434b', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>Special Requirements</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {college.app.specialReqs.map((req, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#334155', lineHeight: 1.5 }}>
-                        <span style={{ color: '#f59e0b', fontWeight: 900, fontSize: 11, marginTop: 3, flexShrink: 0 }}>&#9679;</span>
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#3f434b', lineHeight: 1.5 }}>
+                        <span style={{ color: '#f59e0b', fontWeight: 600, fontSize: 11, marginTop: 3, flexShrink: 0 }}>&#9679;</span>
                         {req}
                       </div>
                     ))}
@@ -2308,11 +2275,11 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
               {college.app.lookingFor && (
                 <div style={{
                   padding: 16, borderRadius: 12,
-                  background: 'linear-gradient(135deg, rgba(14,165,233,.04), rgba(139,92,246,.04))',
-                  border: '1px solid rgba(14,165,233,.10)',
+                  background: '#faf9f6',
+                  border: '1px solid rgba(2,132,199,.10)',
                 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>What They Look For</div>
-                  <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.7 }}>{college.app.lookingFor}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>What They Look For</div>
+                  <div style={{ fontSize: 13, color: '#3f434b', lineHeight: 1.7 }}>{college.app.lookingFor}</div>
                 </div>
               )}
             </DetailSection>
@@ -2327,11 +2294,11 @@ function CollegeDetailModal({ college, exam, activeScore, onClose }) {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 padding: '12px 28px', borderRadius: 12,
-                background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-                color: 'white', fontWeight: 800, fontSize: 14,
+                background: '#0284c7',
+                color: 'white', fontWeight: 600, fontSize: 14,
                 textDecoration: 'none',
-                fontFamily: 'Sora, sans-serif',
-                boxShadow: '0 4px 16px rgba(14,165,233,.3)',
+                fontFamily: 'Fraunces, Georgia, serif',
+                boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               }}
             >
               Visit {college.alias || college.name} Website &rarr;
@@ -2348,7 +2315,7 @@ function DetailSection({ title, icon, children }) {
     <div style={{ marginBottom: 22 }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
-        fontFamily: 'Sora, sans-serif', fontSize: 15, fontWeight: 800, color: '#0f172a',
+        fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 600, color: '#16181d',
       }}>
         <Icon name={icon} size={16} />
         {title}
@@ -2361,8 +2328,8 @@ function DetailSection({ title, icon, children }) {
 function DetailStat({ label, value, icon, color }) {
   return (
     <div style={{
-      padding: 14, background: '#f8fafc', borderRadius: 12,
-      border: '1px solid #e2e8f0', textAlign: 'center',
+      padding: 14, background: '#f7f5ef', borderRadius: 12,
+      border: '1px solid #e4e0d5', textAlign: 'center',
     }}>
       <div style={{
         width: 32, height: 32, borderRadius: 10, margin: '0 auto 8px',
@@ -2370,17 +2337,17 @@ function DetailStat({ label, value, icon, color }) {
       }}>
         <Icon name={icon} size={16} style={{ color }} />
       </div>
-      <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{value}</div>
-      <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', marginTop: 2 }}>{label}</div>
+      <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 18, fontWeight: 600, color: '#16181d' }}>{value}</div>
+      <div style={{ fontSize: 11, color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase', marginTop: 2 }}>{label}</div>
     </div>
   )
 }
 
 function InfoRow({ label, value }) {
   return (
-    <div style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-      <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginTop: 2 }}>{value}</div>
+    <div style={{ padding: '10px 14px', background: '#f7f5ef', borderRadius: 10, border: '1px solid #e4e0d5' }}>
+      <div style={{ fontSize: 10, color: '#8a8f98', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#16181d', marginTop: 2 }}>{value}</div>
     </div>
   )
 }

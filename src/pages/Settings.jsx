@@ -11,27 +11,27 @@ const scaleIn = { initial: { opacity: 0, scale: 0.85 }, animate: { opacity: 1, s
 
 const card = {
   background: '#fff',
-  border: '1px solid rgba(14,165,233,.1)',
-  borderRadius: 16,
-  boxShadow: '0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(14,165,233,.06)',
+  border: '1px solid rgba(2,132,199,.1)',
+  borderRadius: 12,
+  boxShadow: '0 1px 3px rgba(22,24,29,.06)',
   padding: '36px 32px',
   marginBottom: 28,
 }
 
 const sectionTitle = {
-  fontFamily: 'Sora, sans-serif',
+  fontFamily: 'Fraunces, Georgia, serif',
   fontSize: 22,
-  fontWeight: 700,
-  color: '#0f172a',
+  fontWeight: 600,
+  color: '#16181d',
   marginBottom: 8,
 }
 
 const labelStyle = {
   display: 'block',
-  fontFamily: 'Sora, sans-serif',
+  fontFamily: 'Fraunces, Georgia, serif',
   fontSize: 13,
   fontWeight: 600,
-  color: '#334155',
+  color: '#3f434b',
   marginBottom: 6,
 }
 
@@ -39,12 +39,12 @@ const inputStyle = {
   width: '100%',
   padding: '10px 14px',
   fontSize: 14,
-  border: '1px solid #e2e8f0',
+  border: '1px solid #e4e0d5',
   borderRadius: 10,
   outline: 'none',
   transition: 'border-color .2s',
   fontFamily: 'inherit',
-  color: '#0f172a',
+  color: '#16181d',
   boxSizing: 'border-box',
 }
 
@@ -52,9 +52,9 @@ const btnPrimary = {
   padding: '10px 24px',
   fontSize: 14,
   fontWeight: 600,
-  fontFamily: 'Sora, sans-serif',
+  fontFamily: 'Fraunces, Georgia, serif',
   color: '#fff',
-  background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+  background: '#0284c7',
   border: 'none',
   borderRadius: 10,
   cursor: 'pointer',
@@ -226,8 +226,8 @@ export default function Settings() {
             style={{
               width: 56,
               height: 56,
-              borderRadius: 14,
-              background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+              borderRadius: 12,
+              background: '#0284c7',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -239,16 +239,16 @@ export default function Settings() {
           </motion.div>
           <h1
             style={{
-              fontFamily: 'Sora, sans-serif',
+              fontFamily: 'Fraunces, Georgia, serif',
               fontSize: 36,
-              fontWeight: 800,
-              color: '#0f172a',
+              fontWeight: 600,
+              color: '#16181d',
               margin: '0 0 8px',
             }}
           >
             Settings
           </h1>
-          <p style={{ fontSize: 17, color: '#64748b', fontWeight: 500, margin: 0 }}>
+          <p style={{ fontSize: 17, color: '#565a63', fontWeight: 500, margin: 0 }}>
             Manage your profile and account preferences
           </p>
         </motion.div>
@@ -266,7 +266,7 @@ export default function Settings() {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                  background: '#0284c7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -289,12 +289,12 @@ export default function Settings() {
                   borderRadius: '50%',
                   background: displayImage
                     ? `url(${displayImage}) center/cover no-repeat`
-                    : 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                    : '#0284c7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
-                  border: '3px solid rgba(14,165,233,.15)',
+                  border: '3px solid rgba(2,132,199,.15)',
                   position: 'relative',
                   overflow: 'hidden',
                 }}
@@ -302,9 +302,9 @@ export default function Settings() {
                 {!displayImage && (
                   <span
                     style={{
-                      fontFamily: 'Sora, sans-serif',
+                      fontFamily: 'Fraunces, Georgia, serif',
                       fontSize: 32,
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: '#fff',
                       userSelect: 'none',
                     }}
@@ -338,7 +338,7 @@ export default function Settings() {
               </motion.div>
 
               <div>
-                <p style={{ fontSize: 14, color: '#475569', margin: '0 0 12px', lineHeight: 1.5 }}>
+                <p style={{ fontSize: 14, color: '#3f434b', margin: '0 0 12px', lineHeight: 1.5 }}>
                   Upload a photo to personalize your profile. JPG, PNG, or WebP up to 2 MB.
                 </p>
                 <button
@@ -377,7 +377,7 @@ export default function Settings() {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                  background: '#0284c7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -401,8 +401,8 @@ export default function Settings() {
                   }}
                   placeholder="Enter new password"
                   style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = '#0ea5e9')}
-                  onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
+                  onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
+                  onBlur={(e) => (e.target.style.borderColor = '#e4e0d5')}
                 />
               </div>
               <div>
@@ -416,8 +416,8 @@ export default function Settings() {
                   }}
                   placeholder="Confirm new password"
                   style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = '#0ea5e9')}
-                  onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
+                  onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
+                  onBlur={(e) => (e.target.style.borderColor = '#e4e0d5')}
                 />
               </div>
 
@@ -462,7 +462,7 @@ export default function Settings() {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                  background: '#0284c7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -483,10 +483,10 @@ export default function Settings() {
                   onChange={(e) => setAffiliation(e.target.value)}
                   placeholder="e.g. Lincoln High School"
                   style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = '#0ea5e9')}
-                  onBlur={(e) => (e.target.style.borderColor = '#e2e8f0')}
+                  onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
+                  onBlur={(e) => (e.target.style.borderColor = '#e4e0d5')}
                 />
-                <p style={{ fontSize: 12, color: '#94a3b8', margin: '6px 0 0', lineHeight: 1.5 }}>
+                <p style={{ fontSize: 12, color: '#8a8f98', margin: '6px 0 0', lineHeight: 1.5 }}>
                   This is used to connect you with your tutor or study group.
                 </p>
               </div>

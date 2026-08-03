@@ -45,15 +45,15 @@ function ToastItem({ toast, onDismiss }) {
       style={{
         pointerEvents: 'auto',
         padding: '12px 18px',
-        borderRadius: 14,
+        borderRadius: 12,
         background: toast.type === 'success'
-          ? 'linear-gradient(135deg, #059669, #10b981)'
-          : 'linear-gradient(135deg, #1a2744, #334155)',
+          ? '#10b981'
+          : '#16181d',
         color: 'white',
-        fontFamily: 'Sora, sans-serif',
+        fontFamily: 'Fraunces, Georgia, serif',
         fontSize: 13,
         fontWeight: 700,
-        boxShadow: '0 12px 32px rgba(0,0,0,.2)',
+        boxShadow: '0 1px 3px rgba(22,24,29,.06)',
         display: 'flex',
         alignItems: 'center',
         gap: 10,

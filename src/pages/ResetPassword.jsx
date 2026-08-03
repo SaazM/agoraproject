@@ -63,16 +63,16 @@ export default function ResetPassword() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: 'transparent' }}>
       <div className="card" style={{ maxWidth: 520, width: '100%' }}>
-        <div style={{ fontFamily: 'Sora,sans-serif', fontSize: 18, fontWeight: 900, color: '#1a2744', marginBottom: 6 }}>
+        <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 18, fontWeight: 600, color: '#16181d', marginBottom: 6 }}>
           Reset password
         </div>
         {status.loading ? (
-          <div style={{ color: '#64748b' }}>{status.msg}</div>
+          <div style={{ color: '#565a63' }}>{status.msg}</div>
         ) : status.msg ? (
           <div style={{ color: '#ef4444', fontWeight: 800 }}>{status.msg}</div>
         ) : (
           <>
-            <div style={{ color: '#64748b', fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>
+            <div style={{ color: '#565a63', fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>
               Enter a new password (8+ characters).
             </div>
             <div className="input-wrap">

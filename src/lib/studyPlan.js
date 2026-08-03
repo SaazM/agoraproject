@@ -1,5 +1,4 @@
 import { CHAPTERS } from '../data/testData.js'
-import { ACT_CHAPTERS } from '../data/actData.js'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const READING_DOMAINS = new Set([
@@ -9,11 +8,11 @@ const READING_DOMAINS = new Set([
   'Expression of Ideas',
 ])
 
-const ALL_CHAPTERS = { ...CHAPTERS, ...ACT_CHAPTERS }
+const ALL_CHAPTERS = { ...CHAPTERS }
 
 /** Return every chapter for the given exam as a weak topic (count=5 each). */
 export function allChaptersAsWeakTopics(exam = 'sat') {
-  const source = exam === 'act' ? ACT_CHAPTERS : CHAPTERS
+  const source = CHAPTERS
   return Object.entries(source).map(([ch, meta]) => ({
     ...meta,
     ch,
@@ -185,17 +184,11 @@ function buildChapterQueues(weakTopics, studiedMap, exam = 'sat') {
     const chKey = String(topic.ch)
     if (seen.has(chKey)) continue
     seen.add(chKey)
-    const isAct = exam === 'act'
-    const label = isAct ? (topic.name || 'ACT Module') : `Chapter ${chKey}`
-    const title = isAct
-      ? `${topic.subject || 'ACT'} · ${label}`
-      : `Study Guide · Chapter ${chKey}`
+    const title = `Study Guide · Chapter ${chKey}`
     const isDone = Boolean(studiedMap[chKey])
     const subtitle = isDone
       ? 'Completed'
-      : isAct
-        ? `${topic.domain || topic.subject || 'ACT'} · ${topic.count || 0} missed`
-        : `${topic.name || 'Topic'} · ${topic.count || 0} missed`
+      : `${topic.name || 'Topic'} · ${topic.count || 0} missed`
     const task = {
       type: 'guide',
       id: chKey,
@@ -296,10 +289,10 @@ export function buildAdaptiveSchedule({
       allReviewTasks.push({
         type: 'mistakes',
         subject: 'Mixed',
-        title: `Review ${amount} ${exam === 'act' ? 'ACT' : 'SAT'} missed question${amount === 1 ? '' : 's'}`,
+        title: `Review ${amount} SAT missed question${amount === 1 ? '' : 's'}`,
         subtitle: isDone
           ? `Completed — ${amount} question${amount === 1 ? '' : 's'} validated.`
-          : `Use the ${exam === 'act' ? 'ACT ' : ''}Mistake Notebook and validate each one you fix.`,
+          : 'Use the Mistake Notebook and validate each one you fix.',
         href: '/mistakes',
         estimatedMinutes: isDone ? 0 : Math.max(12, amount * 3),
         completed: isDone,
@@ -400,10 +393,10 @@ export function buildAdaptiveSchedule({
       ...reviewTasks[0],
       id: `review-${day.key}`,
       amount: totalAmount,
-      title: `Review ${totalAmount} ${exam === 'act' ? 'ACT' : 'SAT'} missed question${totalAmount === 1 ? '' : 's'}`,
+      title: `Review ${totalAmount} SAT missed question${totalAmount === 1 ? '' : 's'}`,
       subtitle: allDone
         ? `Completed — ${totalAmount} question${totalAmount === 1 ? '' : 's'} validated.`
-        : `Use the ${exam === 'act' ? 'ACT ' : ''}Mistake Notebook and validate each one you fix.`,
+        : 'Use the Mistake Notebook and validate each one you fix.',
       estimatedMinutes: allDone ? 0 : reviewTasks.reduce((sum, t) => sum + (t.completed ? 0 : Number(t.estimatedMinutes || 0)), 0),
       completed: allDone,
     }
@@ -602,19 +595,5 @@ export const UPCOMING_TEST_DATES = {
     { date: '2027-03-13', label: 'Mar 13, 2027' },
     { date: '2027-05-01', label: 'May 1, 2027' },
     { date: '2027-06-05', label: 'Jun 5, 2027' },
-  ],
-  act: [
-    { date: '2025-12-13', label: 'Dec 13, 2025' },
-    { date: '2026-02-14', label: 'Feb 14, 2026' },
-    { date: '2026-04-11', label: 'Apr 11, 2026' },
-    { date: '2026-06-13', label: 'Jun 13, 2026' },
-    { date: '2026-07-11', label: 'Jul 11, 2026' },
-    { date: '2026-09-19', label: 'Sep 19, 2026' },
-    { date: '2026-10-17', label: 'Oct 17, 2026' },
-    { date: '2026-12-12', label: 'Dec 12, 2026' },
-    { date: '2027-02-27', label: 'Feb 27, 2027' },
-    { date: '2027-04-10', label: 'Apr 10, 2027' },
-    { date: '2027-06-12', label: 'Jun 12, 2027' },
-    { date: '2027-07-10', label: 'Jul 10, 2027' },
   ],
 }

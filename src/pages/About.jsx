@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth.jsx'
 import Sidebar from '../components/Sidebar.jsx'
 import Icon from '../components/AppIcons.jsx'
+import HandwrittenFirstLine from '../components/HandwrittenFirstLine.jsx'
 import { motion } from 'framer-motion'
 
 const fadeIn = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }
@@ -9,7 +11,7 @@ const features = [
   {
     icon: 'clock',
     title: 'Timed Practice Tests',
-    desc: 'Full-length SAT and ACT practice tests with built-in timers, module-by-module pacing, and automatic scoring that mirrors real test conditions.',
+    desc: 'Full-length SAT practice tests with built-in timers, module-by-module pacing, and automatic scoring that mirrors real test conditions.',
   },
   {
     icon: 'guide',
@@ -47,14 +49,9 @@ const features = [
     desc: 'Explore 780+ colleges with admission chance estimates based on your scores. Filter by region, size, cost, and major to find your best-fit schools.',
   },
   {
-    icon: 'compare',
-    title: 'SAT vs ACT Comparison',
-    desc: 'Take both exams and compare your results side by side. AGORA helps you decide which test plays to your strengths.',
-  },
-  {
     icon: 'test',
     title: 'Test Strategies',
-    desc: 'Section-by-section strategy guides with time management tips, elimination techniques, and question-type breakdowns for both SAT and ACT.',
+    desc: 'Section-by-section strategy guides with time management tips, elimination techniques, and question-type breakdowns for the SAT.',
   },
   {
     icon: 'settings',
@@ -64,7 +61,7 @@ const features = [
 ]
 
 const steps = [
-  { num: 1, label: 'Create your account and choose SAT or ACT', desc: 'Sign up, pick your exam, and optionally set your test date. All study resources are immediately available.' },
+  { num: 1, label: 'Create your account', desc: 'Sign up and optionally set your test date. All study resources are immediately available.' },
   { num: 2, label: 'Take a diagnostic pre-test', desc: 'A full-length timed practice exam identifies your starting point and pinpoints every area that needs work.' },
   { num: 3, label: 'Get your personalized study plan', desc: 'AGORA builds a custom calendar and adaptive study guide based on your weak areas and available time.' },
   { num: 4, label: 'Work through study guide chapters and practice', desc: 'Interactive lessons, targeted drills, and mistake review reinforce concepts until they stick.' },
@@ -74,24 +71,148 @@ const steps = [
 
 const card = {
   background: '#fff',
-  border: '1px solid rgba(14,165,233,.1)',
-  borderRadius: 16,
-  boxShadow: '0 1px 3px rgba(0,0,0,.04), 0 4px 12px rgba(14,165,233,.06)',
+  border: '1px solid rgba(2,132,199,.1)',
+  borderRadius: 12,
+  boxShadow: '0 1px 3px rgba(22,24,29,.06)',
   padding: '36px 32px',
   marginBottom: 28,
 }
 
+/* ---------- origin story (from the founder's handwritten note) ---------- */
+const STORY_FIRST_LINE = 'In the 6th century BCE, Athens first created its Agora.'
+const STORY_AFTER_FIRST_LINE =
+  'A place where citizens gathered to discuss philosophy and trade, and to foster one of the earliest democracies in the world. Its existence gave individuals a sense of empowerment and agency to act as active participants in the history they were creating.'
+const STORY_P2 =
+  'Today, our American Agora is not necessarily a place or a platform, but the institutional checkmark of a college degree. Whether it be financial well-being, retirement capacity, or likelihood of imprisonment, the societal cushion of a college degree remains an important consideration in the pursuit to expand our Agora. This project aids in that endeavor by leveraging AI algorithms to improve students’ SAT scores, making them more competitive for college admission.'
+
+const STORY_VARIANTS = [
+  { id: 'ink-line', label: '1 · Real ink, first line', note: 'His actual handwriting, cropped from the note. Rest in type.' },
+  { id: 'svg', label: '2 · Traced ink, animated', note: 'Same handwriting traced to vectors — it writes itself on load. Rest in type.' },
+  { id: 'font', label: '3 · Handwriting font', note: 'Whole story in a handwriting web font (Caveat). Reflows on any screen.' },
+  { id: 'hand-font', label: '4 · Font of his hand', note: 'Stand-in (Nanum Pen Script) for a font built from his real handwriting via Calligraphr. Reflows like type.' },
+  { id: 'ink-full', label: '5 · Real ink, whole note', note: 'The full scanned note, untouched — cross-outs and all.' },
+]
+
+export function OriginStory() {
+  const [variant, setVariant] = useState('ink-line')
+  const active = STORY_VARIANTS.find((v) => v.id === variant)
+  const handwritingImg = {
+    width: '100%',
+    maxWidth: 640,
+    display: 'block',
+    margin: '6px 0 18px',
+  }
+  const storyBody = { ...sectionSub, fontSize: 15.5 }
+  const handFontBody = (family, size, lineHeight) => ({
+    fontFamily: family,
+    fontSize: size,
+    lineHeight,
+    color: '#16181d',
+  })
+
+  return (
+    <motion.div {...fadeIn} transition={{ duration: 0.5, delay: 0.05 }} style={card}>
+      <h2 style={sectionTitle}>Our Story</h2>
+
+      {/* temporary style picker */}
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 8,
+          margin: '10px 0 6px',
+          padding: '12px 14px',
+          background: '#f8fafc',
+          border: '1px dashed rgba(2,132,199,.35)',
+          borderRadius: 10,
+        }}
+      >
+        <span style={{ width: '100%', fontSize: 11.5, letterSpacing: '.6px', textTransform: 'uppercase', color: '#565a63', fontWeight: 700 }}>
+          Preview — pick a style
+        </span>
+        {STORY_VARIANTS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            onClick={() => setVariant(v.id)}
+            style={{
+              fontFamily: 'DM Sans, sans-serif',
+              fontSize: 12.5,
+              fontWeight: 600,
+              padding: '6px 12px',
+              borderRadius: 999,
+              cursor: 'pointer',
+              border: variant === v.id ? '1px solid #0284c7' : '1px solid rgba(22,24,29,.15)',
+              background: variant === v.id ? '#0284c7' : '#fff',
+              color: variant === v.id ? '#fff' : '#3f434b',
+            }}
+          >
+            {v.label}
+          </button>
+        ))}
+        <span style={{ width: '100%', fontSize: 12.5, color: '#565a63', lineHeight: 1.5 }}>{active.note}</span>
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        {variant === 'ink-line' && (
+          <>
+            <img src="/handwriting/first-line.png" alt={STORY_FIRST_LINE} style={handwritingImg} />
+            <p style={storyBody}>{STORY_AFTER_FIRST_LINE}</p>
+            <p style={{ ...storyBody, marginTop: 12 }}>{STORY_P2}</p>
+          </>
+        )}
+
+        {variant === 'svg' && (
+          <>
+            <HandwrittenFirstLine style={{ maxWidth: 640, margin: '6px 0 18px', color: '#16181d' }} />
+            <p style={storyBody}>{STORY_AFTER_FIRST_LINE}</p>
+            <p style={{ ...storyBody, marginTop: 12 }}>{STORY_P2}</p>
+          </>
+        )}
+
+        {variant === 'font' && (
+          <>
+            <p style={{ ...handFontBody('Caveat, cursive', 30, 1.35), margin: '0 0 10px', fontWeight: 600 }}>
+              {STORY_FIRST_LINE}
+            </p>
+            <p style={handFontBody('Caveat, cursive', 22, 1.5)}>{STORY_AFTER_FIRST_LINE}</p>
+            <p style={{ ...handFontBody('Caveat, cursive', 22, 1.5), marginTop: 12 }}>{STORY_P2}</p>
+          </>
+        )}
+
+        {variant === 'hand-font' && (
+          <>
+            <p style={{ ...handFontBody("'Nanum Pen Script', cursive", 32, 1.3), margin: '0 0 10px' }}>
+              {STORY_FIRST_LINE}
+            </p>
+            <p style={handFontBody("'Nanum Pen Script', cursive", 24, 1.45)}>{STORY_AFTER_FIRST_LINE}</p>
+            <p style={{ ...handFontBody("'Nanum Pen Script', cursive", 24, 1.45), marginTop: 12 }}>{STORY_P2}</p>
+          </>
+        )}
+
+        {variant === 'ink-full' && (
+          <img
+            src="/handwriting/full-note.png"
+            alt={`${STORY_FIRST_LINE} ${STORY_AFTER_FIRST_LINE} ${STORY_P2}`}
+            style={{ ...handwritingImg, maxWidth: 720 }}
+          />
+        )}
+      </div>
+    </motion.div>
+  )
+}
+
 const sectionTitle = {
-  fontFamily: 'Sora, sans-serif',
+  fontFamily: 'Fraunces, Georgia, serif',
   fontSize: 22,
-  fontWeight: 700,
-  color: '#0f172a',
+  fontWeight: 600,
+  color: '#16181d',
   marginBottom: 8,
 }
 
 const sectionSub = {
   fontSize: 15,
-  color: '#475569',
+  color: '#3f434b',
   lineHeight: 1.7,
 }
 
@@ -116,15 +237,15 @@ export default function About() {
               height: 100,
               objectFit: 'contain',
               marginBottom: 20,
-              filter: 'drop-shadow(0 4px 12px rgba(14,165,233,.25))',
+              filter: 'drop-shadow(0 1px 3px rgba(22,24,29,.06))',
             }}
           />
           <h1
             style={{
-              fontFamily: 'Sora, sans-serif',
+              fontFamily: 'Fraunces, Georgia, serif',
               fontSize: 36,
-              fontWeight: 800,
-              color: '#0f172a',
+              fontWeight: 600,
+              color: '#16181d',
               margin: '0 0 8px',
             }}
           >
@@ -133,7 +254,7 @@ export default function About() {
           <p
             style={{
               fontSize: 17,
-              color: '#64748b',
+              color: '#565a63',
               fontWeight: 500,
               margin: 0,
             }}
@@ -143,6 +264,9 @@ export default function About() {
         </motion.div>
 
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 20px 60px' }}>
+          {/* "Our Story" section (handwritten-note variants) is built but shelved for now.
+              To bring it back, render <OriginStory /> here — see the OriginStory component above. */}
+
           {/* ---------- what is agora ---------- */}
           <motion.div
             {...fadeIn}
@@ -151,7 +275,7 @@ export default function About() {
           >
             <h2 style={sectionTitle}>What is AGORA?</h2>
             <p style={sectionSub}>
-              AGORA is an adaptive SAT/ACT test-prep platform designed to meet
+              AGORA is an adaptive SAT test-prep platform designed to meet
               every student exactly where they are. It starts with a diagnostic
               test that maps your strengths and weaknesses, then generates a
               fully personalized study plan so you spend time only on what
@@ -196,7 +320,7 @@ export default function About() {
                       width: 44,
                       height: 44,
                       borderRadius: 12,
-                      background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                      background: '#0284c7',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -209,16 +333,16 @@ export default function About() {
                   <div>
                     <h3
                       style={{
-                        fontFamily: 'Sora, sans-serif',
+                        fontFamily: 'Fraunces, Georgia, serif',
                         fontSize: 15,
                         fontWeight: 700,
-                        color: '#0f172a',
+                        color: '#16181d',
                         margin: '0 0 6px',
                       }}
                     >
                       {f.title}
                     </h3>
-                    <p style={{ fontSize: 13.5, color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+                    <p style={{ fontSize: 13.5, color: '#565a63', lineHeight: 1.6, margin: 0 }}>
                       {f.desc}
                     </p>
                   </div>
@@ -242,10 +366,10 @@ export default function About() {
                       width: 36,
                       height: 36,
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                      background: '#0284c7',
                       color: '#fff',
-                      fontFamily: 'Sora, sans-serif',
-                      fontWeight: 800,
+                      fontFamily: 'Fraunces, Georgia, serif',
+                      fontWeight: 600,
                       fontSize: 15,
                       display: 'flex',
                       alignItems: 'center',
@@ -258,16 +382,16 @@ export default function About() {
                   <div style={{ flex: 1 }}>
                     <p
                       style={{
-                        fontFamily: 'Sora, sans-serif',
+                        fontFamily: 'Fraunces, Georgia, serif',
                         fontWeight: 700,
                         fontSize: 15,
-                        color: '#0f172a',
+                        color: '#16181d',
                         margin: '0 0 4px',
                       }}
                     >
                       {s.label}
                     </p>
-                    <p style={{ fontSize: 13.5, color: '#64748b', lineHeight: 1.6, margin: 0 }}>
+                    <p style={{ fontSize: 13.5, color: '#565a63', lineHeight: 1.6, margin: 0 }}>
                       {s.desc}
                     </p>
                   </div>
@@ -288,7 +412,7 @@ export default function About() {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+                  background: '#d97706',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -320,7 +444,7 @@ export default function About() {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #0ea5e9, #38bdf8)',
+                  background: '#0284c7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

@@ -81,7 +81,7 @@ function getTaskDotColor(task) {
   const combined = t + ' ' + s
   if (combined.includes('test') || combined.includes('practice test') || combined.includes('final')) return '#f97316' // orange for test
   if (combined.includes('review') || combined.includes('mistake') || combined.includes('revisit')) return '#10b981' // green for review
-  return '#0ea5e9' // blue for study (default)
+  return '#0284c7' // blue for study (default)
 }
 
 /* ─── Styles ──────────────────────────────────────────── */
@@ -96,11 +96,11 @@ const S = {
     gap: 16, flexWrap: 'wrap',
   },
   title: {
-    fontFamily: 'Sora, sans-serif', fontSize: 26, fontWeight: 800,
-    color: '#1a2744', letterSpacing: '-0.02em', margin: 0,
+    fontFamily: 'Fraunces, Georgia, serif', fontSize: 26, fontWeight: 600,
+    color: '#16181d', letterSpacing: '-0.02em', margin: 0,
   },
   subtitle: {
-    marginTop: 6, color: '#64748b', fontSize: 14, lineHeight: 1.6, maxWidth: 520,
+    marginTop: 6, color: '#565a63', fontSize: 14, lineHeight: 1.6, maxWidth: 520,
   },
   navBtns: {
     display: 'flex', gap: 8, flexWrap: 'wrap',
@@ -108,51 +108,51 @@ const S = {
   navBtn: {
     display: 'inline-flex', alignItems: 'center', gap: 6,
     padding: '8px 14px', borderRadius: 10,
-    border: '1px solid #e2e8f0', background: '#fff',
-    color: '#475569', fontSize: 13, fontWeight: 600,
+    border: '1px solid #e4e0d5', background: '#fff',
+    color: '#3f434b', fontSize: 13, fontWeight: 600,
     cursor: 'pointer', textDecoration: 'none',
     transition: 'all .18s ease',
   },
 
   /* Settings card */
   settingsCard: {
-    background: '#fff', borderRadius: 16,
+    background: '#fff', borderRadius: 12,
     border: '1px solid #e5e7eb', padding: '20px 24px',
     marginBottom: 24,
   },
   settingsTitle: {
-    fontFamily: 'Sora, sans-serif', fontSize: 15, fontWeight: 700,
-    color: '#1a2744', marginBottom: 4,
+    fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 700,
+    color: '#16181d', marginBottom: 4,
   },
   settingsDesc: {
-    color: '#64748b', fontSize: 13, lineHeight: 1.6, marginBottom: 16,
+    color: '#565a63', fontSize: 13, lineHeight: 1.6, marginBottom: 16,
   },
   settingsRow: {
     display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center',
   },
   dateInput: {
-    padding: '8px 12px', border: '1.5px solid #e2e8f0', borderRadius: 10,
+    padding: '8px 12px', border: '1.5px solid #e4e0d5', borderRadius: 10,
     fontSize: 13, background: 'white', fontFamily: 'inherit',
     outline: 'none', transition: 'border-color .18s',
   },
   dateChip: (active) => ({
     padding: '6px 12px', fontSize: 12, fontWeight: 600,
-    border: active ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0',
-    borderRadius: 999, background: active ? 'rgba(14,165,233,.08)' : '#fff',
-    color: active ? '#0369a1' : '#64748b',
+    border: active ? '2px solid #0284c7' : '1.5px solid #e4e0d5',
+    borderRadius: 999, background: active ? 'rgba(2,132,199,.08)' : '#fff',
+    color: active ? '#0284c7' : '#565a63',
     cursor: 'pointer', transition: 'all .18s',
   }),
   dayChip: (enabled) => ({
     padding: '7px 14px', fontSize: 12, fontWeight: 600,
-    border: enabled ? '1.5px solid rgba(14,165,233,.4)' : '1.5px solid #e2e8f0',
-    borderRadius: 999, background: enabled ? 'rgba(14,165,233,.08)' : '#fff',
-    color: enabled ? '#0ea5e9' : '#94a3b8',
+    border: enabled ? '1.5px solid rgba(2,132,199,.4)' : '1.5px solid #e4e0d5',
+    borderRadius: 999, background: enabled ? 'rgba(2,132,199,.08)' : '#fff',
+    color: enabled ? '#0284c7' : '#8a8f98',
     cursor: 'pointer', transition: 'all .18s',
   }),
 
   /* Calendar container */
   calContainer: {
-    background: '#fff', borderRadius: 20,
+    background: '#fff', borderRadius: 12,
     border: '1px solid #e5e7eb',
     padding: '24px 28px 28px',
     boxShadow: '0 1px 3px rgba(0,0,0,.04)',
@@ -164,14 +164,14 @@ const S = {
     marginBottom: 20,
   },
   monthLabel: {
-    fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700,
-    color: '#1a2744',
+    fontFamily: 'Fraunces, Georgia, serif', fontSize: 18, fontWeight: 600,
+    color: '#16181d',
   },
   arrowBtn: {
     width: 36, height: 36, borderRadius: '50%',
     border: '1px solid #e5e7eb', background: '#fff',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    cursor: 'pointer', color: '#475569',
+    cursor: 'pointer', color: '#3f434b',
     transition: 'all .18s',
     fontSize: 18, fontWeight: 600,
   },
@@ -179,11 +179,11 @@ const S = {
   /* Weekday headers */
   weekRow: {
     display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)',
-    borderBottom: '1px solid #f1f5f9', paddingBottom: 10, marginBottom: 6,
+    borderBottom: '1px solid #f3f0e9', paddingBottom: 10, marginBottom: 6,
   },
   weekLabel: {
     textAlign: 'center', fontSize: 12, fontWeight: 600,
-    color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.4px',
+    color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '.4px',
   },
 
   /* Day grid */
@@ -199,9 +199,9 @@ const S = {
     minHeight: 64, padding: '8px 4px',
     borderRadius: 12,
     cursor: isInPlan ? 'pointer' : 'default',
-    background: isSelected ? 'rgba(14,165,233,.07)' : 'transparent',
+    background: isSelected ? 'rgba(2,132,199,.07)' : 'transparent',
     transition: 'all .18s ease',
-    border: isSelected ? '2px solid #0ea5e9' : '1px solid #e5e7eb',
+    border: isSelected ? '2px solid #0284c7' : '1px solid #e5e7eb',
     outline: 'none',
     fontFamily: 'inherit',
   }),
@@ -209,24 +209,24 @@ const S = {
     width: 38, height: 38,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     borderRadius: '50%',
-    fontFamily: 'Sora, sans-serif',
+    fontFamily: 'Fraunces, Georgia, serif',
     fontSize: 14, fontWeight: isToday || isSelected ? 700 : 500,
     color: isTestDate
       ? '#fff'
       : isSelected
-        ? '#0ea5e9'
+        ? '#0284c7'
         : isToday
-          ? '#0ea5e9'
+          ? '#0284c7'
           : !isCurrentMonth
             ? '#cbd5e1'
             : isInPlan
-              ? '#334155'
+              ? '#3f434b'
               : '#d1d5db',
     background: isTestDate
       ? '#f97316'
       : 'transparent',
     border: isToday && !isTestDate
-      ? '2px solid #0ea5e9'
+      ? '2px solid #0284c7'
       : 'none',
     transition: 'all .18s ease',
   }),
@@ -241,7 +241,7 @@ const S = {
 
   /* Selected day panel */
   panel: {
-    background: '#fff', borderRadius: 20,
+    background: '#fff', borderRadius: 12,
     border: '1px solid #e5e7eb', padding: '28px 28px 24px',
     boxShadow: '0 1px 3px rgba(0,0,0,.04)',
     marginTop: 20,
@@ -251,60 +251,60 @@ const S = {
     gap: 12, marginBottom: 20, flexWrap: 'wrap',
   },
   panelDate: {
-    fontFamily: 'Sora, sans-serif', fontSize: 22, fontWeight: 700,
-    color: '#1a2744',
+    fontFamily: 'Fraunces, Georgia, serif', fontSize: 22, fontWeight: 600,
+    color: '#16181d',
   },
   panelDay: {
-    fontSize: 13, color: '#94a3b8', fontWeight: 500, marginBottom: 2,
+    fontSize: 13, color: '#8a8f98', fontWeight: 500, marginBottom: 2,
   },
   panelTime: {
-    fontSize: 13, color: '#64748b', marginTop: 6,
+    fontSize: 13, color: '#565a63', marginTop: 6,
     display: 'flex', alignItems: 'center', gap: 5,
   },
   focusBadge: (focus) => ({
     padding: '5px 14px', borderRadius: 999,
     fontSize: 12, fontWeight: 600,
     background: focus === 'Reading'
-      ? 'rgba(59,130,246,.08)'
+      ? 'rgba(2,132,199,.08)'
       : focus === 'Math'
         ? 'rgba(16,185,129,.08)'
-        : 'rgba(148,163,184,.08)',
+        : 'rgba(138,143,152,.08)',
     color: focus === 'Reading'
       ? '#2563eb'
       : focus === 'Math'
         ? '#059669'
-        : '#64748b',
+        : '#565a63',
   }),
   taskCard: {
     display: 'block',
     textDecoration: 'none',
-    color: '#0f172a',
-    border: '1px solid #f1f5f9',
-    borderRadius: 14,
+    color: '#16181d',
+    border: '1px solid #f3f0e9',
+    borderRadius: 12,
     padding: '16px 18px',
     background: '#fafbfc',
     transition: 'all .18s ease',
   },
   taskTitle: {
-    fontWeight: 700, color: '#1a2744', marginBottom: 4, fontSize: 14,
+    fontWeight: 700, color: '#16181d', marginBottom: 4, fontSize: 14,
   },
   taskSub: {
-    fontSize: 13, color: '#64748b', lineHeight: 1.6,
+    fontSize: 13, color: '#565a63', lineHeight: 1.6,
   },
   emptyTask: {
-    border: '1.5px dashed #e2e8f0', borderRadius: 14,
-    padding: '18px 20px', color: '#94a3b8', fontSize: 13, lineHeight: 1.6,
+    border: '1.5px dashed #e4e0d5', borderRadius: 12,
+    padding: '18px 20px', color: '#8a8f98', fontSize: 13, lineHeight: 1.6,
     textAlign: 'center',
   },
 
   /* Legend */
   legend: {
     display: 'flex', gap: 18, marginTop: 16, paddingTop: 14,
-    borderTop: '1px solid #f1f5f9', flexWrap: 'wrap',
+    borderTop: '1px solid #f3f0e9', flexWrap: 'wrap',
   },
   legendItem: {
     display: 'flex', alignItems: 'center', gap: 6,
-    fontSize: 12, color: '#64748b',
+    fontSize: 12, color: '#565a63',
   },
 }
 
@@ -315,7 +315,7 @@ export default function CalendarPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const requestedExam = useMemo(() => String(new URLSearchParams(location.search || '').get('exam') || '').toLowerCase(), [location.search])
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
   const examConfig = useMemo(() => getExamConfig(exam), [exam])
   const examTests = useMemo(() => getTestsForExam(exam), [exam])
   const chapters = useMemo(() => getChaptersForExam(exam), [exam])
@@ -587,7 +587,7 @@ export default function CalendarPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            style={{ color: '#94a3b8', fontSize: 15, fontWeight: 500 }}
+            style={{ color: '#8a8f98', fontSize: 15, fontWeight: 500 }}
           >
             Loading calendar...
           </motion.div>
@@ -608,8 +608,8 @@ export default function CalendarPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             style={{
-              marginBottom: 20, padding: '14px 20px', borderRadius: 14,
-              background: 'linear-gradient(135deg, rgba(26,39,68,.96), rgba(30,58,138,.94))',
+              marginBottom: 20, padding: '14px 20px', borderRadius: 12,
+              background: '#16181d',
               color: 'white',
             }}
           >
@@ -661,7 +661,7 @@ export default function CalendarPage() {
 
             {/* Test date row */}
             <div style={{ ...S.settingsRow, marginBottom: 12 }}>
-              <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600, minWidth: 80 }}>Test date</span>
+              <span style={{ fontSize: 12, color: '#565a63', fontWeight: 600, minWidth: 80 }}>Test date</span>
               <input
                 type="date"
                 value={satDate || ''}
@@ -689,7 +689,7 @@ export default function CalendarPage() {
 
             {/* Available days row */}
             <div style={S.settingsRow}>
-              <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600, minWidth: 80 }}>Study days</span>
+              <span style={{ fontSize: 12, color: '#565a63', fontWeight: 600, minWidth: 80 }}>Study days</span>
               {availabilityLabels.map((label, index) => {
                 const enabled = Boolean(studyPrefs?.days?.[index])
                 return (
@@ -721,13 +721,13 @@ export default function CalendarPage() {
             animate={{ opacity: 1, y: 0 }}
             style={{
               ...S.calContainer, textAlign: 'center',
-              padding: '48px 28px', color: '#64748b',
+              padding: '48px 28px', color: '#565a63',
             }}
           >
             <div style={{ fontSize: 36, marginBottom: 14, opacity: 0.3 }}>
               <Icon name="calendar" size={36} />
             </div>
-            <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 17, fontWeight: 700, color: '#1a2744', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 17, fontWeight: 600, color: '#16181d', marginBottom: 8 }}>
               No calendar yet
             </div>
             <div style={{ fontSize: 14, lineHeight: 1.7, maxWidth: 420, margin: '0 auto' }}>
@@ -754,7 +754,7 @@ export default function CalendarPage() {
                       width: 36, height: 36, borderRadius: '50%',
                       border: '1px solid #e5e7eb', background: '#fff',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer', color: '#475569',
+                      cursor: 'pointer', color: '#3f434b',
                     }}
                     aria-label="Previous month"
                   >
@@ -767,7 +767,7 @@ export default function CalendarPage() {
                       width: 36, height: 36, borderRadius: '50%',
                       border: '1px solid #e5e7eb', background: '#fff',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer', color: '#475569',
+                      cursor: 'pointer', color: '#3f434b',
                     }}
                     aria-label="Next month"
                   >
@@ -775,7 +775,7 @@ export default function CalendarPage() {
                   </button>
                 </div>
 
-                <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 700, color: '#1a2744', pointerEvents: 'none' }}>
+                <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 18, fontWeight: 600, color: '#16181d', pointerEvents: 'none' }}>
                   {monthNames[viewMonth]} {viewYear}
                 </div>
 
@@ -785,8 +785,8 @@ export default function CalendarPage() {
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     padding: '6px 14px', borderRadius: 10,
-                    border: '1px solid #0ea5e9', background: '#fff',
-                    color: '#0ea5e9', fontSize: 12, fontWeight: 600,
+                    border: '1px solid #0284c7', background: '#fff',
+                    color: '#0284c7', fontSize: 12, fontWeight: 600,
                     cursor: 'pointer',
                   }}
                 >
@@ -835,11 +835,11 @@ export default function CalendarPage() {
                       onMouseEnter={(e) => {
                         if (!isInPlan) return
                         if (!isSelected) {
-                          e.currentTarget.style.background = '#f8fafc'
+                          e.currentTarget.style.background = '#f7f5ef'
                         }
                         const numEl = e.currentTarget.querySelector('.day-num')
                         if (numEl && !isSelected && !isTestDate) {
-                          numEl.style.background = '#f1f5f9'
+                          numEl.style.background = '#f3f0e9'
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -881,7 +881,7 @@ export default function CalendarPage() {
               {/* Legend */}
               <div style={S.legend}>
                 <div style={S.legendItem}>
-                  <div style={{ ...S.dot('#0ea5e9'), width: 8, height: 8 }} /> Study
+                  <div style={{ ...S.dot('#0284c7'), width: 8, height: 8 }} /> Study
                 </div>
                 <div style={S.legendItem}>
                   <div style={{ ...S.dot('#f97316'), width: 8, height: 8 }} /> Test
@@ -892,7 +892,7 @@ export default function CalendarPage() {
                 <div style={S.legendItem}>
                   <div style={{
                     width: 18, height: 18, borderRadius: '50%',
-                    border: '2px solid #0ea5e9', background: 'transparent',
+                    border: '2px solid #0284c7', background: 'transparent',
                   }} />
                   Today
                 </div>
@@ -955,12 +955,12 @@ export default function CalendarPage() {
                           to={viewHref(task.href)}
                           style={S.taskCard}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#0ea5e9'
-                            e.currentTarget.style.boxShadow = '0 4px 14px rgba(14,165,233,.1)'
+                            e.currentTarget.style.borderColor = '#0284c7'
+                            e.currentTarget.style.boxShadow = '0 1px 3px rgba(22,24,29,.06)'
                             e.currentTarget.style.transform = 'translateY(-1px)'
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#f1f5f9'
+                            e.currentTarget.style.borderColor = '#f3f0e9'
                             e.currentTarget.style.boxShadow = 'none'
                             e.currentTarget.style.transform = 'translateY(0)'
                           }}

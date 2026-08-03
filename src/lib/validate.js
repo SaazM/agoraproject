@@ -7,7 +7,7 @@ export function isValidUUID(val) {
 }
 
 export function isValidExam(val) {
-  return val === 'sat' || val === 'act'
+  return val === 'sat'
 }
 
 export function sanitizeString(val, maxLen = 500) {

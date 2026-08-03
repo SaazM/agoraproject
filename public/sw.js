@@ -5,7 +5,7 @@
 */
 
 // Bump this to force clients to refresh caches after deploys.
-const VERSION = 'v5'
+const VERSION = 'v6'
 const STATIC_CACHE = `agora-static-${VERSION}`
 const RUNTIME_CACHE = `agora-runtime-${VERSION}`
 

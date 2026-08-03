@@ -53,10 +53,10 @@ export default function AuthCallback() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: 'transparent' }}>
       <div className="card" style={{ maxWidth: 720, width: '100%' }}>
-        <div style={{ fontFamily: 'Sora,sans-serif', fontSize: 18, fontWeight: 900, color: '#1a2744', marginBottom: 8 }}>
+        <div style={{ fontFamily: 'Fraunces,Georgia,serif', fontSize: 18, fontWeight: 600, color: '#16181d', marginBottom: 8 }}>
           Email Confirmation
         </div>
-        <div style={{ color: '#64748b', fontSize: 14, lineHeight: 1.7 }}>
+        <div style={{ color: '#565a63', fontSize: 14, lineHeight: 1.7 }}>
           {msg}
         </div>
       </div>

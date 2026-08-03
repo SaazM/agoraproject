@@ -6,25 +6,17 @@ import { PDF_PAGE_MAP, answerMatches, isMultipleChoiceAnswer } from '../data/tes
 import { EXTRA_PDF_PAGE_MAPS } from '../data/extraPdfPageMaps.js'
 import { getTestConfig } from '../data/tests.js'
 import { getAnswerKeyBySection } from '../data/answerKeys.js'
-import PDFPage from '../components/PDFPage.jsx'
-import PDFSectionStack from '../components/PDFSectionStack.jsx'
 import BrandLink from '../components/BrandLink.jsx'
 import Icon from '../components/AppIcons.jsx'
-import ExamSwitcher from '../components/ExamSwitcher.jsx'
 import TopResourceNav from '../components/TopResourceNav.jsx'
 import { loadMistakes, loadReviewItems, computeDueCount, updateMistakeNote, applyReviewResult, saveReviewItem } from '../lib/mistakesStore.js'
-import { getChoiceOptionsForQuestion, getExamConfigForTest, getGuideContentForExam, getPdfViewerModeForTest, getSectionPageRangesForTest } from '../data/examData.js'
+import { getChoiceOptionsForQuestion, getExamConfigForTest, getGuideContentForExam } from '../data/examData.js'
 import { resolveViewContext, withExam, withViewUser } from '../lib/viewAs.js'
 import { getInitialPreferredExam } from '../lib/examChoice.js'
 import { buildQuestionHintLadder } from '../lib/questionHints.js'
 import { hasUnlockedResources } from '../lib/pretestGate.js'
 import { useToast } from '../components/Toast.jsx'
 import Sidebar from '../components/Sidebar.jsx'
-import * as pdfjsLib from 'pdfjs-dist'
-import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
-
 /* ── framer-motion variants ── */
 const listStagger = {
   hidden: {},
@@ -40,12 +32,7 @@ const panelSlideIn = {
   transition: { duration: 0.35, ease: 'easeOut' },
 }
 
-const textCache = {}
-
-const ALL_GUIDE_CONTENT = {
-  ...getGuideContentForExam('sat'),
-  ...getGuideContentForExam('act'),
-}
+const ALL_GUIDE_CONTENT = getGuideContentForExam('sat')
 
 /* Navbar removed — using Sidebar */
 
@@ -56,27 +43,10 @@ function parseItemKey(k) {
   return { test_id: parts[0], section: parts[1], q_num: q }
 }
 
-function estimateActQuestionTarget(testId, section, qNum) {
-  const range = getSectionPageRangesForTest(testId)?.[section]
-  const totalQuestions = Number(getExamConfigForTest(testId)?.modules?.[section]?.questions || 0)
-  if (!Array.isArray(range) || range.length < 2 || !totalQuestions) return { pageIndex: 0, scrollRatio: 0 }
-  const start = Number(range[0] || 0)
-  const end = Math.max(start, Number(range[1] || start))
-  const pageCount = Math.max(1, end - start + 1)
-  const progress = Math.max(0, Math.min(0.999, (Number(qNum || 1) - 1) / totalQuestions))
-  const offset = progress * pageCount
-  const pageOffset = Math.min(pageCount - 1, Math.floor(offset))
-  return {
-    pageIndex: start + pageOffset,
-    scrollRatio: Math.max(0, Math.min(0.92, offset - pageOffset)),
-  }
-}
-
 function pdfPageFor(testId, section, qNum) {
   const map = (testId === 'pre_test')
     ? (PDF_PAGE_MAP?.[section] || {})
     : (EXTRA_PDF_PAGE_MAPS?.[testId]?.[section] || {})
-  if (String(testId || '').startsWith('act')) return estimateActQuestionTarget(testId, section, qNum)
   if (Number.isFinite(Number(map?.[qNum]))) return { pageIndex: map[qNum], scrollRatio: 0 }
   for (let q = qNum - 1; q >= 1; q--) {
     if (Number.isFinite(Number(map?.[q]))) return { pageIndex: map[q], scrollRatio: 0 }
@@ -87,7 +57,7 @@ function pdfPageFor(testId, section, qNum) {
 function buildMistakeHints(mistake, isMC, questionText = '') {
   const chapterMeta = ALL_GUIDE_CONTENT?.[mistake?.chapter_id] || {}
   return buildQuestionHintLadder({
-    exam: String(mistake?.test_id || '').startsWith('act') ? 'act' : 'sat',
+    exam: 'sat',
     section: mistake?.section || '',
     qNum: mistake?.q_num || 0,
     isMC,
@@ -99,118 +69,10 @@ function buildMistakeHints(mistake, isMC, questionText = '') {
   })
 }
 
-async function loadPdfTextRange(pdfUrl, startPageIndex, endPageIndex) {
-  const url = String(pdfUrl || '').trim()
-  if (!url) return ''
-  if (!textCache[url]) {
-    const task = pdfjsLib.getDocument(url)
-    textCache[url] = task.promise.catch((error) => {
-      delete textCache[url]
-      throw error
-    })
-  }
-  const pdf = await textCache[url]
-  const parts = []
-  const start = Math.max(0, Number(startPageIndex || 0))
-  const end = Math.max(start, Number(endPageIndex || start))
-  for (let pageIndex = start; pageIndex <= end; pageIndex += 1) {
-    const page = await pdf.getPage(pageIndex + 1)
-    const text = await page.getTextContent()
-    const line = (text?.items || []).map((item) => item?.str || '').join(' ')
-    parts.push(line)
-  }
-  return parts.join(' ')
-}
-
-function digitsOnly(value) {
-  return String(value || '').replace(/[^\d]/g, '')
-}
-
-function extractQuestionSnippet(items = [], startIndex = 0, qNum = 0) {
-  const wanted = String(qNum || '')
-  const out = []
-  for (let index = startIndex; index < items.length; index += 1) {
-    const str = String(items[index]?.str || '').trim()
-    if (index > startIndex) {
-      const nextDigits = digitsOnly(str)
-      if (nextDigits && nextDigits !== wanted && nextDigits.length <= 2 && /^[\d.)\]]+$/.test(str)) break
-    }
-    if (str) out.push(str)
-    if (out.join(' ').length > 320) break
-  }
-  return out.join(' ').replace(/\s+/g, ' ').trim()
-}
-
-function findQuestionAnchorOnPage(items = [], qNum = 0) {
-  const wanted = String(qNum || '')
-  const patterns = [
-    new RegExp(`^${wanted}[.)\\]]?$`),
-    new RegExp(`^Q${wanted}$`, 'i'),
-    new RegExp(`^${wanted}$`),
-  ]
-
-  for (let index = 0; index < items.length; index += 1) {
-    const here = String(items[index]?.str || '').trim()
-    const next = String(items[index + 1]?.str || '').trim()
-    const joined = `${here}${next}`.replace(/\s+/g, '')
-    const joinedDigits = digitsOnly(joined)
-    const hereDigits = digitsOnly(here)
-    const directMatch = patterns.some((pattern) => pattern.test(here)) || (hereDigits === wanted && /^[\d.)\]]+$/.test(here))
-    const splitMatch = joinedDigits === wanted && /^[\d.)\]]*$/.test(joined.replace(/[0-9]/g, ''))
-    if (directMatch || splitMatch) {
-      return {
-        index,
-        y: Number(items[index]?.transform?.[5] || 0),
-        snippet: extractQuestionSnippet(items, index, qNum),
-      }
-    }
-  }
-
-  return null
-}
-
-async function findQuestionPageInSection(pdfUrl, startPageIndex, endPageIndex, qNum, preferredPageIndex = null) {
-  const url = String(pdfUrl || '').trim()
-  if (!url || !Number.isFinite(Number(qNum))) return null
-  if (!textCache[url]) {
-    const task = pdfjsLib.getDocument(url)
-    textCache[url] = task.promise.catch((error) => {
-      delete textCache[url]
-      throw error
-    })
-  }
-  const pdf = await textCache[url]
-  const start = Math.max(0, Number(startPageIndex || 0))
-  const end = Math.max(start, Number(endPageIndex || start))
-  const pages = Array.from({ length: end - start + 1 }, (_, index) => start + index)
-  const orderedPages = pages.slice().sort((a, b) => {
-    const pa = preferredPageIndex == null ? Number.MAX_SAFE_INTEGER : Math.abs(a - preferredPageIndex)
-    const pb = preferredPageIndex == null ? Number.MAX_SAFE_INTEGER : Math.abs(b - preferredPageIndex)
-    return pa - pb
-  })
-  let best = null
-  for (const pageIndex of orderedPages) {
-    const page = await pdf.getPage(pageIndex + 1)
-    const text = await page.getTextContent()
-    const items = text?.items || []
-    const anchor = findQuestionAnchorOnPage(items, qNum)
-    const viewport = page.getViewport({ scale: 1 })
-    if (anchor) {
-      const ratio = Math.max(0, Math.min(0.96, 1 - (anchor.y / Math.max(1, viewport.height || 1))))
-      return { pageIndex, scrollRatio: ratio, snippet: anchor.snippet }
-    }
-    const joined = items.map((item) => item?.str || '').join(' ')
-    const score = joined.includes(` ${qNum} `) || joined.includes(`${qNum}.`) || joined.includes(`${qNum})`) ? 1 : 0
-    if (score > 0 && (!best || score > best.score)) best = { pageIndex, score, scrollRatio: 0, snippet: '' }
-  }
-  return best || null
-}
-
 export default function Mistakes() {
   const { user, profile } = useAuth()
   const location = useLocation()
-  const requestedExam = useMemo(() => String(new URLSearchParams(location.search || '').get('exam') || '').toLowerCase(), [location.search])
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = 'sat'
   const { viewUserId, isAdminPreview } = useMemo(
     () => resolveViewContext({ userId: user?.id, profile, search: location.search }),
     [user?.id, profile, location.search]
@@ -221,7 +83,6 @@ export default function Mistakes() {
   const [selected, setSelected] = useState(null)
   const [filterDue, setFilterDue] = useState(false)
   const [savingId, setSavingId] = useState(null)
-  const [zoom, setZoom] = useState(1)
   const [redoChoice, setRedoChoice] = useState(null)
   const [redoText, setRedoText] = useState('')
   const [redoFeedback, setRedoFeedback] = useState(null)
@@ -233,7 +94,6 @@ export default function Mistakes() {
   const addToast = useToast()
   const viewHref = (path) => withViewUser(withExam(path, exam), viewUserId, isAdminPreview)
   const satHref = withViewUser(withExam('/dashboard', 'sat'), viewUserId, isAdminPreview)
-  const actHref = withViewUser(withExam('/dashboard', 'act'), viewUserId, isAdminPreview)
   const showResourceNav = hasUnlockedResources(viewUserId, exam)
 
   useEffect(() => {
@@ -260,7 +120,7 @@ export default function Mistakes() {
   const filtered = useMemo(() => {
     const now = Date.now()
     const list = (items || []).slice()
-      .filter((m) => String(m?.test_id || '').startsWith('act') ? exam === 'act' : exam === 'sat')
+      .filter((m) => !String(m?.test_id || '').startsWith('act'))
       // Hide validated items (once correct, it comes off the list).
       .filter((m) => {
         const k = `${m.test_id}:${m.section}:${m.q_num}`
@@ -277,20 +137,6 @@ export default function Mistakes() {
   const selectedCfg = selected ? getTestConfig(selected.test_id) : null
   const selectedExamConfig = selected ? getExamConfigForTest(selected.test_id) : null
   const selectedModule = selectedExamConfig?.modules?.[selected?.section]
-  const selectedViewerMode = selected ? getPdfViewerModeForTest(selected.test_id) : 'single'
-  const selectedSectionRange = useMemo(() => {
-    if (!selected) return null
-    // Use configured ranges if available (ACT)
-    const configured = getSectionPageRangesForTest(selected.test_id)?.[selected.section]
-    if (configured) return configured
-    // For SAT, compute range from PDF page maps
-    const map = (selected.test_id === 'pre_test' || selected.test_id === 'practice_test_11')
-      ? (PDF_PAGE_MAP?.[selected.section] || {})
-      : (EXTRA_PDF_PAGE_MAPS?.[selected.test_id]?.[selected.section] || {})
-    const pages = Object.values(map).filter((p) => Number.isFinite(Number(p)) && Number(p) > 0)
-    if (!pages.length) return null
-    return [Math.min(...pages), Math.max(...pages)]
-  }, [selected?.test_id, selected?.section])
   const [resolvedPdfTarget, setResolvedPdfTarget] = useState({ pageIndex: 0, scrollRatio: 0 })
   const selectedItemKey = selected ? `${selected.test_id}:${selected.section}:${selected.q_num}` : null
   const selectedKeyBySection = selected ? getAnswerKeyBySection(selected.test_id) : null
@@ -299,7 +145,6 @@ export default function Mistakes() {
   const selectedChoices = selected ? getChoiceOptionsForQuestion(selected.test_id, selected.section, selected.q_num) : ['A', 'B', 'C', 'D']
 
   useEffect(() => {
-    setZoom(1)
     setRedoChoice(null)
     setRedoText('')
     setRedoFeedback(null)
@@ -324,63 +169,13 @@ export default function Mistakes() {
     setResolvedPdfTarget(pdfPageFor(selected.test_id, selected.section, selected.q_num))
   }, [selectedItemKey, selected?.test_id, selected?.section, selected?.q_num])
 
-  useEffect(() => {
-    let cancelled = false
-    async function refineTarget() {
-      if (!selectedCfg?.pdfUrl || !Array.isArray(selectedSectionRange)) return
-      try {
-        const target = await findQuestionPageInSection(
-          selectedCfg.pdfUrl,
-          selectedSectionRange[0],
-          selectedSectionRange[1],
-          selected?.q_num,
-          resolvedPdfTarget.pageIndex
-        )
-        if (!cancelled && Number.isFinite(Number(target?.pageIndex))) {
-          setResolvedPdfTarget((prev) => ({
-            ...prev,
-            pageIndex: Number(target.pageIndex),
-            scrollRatio: Number.isFinite(Number(target.scrollRatio)) ? Number(target.scrollRatio) : prev.scrollRatio,
-          }))
-          if (target?.snippet) setQuestionContextText(target.snippet)
-        }
-      } catch {}
-    }
-    refineTarget()
-    return () => {
-      cancelled = true
-    }
-  }, [selectedItemKey, selectedCfg?.pdfUrl, selectedViewerMode, selectedSectionRange, selected?.q_num])
-
-  useEffect(() => {
-    let cancelled = false
-    async function loadContext() {
-      if (!selected || !selectedCfg?.pdfUrl) return
-      try {
-        if (Array.isArray(selectedSectionRange) && questionContextText) return
-        const start = resolvedPdfTarget.pageIndex
-        const end = Array.isArray(selectedSectionRange)
-          ? Math.min(selectedSectionRange[1], start + 1)
-          : start
-        const text = await loadPdfTextRange(selectedCfg.pdfUrl, start, end)
-        if (!cancelled) setQuestionContextText(text)
-      } catch {
-        if (!cancelled) setQuestionContextText('')
-      }
-    }
-    loadContext()
-    return () => {
-      cancelled = true
-    }
-  }, [selected, selectedCfg?.pdfUrl, resolvedPdfTarget.pageIndex, selectedViewerMode, selectedSectionRange, questionContextText])
-
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#64748b', fontFamily: 'Sora,sans-serif' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#565a63', fontFamily: 'Fraunces, Georgia, serif' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{
             width: 40, height: 40, borderRadius: 12,
-            background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+            background: '#0284c7',
             margin: '0 auto 12px',
             animation: 'pulse 1.5s ease-in-out infinite',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -415,30 +210,28 @@ export default function Mistakes() {
           <span style={{
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
             width: 26, height: 26, borderRadius: 8,
-            background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-            color: '#fff', fontSize: 11, fontWeight: 900,
+            background: '#0284c7',
+            color: '#fff', fontSize: 11, fontWeight: 600,
           }}>Q{selected.q_num}</span>
-          <span style={{ fontWeight: 900, color: '#0f172a', fontSize: 15 }}>Quick Redo</span>
+          <span style={{ fontWeight: 600, color: '#16181d', fontSize: 15 }}>Quick Redo</span>
         </div>
-        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700 }}>
+        <div style={{ fontSize: 11, color: '#8a8f98', fontWeight: 700 }}>
           {selectedCorrect != null ? 'Click Check to validate' : 'Answer key missing'}
         </div>
       </div>
 
       {selectedCorrect == null ? (
-        <div style={{ marginTop: 10, color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+        <div style={{ marginTop: 10, color: '#565a63', fontSize: 13, lineHeight: 1.6 }}>
           This question can't be validated yet because the answer key isn't loaded.
         </div>
       ) : (
         <>
           {selectedIsMC ? (
             <div
-              className={`mistake-choice-grid${exam === 'act' ? ' act' : ''}`}
+              className="mistake-choice-grid"
               style={{
                 display: 'grid',
-                gridTemplateColumns: exam === 'act'
-                  ? 'repeat(auto-fit, minmax(72px, 1fr))'
-                  : `repeat(${selectedChoices.length >= 5 ? 5 : 4}, minmax(0, 1fr))`,
+                gridTemplateColumns: `repeat(${selectedChoices.length >= 5 ? 5 : 4}, minmax(0, 1fr))`,
                 gap: 10,
                 marginTop: 12,
               }}
@@ -449,9 +242,9 @@ export default function Mistakes() {
                   className="btn btn-outline"
                   style={{
                     padding: '10px 12px',
-                    fontWeight: 900,
-                    borderColor: redoChoice === c ? '#1a2744' : '#e2e8f0',
-                    background: redoChoice === c ? 'rgba(26,39,68,.08)' : 'white',
+                    fontWeight: 600,
+                    borderColor: redoChoice === c ? '#16181d' : '#e4e0d5',
+                    background: redoChoice === c ? 'rgba(22,24,29,.08)' : 'white',
                   }}
                   onClick={() => {
                     setRedoChoice(c)
@@ -464,7 +257,7 @@ export default function Mistakes() {
             </div>
           ) : (
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 12, color: '#64748b', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: '#565a63', marginBottom: 8 }}>
                 Open response: enter only the value/expression. Equivalent fractions and comma-formatted numbers count. Examples: <code>75</code>, <code>1/2</code>, <code>0.5</code>, <code>15,000</code>, <code>pi</code>, <code>3*pi/2</code>, <code>2^3</code>.
               </div>
               <input
@@ -508,7 +301,7 @@ export default function Mistakes() {
                     const remaining = (items || []).filter(m => m.id !== selected.id).filter(m => {
                       const k = `${m.test_id}:${m.section}:${m.q_num}`
                       return updatedReview?.[k]?.last_correct !== true
-                    }).filter(m => String(m?.test_id || '').startsWith('act') ? exam === 'act' : exam === 'sat').length
+                    }).filter(m => !String(m?.test_id || '').startsWith('act')).length
                     if (remaining === 0) {
                       addToast("Good job on Q" + selected.q_num + "! You've completed all your missed questions!", 'success')
                     } else {
@@ -523,7 +316,7 @@ export default function Mistakes() {
               {redoSaving ? 'Saving…' : 'Check →'}
             </button>
             {redoFeedback && (
-              <div style={{ fontSize: 12, fontWeight: 900, color: redoFeedback.ok ? '#10b981' : '#ef4444' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: redoFeedback.ok ? '#10b981' : '#ef4444' }}>
                 {redoFeedback.msg}
               </div>
             )}
@@ -532,7 +325,7 @@ export default function Mistakes() {
           {redoFeedback && !redoFeedback.ok && (
             <div style={{ marginTop: 8, background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: '8px 10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                <div style={{ fontWeight: 900, color: '#9a3412', fontSize: 12 }}>Hints</div>
+                <div style={{ fontWeight: 600, color: '#9a3412', fontSize: 12 }}>Hints</div>
                 <div style={{ display: 'flex', gap: 6 }}>
                   {[1, 2, 3].map((n) => (
                     <button
@@ -583,8 +376,8 @@ export default function Mistakes() {
       <Sidebar currentExam={exam} />
       <div className="page fade-up">
         {isAdminPreview && (
-          <div className="card" style={{ marginBottom: 16, background: 'linear-gradient(135deg, rgba(26,39,68,.96), rgba(30,58,138,.94))', color: 'white' }}>
-            <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 4 }}>Admin View</div>
+          <div className="card" style={{ marginBottom: 16, background: '#16181d', color: 'white' }}>
+            <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Admin View</div>
             <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.88 }}>
               You're viewing this student's Mistake Notebook in read-only mode. Notes and validations won't overwrite their data.
             </div>
@@ -603,18 +396,18 @@ export default function Mistakes() {
               transition={{ duration: 0.4, delay: 0.15, ease: 'easeOut' }}
               style={{
                 width: 44, height: 44, borderRadius: 12,
-                background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                background: '#0284c7',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(14,165,233,.3)', flexShrink: 0,
+                boxShadow: '0 1px 3px rgba(22,24,29,.06)', flexShrink: 0,
               }}
             >
               <Icon name="mistakes" size={22} style={{ color: '#fff' }} />
             </motion.div>
             <div>
-              <h1 style={{ fontFamily: 'Sora,sans-serif', fontSize: 24, fontWeight: 900, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
+              <h1 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 24, fontWeight: 600, color: '#16181d', margin: 0, lineHeight: 1.2 }}>
                 Mistake Notebook
               </h1>
-              <div style={{ marginTop: 4, color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+              <div style={{ marginTop: 4, color: '#565a63', fontSize: 13, lineHeight: 1.6 }}>
                 Your missed questions auto-save here. Adding an explanation is <b>optional</b>, but it helps you avoid repeating the same mistake.
               </div>
             </div>
@@ -635,9 +428,9 @@ export default function Mistakes() {
               transition={{ duration: 0.35, delay: 0.15 }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '5px 12px', borderRadius: 20,
-                background: 'rgba(14,165,233,.08)', color: '#0369a1',
-                fontSize: 12, fontWeight: 800,
+                padding: '5px 12px', borderRadius: 12,
+                background: 'rgba(2,132,199,.08)', color: '#0284c7',
+                fontSize: 12, fontWeight: 600,
               }}
             >
               {filtered.length} mistake{filtered.length !== 1 ? 's' : ''}
@@ -648,9 +441,9 @@ export default function Mistakes() {
               transition={{ duration: 0.35, delay: 0.2 }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '5px 12px', borderRadius: 20,
+                padding: '5px 12px', borderRadius: 12,
                 background: 'rgba(16,185,129,.08)', color: '#047857',
-                fontSize: 12, fontWeight: 800,
+                fontSize: 12, fontWeight: 600,
               }}
             >
               {solvedIds.size} validated
@@ -661,10 +454,10 @@ export default function Mistakes() {
               transition={{ duration: 0.35, delay: 0.25 }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '5px 12px', borderRadius: 20,
-                background: dueCount > 0 ? 'rgba(239,68,68,.08)' : 'rgba(148,163,184,.08)',
-                color: dueCount > 0 ? '#dc2626' : '#64748b',
-                fontSize: 12, fontWeight: 800,
+                padding: '5px 12px', borderRadius: 12,
+                background: dueCount > 0 ? 'rgba(239,68,68,.08)' : 'rgba(138,143,152,.08)',
+                color: dueCount > 0 ? '#dc2626' : '#565a63',
+                fontSize: 12, fontWeight: 600,
               }}
             >
               {dueCount} due
@@ -674,12 +467,12 @@ export default function Mistakes() {
             <button
               onClick={() => setFilterDue(false)}
               style={{
-                padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 800,
-                border: filterDue ? '1.5px solid #e2e8f0' : 'none',
-                background: !filterDue ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)' : '#fff',
-                color: !filterDue ? '#fff' : '#475569',
+                padding: '6px 16px', borderRadius: 12, fontSize: 12, fontWeight: 600,
+                border: filterDue ? '1.5px solid #e4e0d5' : 'none',
+                background: !filterDue ? '#0284c7' : '#fff',
+                color: !filterDue ? '#fff' : '#3f434b',
                 cursor: 'pointer', transition: 'all .2s ease',
-                boxShadow: !filterDue ? '0 2px 8px rgba(14,165,233,.25)' : '0 1px 3px rgba(0,0,0,.04)',
+                boxShadow: !filterDue ? '0 1px 3px rgba(22,24,29,.06)' : '0 1px 3px rgba(0,0,0,.04)',
               }}
             >
               All
@@ -687,12 +480,12 @@ export default function Mistakes() {
             <button
               onClick={() => setFilterDue(true)}
               style={{
-                padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 800,
-                border: !filterDue ? '1.5px solid #e2e8f0' : 'none',
-                background: filterDue ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)' : '#fff',
-                color: filterDue ? '#fff' : '#475569',
+                padding: '6px 16px', borderRadius: 12, fontSize: 12, fontWeight: 600,
+                border: !filterDue ? '1.5px solid #e4e0d5' : 'none',
+                background: filterDue ? '#0284c7' : '#fff',
+                color: filterDue ? '#fff' : '#3f434b',
                 cursor: 'pointer', transition: 'all .2s ease',
-                boxShadow: filterDue ? '0 2px 8px rgba(14,165,233,.25)' : '0 1px 3px rgba(0,0,0,.04)',
+                boxShadow: filterDue ? '0 1px 3px rgba(22,24,29,.06)' : '0 1px 3px rgba(0,0,0,.04)',
               }}
             >
               Due now ({dueCount})
@@ -707,28 +500,28 @@ export default function Mistakes() {
             transition={{ duration: 0.4, ease: 'easeOut' }}
             style={{
               maxWidth: 480, margin: '60px auto', textAlign: 'center',
-              padding: '48px 32px', borderRadius: 20,
+              padding: '48px 32px', borderRadius: 12,
               background: '#fff',
               border: '1.5px solid rgba(16,185,129,.15)',
-              boxShadow: '0 4px 24px rgba(16,185,129,.08)',
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
             }}
           >
             <div style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: 'linear-gradient(135deg, #10b981, #059669)',
+              width: 56, height: 56, borderRadius: 12,
+              background: '#10b981',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(16,185,129,.3)',
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               marginBottom: 16,
             }}>
               <Icon name="check" size={28} style={{ color: '#fff' }} />
             </div>
-            <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 900, fontSize: 18, color: '#0f172a', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, fontSize: 18, color: '#16181d', marginBottom: 8 }}>
               {filterDue ? 'Nothing due right now' : 'No mistakes yet'}
             </div>
-            <div style={{ color: '#64748b', fontSize: 14, lineHeight: 1.7 }}>
+            <div style={{ color: '#565a63', fontSize: 14, lineHeight: 1.7 }}>
               {filterDue
                 ? "You're all caught up! Check back later or switch to All to review previous mistakes."
-                : `Take a ${exam === 'act' ? 'practice ACT' : 'Pre Test or optional Skill Builder test'}. Any missed questions will appear here for review.`}
+                : 'Take a Pre Test or optional Skill Builder test. Any missed questions will appear here for review.'}
             </div>
           </motion.div>
         ) : (
@@ -744,7 +537,7 @@ export default function Mistakes() {
               >
                 {filtered.map((m) => {
                   const k = `${m.test_id}:${m.section}:${m.q_num}`
-                  const cfg = getTestConfig(m.test_id) || { label: m.test_id, pdfUrl: '/practice-test-11.pdf' }
+                  const cfg = getTestConfig(m.test_id) || { label: m.test_id }
                   const secLabel = getExamConfigForTest(m.test_id)?.modules?.[m.section]?.label || m.section
                   const dueAt = reviewItems?.[k]?.due_at
                   const dueSoon = dueAt && new Date(dueAt).getTime() <= Date.now()
@@ -753,7 +546,7 @@ export default function Mistakes() {
                     <motion.button
                       key={m.id}
                       variants={listItem}
-                      whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(14,165,233,.12)', borderColor: '#0ea5e9' }}
+                      whileHover={{ y: -2, boxShadow: '0 1px 3px rgba(22,24,29,.06)', borderColor: '#0284c7' }}
                       onClick={() => setSelected(m)}
                       style={{
                         width: '100%',
@@ -761,17 +554,17 @@ export default function Mistakes() {
                         padding: '14px 16px',
                         border: solved
                           ? '1.5px solid rgba(16,185,129,.25)'
-                          : '1.5px solid rgba(14,165,233,.12)',
+                          : '1.5px solid rgba(2,132,199,.12)',
                         borderLeft: solved
                           ? '3px solid #10b981'
-                          : '1.5px solid rgba(14,165,233,.12)',
-                        borderRadius: 14,
+                          : '1.5px solid rgba(2,132,199,.12)',
+                        borderRadius: 12,
                         background: solved
-                          ? 'linear-gradient(135deg, rgba(16,185,129,.04), rgba(16,185,129,.01))'
+                          ? 'rgba(16,185,129,.04)'
                           : '#fff',
                         cursor: 'pointer',
                         opacity: solved ? 0.75 : 1,
-                        boxShadow: '0 2px 8px rgba(15,23,42,.05)',
+                        boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                         transition: 'all .2s ease',
                       }}
                     >
@@ -782,28 +575,28 @@ export default function Mistakes() {
                             minWidth: 28, height: 28, borderRadius: 8,
                             background: solved
                               ? 'rgba(16,185,129,.12)'
-                              : 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                              : '#0284c7',
                             color: solved ? '#059669' : '#fff',
-                            fontSize: 11, fontWeight: 900, flexShrink: 0,
+                            fontSize: 11, fontWeight: 600, flexShrink: 0,
                             padding: '0 6px',
                           }}>
                             Q{m.q_num}
                           </span>
                           <div>
-                            <div style={{ fontWeight: 800, fontSize: 14, color: solved ? '#059669' : '#0f172a' }}>
+                            <div style={{ fontWeight: 600, fontSize: 14, color: solved ? '#059669' : '#16181d' }}>
                               {solved ? '✓ ' : ''}{cfg.label} · {secLabel}
                             </div>
-                            <div style={{ marginTop: 3, fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
-                              {m.chapter_id ? `Ch ${m.chapter_id}` : 'No chapter'} · Your answer: <b style={{ color: '#64748b' }}>{String(m.given || '').trim() || 'Unanswered'}</b>
+                            <div style={{ marginTop: 3, fontSize: 12, color: '#8a8f98', fontWeight: 500 }}>
+                              {m.chapter_id ? `Ch ${m.chapter_id}` : 'No chapter'} · Your answer: <b style={{ color: '#565a63' }}>{String(m.given || '').trim() || 'Unanswered'}</b>
                             </div>
                           </div>
                         </div>
                         <span style={{
-                          fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 12,
+                          fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 12,
                           background: solved
                             ? 'rgba(16,185,129,.1)'
-                            : dueSoon ? 'rgba(239,68,68,.08)' : 'rgba(148,163,184,.06)',
-                          color: solved ? '#059669' : (dueSoon ? '#dc2626' : '#94a3b8'),
+                            : dueSoon ? 'rgba(239,68,68,.08)' : 'rgba(138,143,152,.06)',
+                          color: solved ? '#059669' : (dueSoon ? '#dc2626' : '#8a8f98'),
                           flexShrink: 0,
                         }}>
                           {solved ? 'DONE' : (dueSoon ? 'DUE' : '—')}
@@ -825,8 +618,8 @@ export default function Mistakes() {
                 {/* Nav bar */}
                 <div style={{
                   display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14,
-                  background: '#fff', border: '1.5px solid rgba(14,165,233,.12)', borderRadius: 14,
-                  boxShadow: '0 2px 8px rgba(15,23,42,.04)', padding: '12px 16px',
+                  background: '#fff', border: '1.5px solid rgba(2,132,199,.12)', borderRadius: 12,
+                  boxShadow: '0 1px 3px rgba(22,24,29,.06)', padding: '12px 16px',
                 }}>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <button className="btn btn-outline" onClick={() => setSelected(null)}>
@@ -842,73 +635,67 @@ export default function Mistakes() {
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                       minWidth: 28, height: 28, borderRadius: 8,
-                      background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
-                      color: '#fff', fontSize: 11, fontWeight: 900, padding: '0 6px',
+                      background: '#0284c7',
+                      color: '#fff', fontSize: 11, fontWeight: 600, padding: '0 6px',
                     }}>Q{selected.q_num}</span>
-                    <span style={{ fontWeight: 800, color: '#0f172a', fontSize: 14 }}>
+                    <span style={{ fontWeight: 600, color: '#16181d', fontSize: 14 }}>
                       {selectedCfg?.label || selected.test_id} · {selectedModule?.label || selected.section}
                     </span>
                   </div>
-                  <a className="btn btn-outline" href={selectedCfg?.pdfUrl || '/practice-test-11.pdf'} target="_blank" rel="noreferrer">Open PDF →</a>
+                  {selectedCfg?.cbUrl && (
+                    <a className="btn btn-outline" href={`${selectedCfg.cbUrl}#page=${resolvedPdfTarget.pageIndex + 1}`} target="_blank" rel="noreferrer">
+                      Open {selectedCfg.cbLabel || 'test'} on College Board ↗
+                    </a>
+                  )}
                 </div>
 
                 {/* Answer box - sticky at page level, outside any overflow container */}
                 <div style={{
                   position: 'sticky', top: 0, zIndex: 20,
                   background: '#fff',
-                  borderRadius: 16,
-                  border: '1.5px solid rgba(14,165,233,.18)',
-                  boxShadow: '0 4px 24px rgba(15,23,42,.12)',
+                  borderRadius: 12,
+                  border: '1.5px solid rgba(2,132,199,.18)',
+                  boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                   marginBottom: 14,
                   padding: '18px 20px',
                 }}>
                   {answerPanel}
                 </div>
 
-                {/* Zoom controls */}
+                {/* Question source — the test lives on the College Board site */}
                 <div style={{
-                  display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10,
-                  background: '#fff', border: '1.5px solid rgba(14,165,233,.12)', borderRadius: 12,
-                  padding: '10px 16px',
+                  border: '1.5px solid rgba(2,132,199,.12)', borderRadius: 12, background: 'white',
+                  boxShadow: '0 1px 3px rgba(22,24,29,.06)', padding: '18px 20px',
                 }}>
-                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 800 }}>
-                    Scroll down to see the question. Answer box stays pinned at the top.
+                  <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: '#0284c7', marginBottom: 8 }}>
+                    Official College Board Test
                   </div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => setZoom(z => Math.max(0.8, Math.round((z - 0.25) * 100) / 100))}>− Zoom</button>
-                    <div style={{ fontSize: 12, color: '#64748b', fontWeight: 900, minWidth: 74, textAlign: 'center' }}>
-                      {Math.round(zoom * 100)}%
-                    </div>
-                    <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => setZoom(z => Math.min(3.0, Math.round((z + 0.25) * 100) / 100))}>+ Zoom</button>
+                  <div style={{ fontWeight: 600, color: '#16181d', fontSize: 16, marginBottom: 6 }}>
+                    {selectedCfg?.cbLabel || selectedCfg?.label || selected.test_id}
                   </div>
-                </div>
-
-                {/* PDF viewer - full width, scrolls below the sticky answer box */}
-                <div style={{ border: '1.5px solid rgba(14,165,233,.12)', borderRadius: 16, background: 'white', boxShadow: '0 2px 8px rgba(15,23,42,.04)' }}>
-                  {Array.isArray(selectedSectionRange) ? (
-                    <PDFSectionStack
-                      key={selectedItemKey}
-                      pdfUrl={selectedCfg?.pdfUrl || '/practice-test-11.pdf'}
-                      startPage={selectedSectionRange[0]}
-                      endPage={selectedSectionRange[1]}
-                      zoom={zoom}
-                      initialPageIndex={resolvedPdfTarget.pageIndex}
-                      initialScrollRatio={resolvedPdfTarget.scrollRatio}
-                      containerStyle={{ maxHeight: 'none', height: 'auto', overflowY: 'visible', padding: 10, paddingTop: 0 }}
-                    />
+                  <div style={{ color: '#565a63', fontSize: 13, lineHeight: 1.7, marginBottom: 12 }}>
+                    Open the test in another tab and find <b>{selectedModule?.label || selected.section} · Q{selected.q_num}</b> on
+                    page <b>{resolvedPdfTarget.pageIndex + 1}</b> of the PDF, then redo the question using the answer box above.
+                  </div>
+                  {selectedCfg?.cbUrl ? (
+                    <a
+                      className="btn btn-primary"
+                      href={`${selectedCfg.cbUrl}#page=${resolvedPdfTarget.pageIndex + 1}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open to page {resolvedPdfTarget.pageIndex + 1} ↗
+                    </a>
                   ) : (
-                    <PDFPage
-                      pdfUrl={selectedCfg?.pdfUrl || '/practice-test-11.pdf'}
-                      pageIndex={resolvedPdfTarget.pageIndex}
-                      zoom={zoom}
-                      maxScale={6}
-                    />
+                    <div style={{ color: '#8a8f98', fontSize: 12 }}>Test link unavailable for this item.</div>
                   )}
+                  <div style={{ marginTop: 12, fontSize: 12, color: '#8a8f98', lineHeight: 1.6 }}>
+                    If the PDF doesn't jump to the page automatically, scroll to page {resolvedPdfTarget.pageIndex + 1}.
+                  </div>
                 </div>
 
-                {exam !== 'act' && (
-                  <div style={{ marginTop: 12 }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>Optional explanation (save what you learned)</div>
+                <div style={{ marginTop: 12 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>Optional explanation (save what you learned)</div>
                     <textarea
                       value={selected.note || ''}
                       onChange={(e) => setSelected(prev => ({ ...prev, note: e.target.value }))}
@@ -919,7 +706,7 @@ export default function Mistakes() {
                         minHeight: 110,
                         padding: 12,
                         borderRadius: 12,
-                        border: '1.5px solid rgba(14,165,233,.12)',
+                        border: '1.5px solid rgba(2,132,199,.12)',
                         outline: 'none',
                         resize: 'vertical',
                         fontFamily: 'DM Sans, system-ui, -apple-system, Segoe UI, sans-serif',
@@ -928,12 +715,12 @@ export default function Mistakes() {
                       }}
                     />
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
-                      <div style={{ color: '#94a3b8', fontSize: 12 }}>
+                      <div style={{ color: '#8a8f98', fontSize: 12 }}>
                         Tip: Avoid "I'll be more careful." Write the specific method you'll apply.
                       </div>
                       <button
                         className="btn"
-                        style={{ background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', color: 'white', fontWeight: 800, borderRadius: 10, boxShadow: '0 2px 8px rgba(14,165,233,.2)' }}
+                        style={{ background: '#0284c7', color: 'white', fontWeight: 600, borderRadius: 10, boxShadow: '0 1px 3px rgba(22,24,29,.06)' }}
                         disabled={isAdminPreview || savingId === selected.id}
                         onClick={async () => {
                           if (isAdminPreview) return
@@ -947,7 +734,6 @@ export default function Mistakes() {
                       </button>
                     </div>
                   </div>
-                )}
               </motion.div>
             )}
           </AnimatePresence>

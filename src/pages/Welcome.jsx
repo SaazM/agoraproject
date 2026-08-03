@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon from '../components/AppIcons.jsx'
 
-const sf = 'Sora, sans-serif'
+const sf = 'Fraunces, Georgia, serif'
 
 /* ─── Animation variants ─────────────────────────────── */
 
@@ -30,12 +30,12 @@ function StepBadge({ number, active }) {
   return (
     <div style={{
       width: 36, height: 36, borderRadius: 12,
-      background: active ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)' : '#e2e8f0',
-      color: active ? 'white' : '#94a3b8',
-      fontSize: 15, fontWeight: 800, fontFamily: sf,
+      background: active ? '#0284c7' : '#e4e0d5',
+      color: active ? 'white' : '#8a8f98',
+      fontSize: 15, fontWeight: 600, fontFamily: sf,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       transition: 'all .3s ease',
-      boxShadow: active ? '0 4px 14px rgba(14,165,233,.35)' : 'none',
+      boxShadow: active ? '0 1px 3px rgba(22,24,29,.06)' : 'none',
     }}>
       {number}
     </div>
@@ -48,17 +48,17 @@ function MockWindow({ label, children }) {
       variants={fadeUp}
       style={{
         background: 'white',
-        border: '1.5px solid rgba(14,165,233,.15)',
-        borderRadius: 16,
+        border: '1.5px solid rgba(2,132,199,.15)',
+        borderRadius: 12,
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(14,165,233,.08)',
+        boxShadow: '0 1px 3px rgba(22,24,29,.06)',
       }}
     >
       <div style={{
         padding: '8px 16px',
-        background: 'linear-gradient(90deg, #f0f7ff, #f8fafc)',
-        borderBottom: '1px solid rgba(14,165,233,.1)',
-        fontSize: 12, fontWeight: 700, color: '#64748b',
+        background: '#faf9f6',
+        borderBottom: '1px solid rgba(2,132,199,.1)',
+        fontSize: 12, fontWeight: 700, color: '#565a63',
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
         <span style={{ display: 'flex', gap: 5 }}>
@@ -79,15 +79,15 @@ function StatBox({ label, value, sub, color }) {
       variants={fadeUp}
       style={{
         flex: '1 1 0', minWidth: 100, textAlign: 'center',
-        background: 'white', borderRadius: 14,
-        border: '1.5px solid rgba(14,165,233,.12)',
+        background: 'white', borderRadius: 12,
+        border: '1.5px solid rgba(2,132,199,.12)',
         padding: '14px 10px',
-        boxShadow: '0 2px 8px rgba(14,165,233,.06)',
+        boxShadow: '0 1px 3px rgba(22,24,29,.06)',
       }}
     >
-      <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 900, color: color || '#0f172a', fontFamily: sf, marginTop: 2 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>{sub}</div>}
+      <div style={{ fontSize: 11, color: '#8a8f98', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
+      <div style={{ fontSize: 26, fontWeight: 600, color: color || '#16181d', fontFamily: sf, marginTop: 2 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: '#8a8f98', marginTop: 1 }}>{sub}</div>}
     </motion.div>
   )
 }
@@ -98,8 +98,8 @@ function StepDashboard() {
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible">
       <motion.div variants={fadeUp} style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>Your Dashboard</h3>
-        <p style={{ fontSize: 15, color: '#64748b', margin: 0, lineHeight: 1.7 }}>
+        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#16181d', margin: '0 0 6px' }}>Your Dashboard</h3>
+        <p style={{ fontSize: 15, color: '#565a63', margin: 0, lineHeight: 1.7 }}>
           Your home base shows key stats at a glance. Track your best score, number of completed tests, and current study streak.
         </p>
       </motion.div>
@@ -107,7 +107,7 @@ function StepDashboard() {
       <MockWindow label="Dashboard">
         {/* Hero mockup */}
         <motion.div variants={fadeUp} style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0ea5e9 100%)',
+          background: '#16181d',
           borderRadius: 12, padding: '18px 20px', marginBottom: 14,
           display: 'flex', alignItems: 'center', gap: 14,
         }}>
@@ -115,7 +115,7 @@ function StepDashboard() {
             <img src="/logo.png" alt="" style={{ width: 28, height: 28 }} />
           </div>
           <div>
-            <div style={{ fontFamily: sf, fontSize: 16, fontWeight: 900, color: 'white' }}>The Agora Project</div>
+            <div style={{ fontFamily: sf, fontSize: 16, fontWeight: 600, color: 'white' }}>The Agora Project</div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,.5)' }}>Built for speed, focus, and results</div>
           </div>
         </motion.div>
@@ -129,22 +129,22 @@ function StepDashboard() {
 
         {/* Resource cards mockup */}
         <motion.div variants={fadeUp}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>Resources</div>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#565a63', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.8 }}>Resources</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
             {[
-              { label: 'Study Guide', color: '#1e3a8a', icon: 'guide' },
+              { label: 'Study Guide', color: '#0284c7', icon: 'guide' },
               { label: 'Strategies', color: '#166534', icon: 'target' },
               { label: 'Practice', color: '#84cc16', icon: 'star' },
-              { label: 'Extra Tests', color: '#0ea5e9', icon: 'test' },
+              { label: 'Extra Tests', color: '#0284c7', icon: 'test' },
               { label: 'Mistakes', color: '#f59e0b', icon: 'mistakes' },
               { label: 'Report', color: '#8b5cf6', icon: 'chart' },
               { label: 'Journey', color: '#06b6d4', icon: 'calendar' },
-              { label: 'Colleges', color: '#0f172a', icon: 'students' },
+              { label: 'Colleges', color: '#16181d', icon: 'students' },
               { label: 'Compare', color: '#dc2626', icon: 'results' },
             ].map(r => (
               <div key={r.label} style={{
                 padding: '10px 8px', borderRadius: 8,
-                background: '#f8fafc', border: '1px solid #e2e8f0',
+                background: '#f7f5ef', border: '1px solid #e4e0d5',
                 textAlign: 'center',
               }}>
                 <div style={{
@@ -154,19 +154,19 @@ function StepDashboard() {
                 }}>
                   <Icon name={r.icon} size={12} style={{ color: r.color }} />
                 </div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#0f172a' }}>{r.label}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: '#16181d' }}>{r.label}</div>
               </div>
             ))}
           </div>
         </motion.div>
       </MockWindow>
 
-      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(14,165,233,.06)', borderRadius: 12, border: '1px solid rgba(14,165,233,.1)' }}>
+      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(2,132,199,.06)', borderRadius: 12, border: '1px solid rgba(2,132,199,.1)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="home" size={15} style={{ color: 'white' }} />
           </div>
-          <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: '#3f434b', margin: 0, lineHeight: 1.7 }}>
             Your dashboard updates in real time as you take tests and study. Every score improvement is tracked automatically.
           </p>
         </div>
@@ -186,8 +186,8 @@ function StepStudyGuide() {
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible">
       <motion.div variants={fadeUp} style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>Study Guide</h3>
-        <p style={{ fontSize: 15, color: '#64748b', margin: 0, lineHeight: 1.7 }}>
+        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#16181d', margin: '0 0 6px' }}>Study Guide</h3>
+        <p style={{ fontSize: 15, color: '#565a63', margin: 0, lineHeight: 1.7 }}>
           Work through chapters organized by topic. Each chapter includes lessons and practice questions tailored to what you need to learn.
         </p>
       </motion.div>
@@ -197,7 +197,7 @@ function StepStudyGuide() {
           {chapters.map((c, i) => (
             <motion.div key={c.ch} variants={fadeUp} custom={i} style={{
               background: 'white', borderRadius: 12,
-              border: c.done ? '1.5px solid rgba(16,185,129,.25)' : '1.5px solid rgba(14,165,233,.1)',
+              border: c.done ? '1.5px solid rgba(16,185,129,.25)' : '1.5px solid rgba(2,132,199,.1)',
               padding: '14px 16px',
               transition: 'all .2s ease',
             }}>
@@ -205,23 +205,23 @@ function StepStudyGuide() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
                     width: 30, height: 30, borderRadius: 9,
-                    background: c.done ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                    background: c.done ? 'linear-gradient(135deg, #10b981, #059669)' : '#0284c7',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: 'white', fontSize: 13, fontWeight: 800,
                   }}>
                     {c.done ? '\u2713' : i + 1}
                   </div>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{c.ch}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#16181d' }}>{c.ch}</span>
                 </div>
                 {c.done
                   ? <span style={{ fontSize: 11, fontWeight: 800, color: '#10b981', background: 'rgba(16,185,129,.08)', padding: '3px 10px', borderRadius: 6 }}>COMPLETE</span>
-                  : <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>{c.pct}%</span>
+                  : <span style={{ fontSize: 11, fontWeight: 700, color: '#565a63' }}>{c.pct}%</span>
                 }
               </div>
-              <div style={{ height: 6, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden' }}>
+              <div style={{ height: 6, background: '#f3f0e9', borderRadius: 99, overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', width: `${c.pct}%`,
-                  background: c.done ? 'linear-gradient(90deg, #10b981, #059669)' : 'linear-gradient(90deg, #0ea5e9, #3b82f6)',
+                  background: c.done ? 'linear-gradient(90deg, #10b981, #059669)' : '#0284c7',
                   borderRadius: 99, transition: 'width .6s ease',
                 }} />
               </div>
@@ -230,12 +230,12 @@ function StepStudyGuide() {
         </motion.div>
       </MockWindow>
 
-      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(14,165,233,.06)', borderRadius: 12, border: '1px solid rgba(14,165,233,.1)' }}>
+      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(2,132,199,.06)', borderRadius: 12, border: '1px solid rgba(2,132,199,.1)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="guide" size={15} style={{ color: 'white' }} />
           </div>
-          <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: '#3f434b', margin: 0, lineHeight: 1.7 }}>
             Chapters are prioritized based on your weak areas. Complete them at your own pace to build mastery before test day.
           </p>
         </div>
@@ -255,15 +255,15 @@ function StepJourney() {
 
   const statusColors = {
     done: { bg: 'linear-gradient(135deg, #10b981, #059669)', border: 'rgba(16,185,129,.25)', text: '#10b981', barColor: '#10b981' },
-    active: { bg: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', border: 'rgba(14,165,233,.3)', text: '#0ea5e9', barColor: '#0ea5e9' },
-    upcoming: { bg: '#e2e8f0', border: 'rgba(203,213,225,.5)', text: '#94a3b8', barColor: '#e2e8f0' },
+    active: { bg: '#0284c7', border: 'rgba(2,132,199,.3)', text: '#0284c7', barColor: '#0284c7' },
+    upcoming: { bg: '#e4e0d5', border: 'rgba(203,213,225,.5)', text: '#8a8f98', barColor: '#e4e0d5' },
   }
 
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible">
       <motion.div variants={fadeUp} style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>Smart Journey</h3>
-        <p style={{ fontSize: 15, color: '#64748b', margin: 0, lineHeight: 1.7 }}>
+        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#16181d', margin: '0 0 6px' }}>Smart Journey</h3>
+        <p style={{ fontSize: 15, color: '#565a63', margin: 0, lineHeight: 1.7 }}>
           Follow a guided path from your first pre-test through mastery. Each step unlocks the next as you progress.
         </p>
       </motion.div>
@@ -281,10 +281,10 @@ function StepJourney() {
                     width: 40, height: 40, borderRadius: 12,
                     background: colors.bg,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: step.status === 'upcoming' ? '#94a3b8' : 'white',
+                    color: step.status === 'upcoming' ? '#8a8f98' : 'white',
                     fontSize: 15, fontWeight: 800,
-                    boxShadow: step.status === 'active' ? '0 4px 14px rgba(14,165,233,.3)' : 'none',
-                    border: step.status === 'active' ? '2px solid rgba(14,165,233,.2)' : 'none',
+                    boxShadow: step.status === 'active' ? '0 1px 3px rgba(22,24,29,.06)' : 'none',
+                    border: step.status === 'active' ? '2px solid rgba(2,132,199,.2)' : 'none',
                   }}>
                     {step.icon}
                   </div>
@@ -307,7 +307,7 @@ function StepJourney() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{
                       fontSize: 15, fontWeight: 700,
-                      color: step.status === 'upcoming' ? '#94a3b8' : '#0f172a',
+                      color: step.status === 'upcoming' ? '#8a8f98' : '#16181d',
                     }}>
                       {step.label}
                     </span>
@@ -315,7 +315,7 @@ function StepJourney() {
                       fontSize: 10, fontWeight: 800,
                       padding: '3px 10px', borderRadius: 6,
                       color: colors.text,
-                      background: step.status === 'done' ? 'rgba(16,185,129,.08)' : step.status === 'active' ? 'rgba(14,165,233,.08)' : 'rgba(148,163,184,.08)',
+                      background: step.status === 'done' ? 'rgba(16,185,129,.08)' : step.status === 'active' ? 'rgba(2,132,199,.08)' : 'rgba(138,143,152,.08)',
                       textTransform: 'uppercase',
                     }}>
                       {step.status === 'done' ? 'Complete' : step.status === 'active' ? 'In Progress' : 'Locked'}
@@ -328,12 +328,12 @@ function StepJourney() {
         </div>
       </MockWindow>
 
-      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(14,165,233,.06)', borderRadius: 12, border: '1px solid rgba(14,165,233,.1)' }}>
+      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(2,132,199,.06)', borderRadius: 12, border: '1px solid rgba(2,132,199,.1)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="target" size={15} style={{ color: 'white' }} />
           </div>
-          <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: '#3f434b', margin: 0, lineHeight: 1.7 }}>
             The journey adapts to your performance. Complete each step to unlock the next, and watch your progress grow.
           </p>
         </div>
@@ -355,8 +355,8 @@ function StepPractice() {
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible">
       <motion.div variants={fadeUp} style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>More Practice</h3>
-        <p style={{ fontSize: 15, color: '#64748b', margin: 0, lineHeight: 1.7 }}>
+        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#16181d', margin: '0 0 6px' }}>More Practice</h3>
+        <p style={{ fontSize: 15, color: '#565a63', margin: 0, lineHeight: 1.7 }}>
           Practice with real-style questions. Pick an answer and get instant feedback with detailed explanations.
         </p>
       </motion.div>
@@ -368,25 +368,25 @@ function StepPractice() {
           }}>
             <div style={{
               padding: '4px 12px', borderRadius: 8,
-              background: 'linear-gradient(135deg, rgba(14,165,233,.1), rgba(59,130,246,.1))',
-              fontSize: 11, fontWeight: 800, color: '#0ea5e9',
-              border: '1px solid rgba(14,165,233,.15)',
+              background: 'rgba(2,132,199,.08)',
+              fontSize: 11, fontWeight: 800, color: '#0284c7',
+              border: '1px solid rgba(2,132,199,.15)',
             }}>
               Question 7 of 25
             </div>
             <div style={{
               padding: '4px 12px', borderRadius: 8,
-              background: 'rgba(148,163,184,.08)',
-              fontSize: 11, fontWeight: 700, color: '#94a3b8',
+              background: 'rgba(138,143,152,.08)',
+              fontSize: 11, fontWeight: 700, color: '#8a8f98',
             }}>
               Algebra
             </div>
           </div>
 
           <div style={{
-            fontSize: 16, color: '#0f172a', lineHeight: 1.8,
-            padding: '16px 20px', background: '#f8fafc',
-            borderRadius: 12, border: '1px solid #e2e8f0',
+            fontSize: 16, color: '#16181d', lineHeight: 1.8,
+            padding: '16px 20px', background: '#f7f5ef',
+            borderRadius: 12, border: '1px solid #e4e0d5',
             marginBottom: 16,
           }}>
             If 2x + 5 = 13, what is the value of x?
@@ -398,11 +398,11 @@ function StepPractice() {
               const isCorrect = selected && choice.letter === correctAnswer
               const isWrong = isSelected && choice.letter !== correctAnswer
 
-              let borderColor = 'rgba(14,165,233,.12)'
+              let borderColor = 'rgba(2,132,199,.12)'
               let bg = 'white'
               if (isCorrect) { borderColor = '#10b981'; bg = 'rgba(16,185,129,.06)' }
               else if (isWrong) { borderColor = '#ef4444'; bg = 'rgba(239,68,68,.04)' }
-              else if (isSelected) { borderColor = '#0ea5e9'; bg = 'rgba(14,165,233,.04)' }
+              else if (isSelected) { borderColor = '#0284c7'; bg = 'rgba(2,132,199,.04)' }
 
               return (
                 <motion.div
@@ -417,12 +417,12 @@ function StepPractice() {
                     cursor: 'pointer',
                     transition: 'all .2s ease',
                   }}
-                  whileHover={{ scale: 1.01, boxShadow: '0 2px 12px rgba(14,165,233,.1)' }}
+                  whileHover={{ scale: 1.01, boxShadow: '0 1px 3px rgba(22,24,29,.06)' }}
                   whileTap={{ scale: 0.99 }}
                 >
                   <div style={{
                     width: 32, height: 32, borderRadius: 10,
-                    background: isCorrect ? 'linear-gradient(135deg, #10b981, #059669)' : isWrong ? '#ef4444' : 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+                    background: isCorrect ? 'linear-gradient(135deg, #10b981, #059669)' : isWrong ? '#ef4444' : '#0284c7',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: 'white', fontSize: 14, fontWeight: 800,
                     opacity: (isSelected || isCorrect) ? 1 : 0.25,
@@ -432,7 +432,7 @@ function StepPractice() {
                   </div>
                   <span style={{
                     fontSize: 15, fontWeight: isSelected ? 700 : 500,
-                    color: isCorrect ? '#059669' : isWrong ? '#ef4444' : '#334155',
+                    color: isCorrect ? '#059669' : isWrong ? '#ef4444' : '#3f434b',
                   }}>
                     {choice.text}
                   </span>
@@ -457,7 +457,7 @@ function StepPractice() {
               <div style={{ fontSize: 13, fontWeight: 800, color: selected === correctAnswer ? '#059669' : '#ef4444', marginBottom: 4 }}>
                 {selected === correctAnswer ? 'Correct!' : 'Not quite!'}
               </div>
-              <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13, color: '#565a63', lineHeight: 1.6 }}>
                 2x + 5 = 13 {'\u2192'} 2x = 8 {'\u2192'} x = 4. The answer is B.
               </div>
             </motion.div>
@@ -465,12 +465,12 @@ function StepPractice() {
         </motion.div>
       </MockWindow>
 
-      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(14,165,233,.06)', borderRadius: 12, border: '1px solid rgba(14,165,233,.1)' }}>
+      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(2,132,199,.06)', borderRadius: 12, border: '1px solid rgba(2,132,199,.1)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="test" size={15} style={{ color: 'white' }} />
           </div>
-          <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: '#3f434b', margin: 0, lineHeight: 1.7 }}>
             Try clicking an answer above! Practice questions work just like this throughout the platform — instant feedback helps you learn faster.
           </p>
         </div>
@@ -491,8 +491,8 @@ function StepProgress() {
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible">
       <motion.div variants={fadeUp} style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>Track Your Progress</h3>
-        <p style={{ fontSize: 15, color: '#64748b', margin: 0, lineHeight: 1.7 }}>
+        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#16181d', margin: '0 0 6px' }}>Track Your Progress</h3>
+        <p style={{ fontSize: 15, color: '#565a63', margin: 0, lineHeight: 1.7 }}>
           See how far you have come with detailed analytics and visual progress charts. Every test tells a story.
         </p>
       </motion.div>
@@ -500,7 +500,7 @@ function StepProgress() {
       <MockWindow label="Progress Overview">
         <motion.div variants={fadeUp}>
           {/* Score trend chart */}
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#565a63', marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.8 }}>
             Score Trend
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 120, marginBottom: 8, padding: '0 4px' }}>
@@ -512,7 +512,7 @@ function StepProgress() {
                 transition={{ duration: 0.6, delay: 0.15 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                   flex: 1,
-                  background: `linear-gradient(180deg, #0ea5e9 0%, #3b82f6 100%)`,
+                  background: `#0284c7`,
                   borderRadius: '8px 8px 4px 4px',
                   minWidth: 0,
                   position: 'relative',
@@ -521,7 +521,7 @@ function StepProgress() {
               >
                 <div style={{
                   position: 'absolute', top: -20,
-                  fontSize: 11, fontWeight: 800, color: '#0ea5e9',
+                  fontSize: 11, fontWeight: 800, color: '#0284c7',
                   whiteSpace: 'nowrap',
                 }}>
                   {bar.score}
@@ -531,7 +531,7 @@ function StepProgress() {
           </div>
           <div style={{ display: 'flex', gap: 10, padding: '0 4px' }}>
             {barData.map((bar, i) => (
-              <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>
+              <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 10, color: '#8a8f98', fontWeight: 600 }}>
                 {bar.label}
               </div>
             ))}
@@ -539,21 +539,21 @@ function StepProgress() {
         </motion.div>
 
         <motion.div variants={fadeUp} style={{ marginTop: 20 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: '#565a63', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.8 }}>
             Skill Breakdown
           </div>
           {[
             { skill: 'Algebra & Functions', pct: 85, color: '#10b981' },
-            { skill: 'Geometry & Trig', pct: 70, color: '#0ea5e9' },
+            { skill: 'Geometry & Trig', pct: 70, color: '#0284c7' },
             { skill: 'Data Analysis', pct: 55, color: '#f59e0b' },
             { skill: 'Advanced Math', pct: 40, color: '#ef4444' },
           ].map((item, i) => (
             <div key={item.skill} style={{ marginBottom: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#334155' }}>{item.skill}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#3f434b' }}>{item.skill}</span>
                 <span style={{ fontSize: 12, fontWeight: 800, color: item.color }}>{item.pct}%</span>
               </div>
-              <div style={{ height: 8, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden' }}>
+              <div style={{ height: 8, background: '#f3f0e9', borderRadius: 99, overflow: 'hidden' }}>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${item.pct}%` }}
@@ -566,12 +566,12 @@ function StepProgress() {
         </motion.div>
       </MockWindow>
 
-      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(14,165,233,.06)', borderRadius: 12, border: '1px solid rgba(14,165,233,.1)' }}>
+      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(2,132,199,.06)', borderRadius: 12, border: '1px solid rgba(2,132,199,.1)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="chart" size={15} style={{ color: 'white' }} />
           </div>
-          <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: '#3f434b', margin: 0, lineHeight: 1.7 }}>
             Your progress page updates after every test. Use it to identify strengths and focus on areas that need the most work.
           </p>
         </div>
@@ -591,25 +591,25 @@ function StepComplete({ onGetStarted, role }) {
       <motion.div
         variants={fadeUp}
         style={{
-          width: 80, height: 80, borderRadius: 24,
+          width: 80, height: 80, borderRadius: 12,
           background: 'linear-gradient(135deg, #10b981, #059669)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 24px',
-          boxShadow: '0 12px 32px rgba(16,185,129,.3)',
+          boxShadow: '0 1px 3px rgba(22,24,29,.06)',
         }}
       >
         <span style={{ fontSize: 36, color: 'white', fontWeight: 900 }}>{'\u2713'}</span>
       </motion.div>
 
       <motion.h3 variants={fadeUp} style={{
-        fontFamily: sf, fontSize: 32, fontWeight: 900, color: '#0f172a',
+        fontFamily: sf, fontSize: 32, fontWeight: 600, color: '#16181d',
         margin: '0 0 12px',
       }}>
         You're All Set!
       </motion.h3>
 
       <motion.p variants={fadeUp} style={{
-        fontSize: 16, color: '#64748b', margin: '0 auto 32px',
+        fontSize: 16, color: '#565a63', margin: '0 auto 32px',
         maxWidth: 440, lineHeight: 1.7,
       }}>
         {role === 'tutor'
@@ -626,22 +626,22 @@ function StepComplete({ onGetStarted, role }) {
           { icon: 'target', label: 'Strategies', desc: 'Score higher' },
         ].map((item) => (
           <div key={item.label} style={{
-            background: 'white', borderRadius: 16,
-            border: '1.5px solid rgba(14,165,233,.12)',
+            background: 'white', borderRadius: 12,
+            border: '1.5px solid rgba(2,132,199,.12)',
             padding: '20px 24px', width: 140,
-            boxShadow: '0 4px 16px rgba(14,165,233,.06)',
+            boxShadow: '0 1px 3px rgba(22,24,29,.06)',
           }}>
             <div style={{
               width: 40, height: 40, borderRadius: 12,
-              background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+              background: '#0284c7',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 10px',
               color: 'white',
             }}>
               <Icon name={item.icon} size={19} />
             </div>
-            <div style={{ fontFamily: sf, fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 2 }}>{item.label}</div>
-            <div style={{ fontSize: 12, color: '#94a3b8' }}>{item.desc}</div>
+            <div style={{ fontFamily: sf, fontSize: 14, fontWeight: 600, color: '#16181d', marginBottom: 2 }}>{item.label}</div>
+            <div style={{ fontSize: 12, color: '#8a8f98' }}>{item.desc}</div>
           </div>
         ))}
       </motion.div>
@@ -649,17 +649,17 @@ function StepComplete({ onGetStarted, role }) {
       <motion.button
         variants={fadeUp}
         onClick={onGetStarted}
-        whileHover={{ scale: 1.03, boxShadow: '0 12px 32px rgba(249,115,22,.35)' }}
+        whileHover={{ scale: 1.03, boxShadow: '0 1px 3px rgba(22,24,29,.06)' }}
         whileTap={{ scale: 0.97 }}
         style={{
           marginTop: 36,
           padding: '16px 48px',
-          fontSize: 18, fontWeight: 900, fontFamily: sf,
+          fontSize: 18, fontWeight: 600, fontFamily: sf,
           color: 'white',
-          background: 'linear-gradient(135deg, #f97316, #ea580c)',
-          border: 'none', borderRadius: 16,
+          background: '#d97706',
+          border: 'none', borderRadius: 12,
           cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(249,115,22,.3)',
+          boxShadow: '0 1px 3px rgba(22,24,29,.06)',
           transition: 'box-shadow .3s ease',
         }}
       >
@@ -679,8 +679,8 @@ function StepCollegeRecruiting() {
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible">
       <motion.div variants={fadeUp} style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>College Recruiting</h3>
-        <p style={{ fontSize: 15, color: '#64748b', margin: 0, lineHeight: 1.7 }}>
+        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#16181d', margin: '0 0 6px' }}>College Recruiting</h3>
+        <p style={{ fontSize: 15, color: '#565a63', margin: 0, lineHeight: 1.7 }}>
           Explore 775+ colleges and see your estimated admission chances based on your scores. Filter by region, cost, size, major, and more.
         </p>
       </motion.div>
@@ -691,13 +691,13 @@ function StepCollegeRecruiting() {
             <motion.div key={s.name} variants={fadeUp} custom={i} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               padding: '14px 16px', borderRadius: 12,
-              border: '1.5px solid rgba(14,165,233,.1)',
+              border: '1.5px solid rgba(2,132,199,.1)',
               marginBottom: 8,
               background: 'white',
             }}>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>{s.name}</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{s.loc} &middot; SAT {s.sat}</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: '#16181d' }}>{s.name}</div>
+                <div style={{ fontSize: 11, color: '#8a8f98', marginTop: 2 }}>{s.loc} &middot; SAT {s.sat}</div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{
@@ -705,7 +705,7 @@ function StepCollegeRecruiting() {
                   background: `${s.tierColor}15`, color: s.tierColor,
                   fontSize: 11, fontWeight: 800,
                 }}>{s.tier}</div>
-                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>{s.accept} accept</div>
+                <div style={{ fontSize: 11, color: '#8a8f98', marginTop: 2 }}>{s.accept} accept</div>
               </div>
             </motion.div>
           ))}
@@ -715,20 +715,20 @@ function StepCollegeRecruiting() {
             {['Region', 'Cost', 'Size', 'Major', 'Match Tier'].map(f => (
               <span key={f} style={{
                 padding: '4px 10px', borderRadius: 7,
-                background: '#f1f5f9', fontSize: 11, fontWeight: 700, color: '#64748b',
-                border: '1px solid #e2e8f0',
+                background: '#f3f0e9', fontSize: 11, fontWeight: 700, color: '#565a63',
+                border: '1px solid #e4e0d5',
               }}>{f}</span>
             ))}
           </motion.div>
         </motion.div>
       </MockWindow>
 
-      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(14,165,233,.06)', borderRadius: 12, border: '1px solid rgba(14,165,233,.1)' }}>
+      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(2,132,199,.06)', borderRadius: 12, border: '1px solid rgba(2,132,199,.1)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="students" size={15} style={{ color: 'white' }} />
           </div>
-          <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: '#3f434b', margin: 0, lineHeight: 1.7 }}>
             Click any school to see detailed info — tuition, test score ranges, acceptance rates, popular majors, and your estimated admission chance.
           </p>
         </div>
@@ -740,7 +740,7 @@ function StepCollegeRecruiting() {
 function StepStrategies() {
   const strategies = [
     { title: 'Time Management', desc: 'Learn to pace yourself across all sections', icon: 'clock', color: '#f59e0b' },
-    { title: 'Process of Elimination', desc: 'Narrow down choices to boost accuracy', icon: 'target', color: '#0ea5e9' },
+    { title: 'Process of Elimination', desc: 'Narrow down choices to boost accuracy', icon: 'target', color: '#0284c7' },
     { title: 'Reading Strategies', desc: 'Active reading techniques for passages', icon: 'guide', color: '#8b5cf6' },
     { title: 'Math Shortcuts', desc: 'Quick formulas and mental math tricks', icon: 'math', color: '#10b981' },
   ]
@@ -748,8 +748,8 @@ function StepStrategies() {
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="visible">
       <motion.div variants={fadeUp} style={{ marginBottom: 20 }}>
-        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '0 0 6px' }}>Test Strategies</h3>
-        <p style={{ fontSize: 15, color: '#64748b', margin: 0, lineHeight: 1.7 }}>
+        <h3 style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#16181d', margin: '0 0 6px' }}>Test Strategies</h3>
+        <p style={{ fontSize: 15, color: '#565a63', margin: 0, lineHeight: 1.7 }}>
           Master proven strategies to maximize your score. Time management, elimination techniques, and section-specific tips.
         </p>
       </motion.div>
@@ -759,7 +759,7 @@ function StepStrategies() {
           {strategies.map((s, i) => (
             <motion.div key={s.title} variants={fadeUp} custom={i} style={{
               padding: '16px 14px', borderRadius: 12,
-              border: '1.5px solid rgba(14,165,233,.1)',
+              border: '1.5px solid rgba(2,132,199,.1)',
               background: 'white',
             }}>
               <div style={{
@@ -770,19 +770,19 @@ function StepStrategies() {
               }}>
                 <Icon name={s.icon} size={16} style={{ color: s.color }} />
               </div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginBottom: 3 }}>{s.title}</div>
-              <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>{s.desc}</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#16181d', marginBottom: 3 }}>{s.title}</div>
+              <div style={{ fontSize: 11, color: '#8a8f98', lineHeight: 1.5 }}>{s.desc}</div>
             </motion.div>
           ))}
         </motion.div>
       </MockWindow>
 
-      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(14,165,233,.06)', borderRadius: 12, border: '1px solid rgba(14,165,233,.1)' }}>
+      <motion.div variants={fadeUp} style={{ marginTop: 16, padding: '14px 18px', background: 'rgba(2,132,199,.06)', borderRadius: 12, border: '1px solid rgba(2,132,199,.1)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="target" size={15} style={{ color: 'white' }} />
           </div>
-          <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 14, color: '#3f434b', margin: 0, lineHeight: 1.7 }}>
             Each strategy includes practical tips you can apply immediately. Knowing how to approach the test is just as important as knowing the content.
           </p>
         </div>
@@ -871,7 +871,7 @@ export default function Welcome() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #edf4ff 0%, #f0f4f8 100%)',
+      background: '#faf9f6',
     }}>
       {/* ── Hero Section ── */}
       <motion.div
@@ -892,17 +892,17 @@ export default function Welcome() {
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{
             width: 64, height: 64,
-            borderRadius: 18,
+            borderRadius: 12,
             marginBottom: 20,
-            boxShadow: '0 8px 24px rgba(14,165,233,.15)',
+            boxShadow: '0 1px 3px rgba(22,24,29,.06)',
           }}
         />
 
         <h1 style={{
           fontFamily: sf,
           fontSize: 36,
-          fontWeight: 900,
-          color: '#0f172a',
+          fontWeight: 600,
+          color: '#16181d',
           margin: '0 0 10px',
           lineHeight: 1.2,
         }}>
@@ -911,7 +911,7 @@ export default function Welcome() {
 
         <p style={{
           fontSize: 16,
-          color: '#64748b',
+          color: '#565a63',
           margin: '0 auto',
           maxWidth: 460,
           lineHeight: 1.7,
@@ -945,17 +945,17 @@ export default function Welcome() {
                     borderRadius: 12,
                     padding: isActive ? '0 16px' : 0,
                     background: isActive
-                      ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)'
+                      ? '#0284c7'
                       : isDone
                         ? 'rgba(16,185,129,.12)'
                         : 'white',
-                    color: isActive ? 'white' : isDone ? '#10b981' : '#94a3b8',
-                    fontSize: 13, fontWeight: 800, fontFamily: sf,
+                    color: isActive ? 'white' : isDone ? '#10b981' : '#8a8f98',
+                    fontSize: 13, fontWeight: 600, fontFamily: sf,
                     cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    boxShadow: isActive ? '0 4px 16px rgba(14,165,233,.3)' : '0 2px 8px rgba(0,0,0,.04)',
+                    boxShadow: isActive ? '0 1px 3px rgba(22,24,29,.06)' : '0 2px 8px rgba(0,0,0,.04)',
                     transition: 'all .3s ease',
-                    border: isActive ? 'none' : isDone ? '1.5px solid rgba(16,185,129,.2)' : '1.5px solid #e2e8f0',
+                    border: isActive ? 'none' : isDone ? '1.5px solid rgba(16,185,129,.2)' : '1.5px solid #e4e0d5',
                   }}
                   aria-label={`Step ${i + 1}: ${s.title}`}
                 >
@@ -965,7 +965,7 @@ export default function Welcome() {
                 {i < STEPS.length - 1 && (
                   <div style={{
                     width: 24, height: 2,
-                    background: i < step ? '#10b981' : '#e2e8f0',
+                    background: i < step ? '#10b981' : '#e4e0d5',
                     borderRadius: 99,
                     transition: 'background .3s ease',
                   }} />
@@ -1011,11 +1011,11 @@ export default function Welcome() {
             whileHover={!isFirst ? { scale: 1.03 } : {}}
             whileTap={!isFirst ? { scale: 0.97 } : {}}
             style={{
-              padding: '12px 28px', fontSize: 14, fontWeight: 800,
+              padding: '12px 28px', fontSize: 14, fontWeight: 600,
               fontFamily: sf,
-              color: isFirst ? '#cbd5e1' : '#64748b',
+              color: isFirst ? '#cbd5e1' : '#565a63',
               background: 'white',
-              border: `1.5px solid ${isFirst ? '#e2e8f0' : 'rgba(14,165,233,.15)'}`,
+              border: `1.5px solid ${isFirst ? '#e4e0d5' : 'rgba(2,132,199,.15)'}`,
               borderRadius: 12,
               cursor: isFirst ? 'not-allowed' : 'pointer',
               transition: 'all .2s ease',
@@ -1035,7 +1035,7 @@ export default function Welcome() {
                   width: i === step ? 24 : 8, height: 8,
                   borderRadius: 99, border: 'none', padding: 0,
                   background: i === step
-                    ? 'linear-gradient(90deg, #0ea5e9, #3b82f6)'
+                    ? '#0284c7'
                     : i < step
                       ? '#10b981'
                       : '#cbd5e1',
@@ -1049,17 +1049,17 @@ export default function Welcome() {
 
           <motion.button
             onClick={goNext}
-            whileHover={{ scale: 1.03, boxShadow: '0 8px 24px rgba(249,115,22,.3)' }}
+            whileHover={{ scale: 1.03, boxShadow: '0 1px 3px rgba(22,24,29,.06)' }}
             whileTap={{ scale: 0.97 }}
             style={{
-              padding: '12px 32px', fontSize: 14, fontWeight: 800,
+              padding: '12px 32px', fontSize: 14, fontWeight: 600,
               fontFamily: sf,
               color: 'white',
-              background: 'linear-gradient(135deg, #f97316, #ea580c)',
+              background: '#d97706',
               border: 'none',
               borderRadius: 12,
               cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(249,115,22,.25)',
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               transition: 'all .2s ease',
             }}
           >
@@ -1079,7 +1079,7 @@ export default function Welcome() {
         style={{
           textAlign: 'center',
           paddingBottom: 24,
-          fontSize: 12, color: '#94a3b8',
+          fontSize: 12, color: '#8a8f98',
         }}
       >
         Use arrow keys to navigate

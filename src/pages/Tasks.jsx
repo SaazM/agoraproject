@@ -18,10 +18,10 @@ function TaskCard({ task, index, completed = false }) {
   const accent = completed
     ? doneAccent
     : task.type === 'guide'
-      ? '#0ea5e9'
+      ? '#0284c7'
       : task.type === 'mistakes'
         ? '#f59e0b'
-        : '#0ea5e9'
+        : '#0284c7'
   const icon = completed
     ? 'check'
     : task.type === 'guide'
@@ -43,16 +43,16 @@ function TaskCard({ task, index, completed = false }) {
           alignItems: 'flex-start',
           gap: 14,
           padding: '16px 18px',
-          border: completed ? '2px solid rgba(5,150,105,.35)' : '1.5px solid rgba(14,165,233,.18)',
-          borderRadius: 14,
+          border: completed ? '2px solid rgba(5,150,105,.35)' : '1.5px solid rgba(2,132,199,.18)',
+          borderRadius: 12,
           textDecoration: 'none',
-          color: completed ? '#059669' : '#0f172a',
+          color: completed ? '#059669' : '#16181d',
           background: completed
-            ? 'linear-gradient(135deg, rgba(5,150,105,.06), rgba(5,150,105,.02))'
+            ? 'rgba(5,150,105,.06)'
             : 'white',
           boxShadow: completed
             ? '0 2px 8px rgba(5,150,105,.08)'
-            : '0 2px 10px rgba(15,23,42,.05)',
+            : '0 1px 3px rgba(22,24,29,.06)',
           transition: 'all .2s ease',
         }}
       >
@@ -66,10 +66,10 @@ function TaskCard({ task, index, completed = false }) {
             justifyContent: 'center',
             background: completed
               ? 'rgba(5,150,105,.15)'
-              : `linear-gradient(135deg, ${accent}, ${accent}dd)`,
+              : accent,
             color: completed ? doneAccent : 'white',
             flexShrink: 0,
-            boxShadow: completed ? 'none' : `0 3px 10px ${accent}33`,
+            boxShadow: completed ? 'none' : '0 1px 3px rgba(22,24,29,.06)',
           }}
         >
           <Icon name={icon} size={17} />
@@ -78,8 +78,8 @@ function TaskCard({ task, index, completed = false }) {
           <div
             style={{
               fontSize: 14,
-              fontWeight: 900,
-              color: completed ? '#059669' : '#0f172a',
+              fontWeight: 600,
+              color: completed ? '#059669' : '#16181d',
               lineHeight: 1.35,
             }}
           >
@@ -89,7 +89,7 @@ function TaskCard({ task, index, completed = false }) {
           <div
             style={{
               fontSize: 12,
-              color: completed ? '#6ee7b7' : '#64748b',
+              color: completed ? '#6ee7b7' : '#565a63',
               lineHeight: 1.5,
               marginTop: 3,
             }}
@@ -100,7 +100,7 @@ function TaskCard({ task, index, completed = false }) {
             <div
               style={{
                 fontSize: 11,
-                color: '#94a3b8',
+                color: '#8a8f98',
                 marginTop: 4,
                 fontWeight: 700,
               }}
@@ -117,10 +117,10 @@ function TaskCard({ task, index, completed = false }) {
             padding: '6px 14px',
             borderRadius: 8,
             fontSize: 12,
-            fontWeight: 800,
+            fontWeight: 600,
             background: completed
               ? 'rgba(5,150,105,.12)'
-              : 'linear-gradient(135deg, #1e3a8a, #0ea5e9)',
+              : '#0284c7',
             color: completed ? '#059669' : 'white',
             flexShrink: 0,
             alignSelf: 'center',
@@ -161,11 +161,11 @@ function DaySection({ day, dayLabel, tasks, startIndex }) {
       >
         <div
           style={{
-            fontFamily: 'Sora, sans-serif',
+            fontFamily: 'Fraunces, Georgia, serif',
             fontSize: 13,
-            fontWeight: 900,
+            fontWeight: 600,
             color: '#ffffff',
-            background: '#0f172a',
+            background: '#16181d',
             padding: '6px 14px',
             borderRadius: 8,
             letterSpacing: '0.03em',
@@ -173,28 +173,28 @@ function DaySection({ day, dayLabel, tasks, startIndex }) {
         >
           {dayLabel}
         </div>
-        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>
+        <div style={{ fontSize: 12, color: '#8a8f98', fontWeight: 600 }}>
           {day.label}
         </div>
         {day.focus && day.focus !== 'Rest' && (
           <span
             style={{
               fontSize: 11,
-              fontWeight: 900,
+              fontWeight: 600,
               padding: '3px 10px',
               borderRadius: 999,
               background:
                 day.focus === 'Reading'
-                  ? 'rgba(59,130,246,.12)'
+                  ? 'rgba(2,132,199,.12)'
                   : day.focus === 'Math'
                     ? 'rgba(16,185,129,.12)'
-                    : 'rgba(148,163,184,.14)',
+                    : 'rgba(138,143,152,.14)',
               color:
                 day.focus === 'Reading'
                   ? '#2563eb'
                   : day.focus === 'Math'
                     ? '#059669'
-                    : '#64748b',
+                    : '#565a63',
             }}
           >
             {day.focus}
@@ -204,7 +204,7 @@ function DaySection({ day, dayLabel, tasks, startIndex }) {
           <span
             style={{
               fontSize: 11,
-              color: '#94a3b8',
+              color: '#8a8f98',
               fontWeight: 700,
               marginLeft: 'auto',
             }}
@@ -238,7 +238,7 @@ export default function Tasks() {
     [location.search]
   )
   const exam =
-    requestedExam === 'act' || requestedExam === 'sat'
+    requestedExam === 'sat'
       ? requestedExam
       : getInitialPreferredExam(user)
 
@@ -458,7 +458,7 @@ export default function Tasks() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#64748b',
+            color: '#565a63',
           }}
         >
           Loading...
@@ -510,19 +510,19 @@ export default function Tasks() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     background:
-                      'linear-gradient(135deg, #0f172a, #1e3a8a)',
+                      '#16181d',
                     color: 'white',
-                    boxShadow: '0 4px 14px rgba(15,23,42,.3)',
+                    boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                   }}
                 >
                   <Icon name="task" size={20} />
                 </span>
                 <h1
                   style={{
-                    fontFamily: 'Sora, sans-serif',
+                    fontFamily: 'Fraunces, Georgia, serif',
                     fontSize: 24,
-                    fontWeight: 900,
-                    color: '#0f172a',
+                    fontWeight: 600,
+                    color: '#16181d',
                     margin: 0,
                   }}
                 >
@@ -532,14 +532,13 @@ export default function Tasks() {
               <p
                 style={{
                   fontSize: 14,
-                  color: '#64748b',
+                  color: '#565a63',
                   lineHeight: 1.6,
                   margin: 0,
                 }}
               >
                 Your personalized study schedule adapts based on your
-                progress. Complete tasks to stay on track for{' '}
-                {exam === 'act' ? 'the ACT' : 'the SAT'}.
+                progress. Complete tasks to stay on track for the SAT.
               </p>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -575,8 +574,8 @@ export default function Tasks() {
                   marginBottom: 24,
                   padding: '16px 20px',
                   background:
-                    'linear-gradient(135deg, rgba(14,165,233,.06), rgba(99,102,241,.06))',
-                  border: '1.5px solid rgba(14,165,233,.15)',
+                    '#faf9f6',
+                  border: '1.5px solid rgba(2,132,199,.15)',
                 }}
               >
                 <div
@@ -590,8 +589,8 @@ export default function Tasks() {
                   <span
                     style={{
                       fontSize: 13,
-                      fontWeight: 900,
-                      color: '#0f172a',
+                      fontWeight: 600,
+                      color: '#16181d',
                     }}
                   >
                     Today's Progress
@@ -602,9 +601,9 @@ export default function Tasks() {
                     transition={{ duration: 0.4, delay: 0.2, ease: 'easeOut' }}
                     style={{
                       fontSize: 13,
-                      fontWeight: 800,
+                      fontWeight: 600,
                       color:
-                        todayProgress === 100 ? '#059669' : '#0ea5e9',
+                        todayProgress === 100 ? '#059669' : '#0284c7',
                     }}
                   >
                     {completedTodayTasks}/{totalTodayTasks} tasks
@@ -614,7 +613,7 @@ export default function Tasks() {
                 <div
                   style={{
                     height: 8,
-                    background: 'rgba(14,165,233,.1)',
+                    background: 'rgba(2,132,199,.1)',
                     borderRadius: 999,
                     overflow: 'hidden',
                   }}
@@ -630,7 +629,7 @@ export default function Tasks() {
                       background:
                         todayProgress === 100
                           ? 'linear-gradient(135deg, #10b981, #059669)'
-                          : 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                          : '#0284c7',
                       borderRadius: 999,
                     }}
                   />
@@ -684,15 +683,15 @@ export default function Tasks() {
                   marginBottom: 28,
                   padding: '28px 20px',
                   textAlign: 'center',
-                  background: '#f8fafc',
+                  background: '#f7f5ef',
                   border: '1.5px dashed #cbd5e1',
                 }}
               >
                 <div
                   style={{
                     fontSize: 14,
-                    fontWeight: 800,
-                    color: '#475569',
+                    fontWeight: 600,
+                    color: '#3f434b',
                     marginBottom: 4,
                   }}
                 >
@@ -701,7 +700,7 @@ export default function Tasks() {
                 <div
                   style={{
                     fontSize: 13,
-                    color: '#94a3b8',
+                    color: '#8a8f98',
                     lineHeight: 1.6,
                   }}
                 >
@@ -726,7 +725,7 @@ export default function Tasks() {
                     gap: 10,
                     marginBottom: 18,
                     paddingTop: 6,
-                    borderTop: '1px solid #e2e8f0',
+                    borderTop: '1px solid #e4e0d5',
                   }}
                 >
                   <span
@@ -738,19 +737,19 @@ export default function Tasks() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       background:
-                        'linear-gradient(135deg, #0f172a, #1e3a8a)',
+                        '#16181d',
                       color: 'white',
-                      boxShadow: '0 3px 10px rgba(15,23,42,.25)',
+                      boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                     }}
                   >
                     <Icon name="calendar" size={15} />
                   </span>
                   <h2
                     style={{
-                      fontFamily: 'Sora, sans-serif',
+                      fontFamily: 'Fraunces, Georgia, serif',
                       fontSize: 18,
-                      fontWeight: 900,
-                      color: '#0f172a',
+                      fontWeight: 600,
+                      color: '#16181d',
                       margin: 0,
                     }}
                   >
@@ -790,8 +789,8 @@ export default function Tasks() {
                 marginTop: 8,
                 padding: '14px 18px',
                 borderRadius: 12,
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: '#f7f5ef',
+                border: '1px solid #e4e0d5',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -802,7 +801,7 @@ export default function Tasks() {
               <div
                 style={{
                   fontSize: 12,
-                  color: '#64748b',
+                  color: '#565a63',
                   lineHeight: 1.6,
                   fontWeight: 700,
                 }}
@@ -837,15 +836,15 @@ export default function Tasks() {
             style={{
               textAlign: 'center',
               padding: '36px 24px',
-              background: '#f8fafc',
-              border: '1.5px solid #e2e8f0',
+              background: '#f7f5ef',
+              border: '1.5px solid #e4e0d5',
             }}
           >
             <div
               style={{
                 fontSize: 14,
-                fontWeight: 800,
-                color: '#475569',
+                fontWeight: 600,
+                color: '#3f434b',
                 marginBottom: 6,
               }}
             >
@@ -854,7 +853,7 @@ export default function Tasks() {
             <div
               style={{
                 fontSize: 13,
-                color: '#94a3b8',
+                color: '#8a8f98',
                 lineHeight: 1.6,
               }}
             >

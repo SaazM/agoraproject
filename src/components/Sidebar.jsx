@@ -63,45 +63,6 @@ export default function Sidebar({ currentExam = 'sat' }) {
       </div>
 
       <nav className="sidebar-nav">
-        {/* Exam toggle — students only */}
-        {effectiveRole === 'student' && (
-          <div style={{
-            display: 'flex', gap: 4, padding: '0 12px 8px',
-            marginBottom: 4,
-          }}>
-            {['sat', 'act'].map(ex => {
-              const active = currentExam === ex
-              const examPages = ['/dashboard', '/tasks', '/guide', '/strategies', '/practice', '/extra-tests', '/mistakes', '/formulas', '/report', '/calendar', '/journey', '/college-recruiting']
-              const basePath = examPages.some(p => location.pathname === p || location.pathname.startsWith(p + '/'))
-                ? location.pathname
-                : '/dashboard'
-              return (
-                <Link
-                  key={ex}
-                  to={`${basePath}?exam=${ex}`}
-                  style={{
-                    flex: 1,
-                    padding: '8px 0',
-                    textAlign: 'center',
-                    fontSize: 13,
-                    fontWeight: 800,
-                    fontFamily: 'Sora, sans-serif',
-                    borderRadius: 8,
-                    textDecoration: 'none',
-                    transition: 'all .2s',
-                    background: active ? 'linear-gradient(135deg, #0ea5e9, #3b82f6)' : 'rgba(255,255,255,.06)',
-                    color: active ? 'white' : '#94a3b8',
-                    border: active ? 'none' : '1px solid rgba(255,255,255,.08)',
-                    boxShadow: active ? '0 2px 8px rgba(14,165,233,.3)' : 'none',
-                  }}
-                >
-                  {ex.toUpperCase()}
-                </Link>
-              )
-            })}
-          </div>
-        )}
-
         {items.map((item, i) => {
           if ('section' in item) {
             if (!item.section) return <div key={`sep-${i}`} style={{ height: 12 }} />

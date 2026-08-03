@@ -1,0 +1,44 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "agora-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5211",
+        "--strictPort"
+      ],
+      "port": 5211
+    },
+    {
+      "name": "agora-dev-b",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5223",
+        "--strictPort"
+      ],
+      "port": 5223
+    },
+    {
+      "name": "agora-dev-c",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5237",
+        "--strictPort"
+      ],
+      "port": 5237
+    }
+  ]
+}

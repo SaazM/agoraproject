@@ -16,7 +16,7 @@ export default function ExtraTests() {
   const location = useLocation()
   const navigate = useNavigate()
   const requestedExam = useMemo(() => String(new URLSearchParams(location.search).get('exam') || '').toLowerCase(), [location.search])
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
   const examConfig = useMemo(() => getExamConfig(exam), [exam])
   const examTests = useMemo(() => getTestsForExam(exam), [exam])
   const { viewUserId, isAdminPreview } = useMemo(
@@ -96,7 +96,7 @@ export default function ExtraTests() {
       <div className="app-layout has-sidebar">
         <Sidebar currentExam={exam} />
         <div className="page fade-up" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <div style={{ color: '#94a3b8', fontSize: 15, fontWeight: 500 }}>Loading...</div>
+          <div style={{ color: '#8a8f98', fontSize: 15, fontWeight: 500 }}>Loading...</div>
         </div>
       </div>
     )
@@ -120,18 +120,18 @@ export default function ExtraTests() {
               transition={{ duration: 0.4, delay: 0.15 }}
               style={{
                 width: 44, height: 44, borderRadius: 12,
-                background: 'linear-gradient(135deg, #0f172a, #1e3a8a)',
+                background: '#16181d',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(15,23,42,.3)',
+                boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               }}
             >
               <Icon name="test" size={22} style={{ color: '#fff' }} />
             </motion.div>
             <div>
-              <h1 style={{ fontFamily: "'Sora', sans-serif", fontWeight: 900, fontSize: 26, color: '#0f172a', margin: 0, lineHeight: 1.2 }}>
+              <h1 style={{ fontFamily: "Fraunces, Georgia, serif", fontWeight: 600, fontSize: 26, color: '#16181d', margin: 0, lineHeight: 1.2 }}>
                 Extra Tests
               </h1>
-              <div style={{ fontSize: 13, color: '#64748b', marginTop: 4, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13, color: '#565a63', marginTop: 4, lineHeight: 1.6 }}>
                 Optional {examConfig.label} practice tests to reinforce weak topics and track your improvement over time.
               </div>
             </div>
@@ -144,23 +144,23 @@ export default function ExtraTests() {
             animate={{ opacity: 1, y: 0 }}
             style={{
               maxWidth: 520, margin: '40px auto', textAlign: 'center',
-              padding: '48px 32px', borderRadius: 20,
-              background: '#fff', border: '1.5px solid rgba(14,165,233,.15)',
-              boxShadow: '0 4px 24px rgba(14,165,233,.08)',
+              padding: '48px 32px', borderRadius: 12,
+              background: '#fff', border: '1.5px solid rgba(2,132,199,.15)',
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
             }}
           >
             <div style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: 'linear-gradient(135deg, #f59e0b, #f97316)',
+              width: 56, height: 56, borderRadius: 12,
+              background: '#d97706',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(245,158,11,.3)', marginBottom: 16,
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)', marginBottom: 16,
             }}>
               <Icon name="lock" size={28} style={{ color: '#fff' }} />
             </div>
-            <div style={{ fontFamily: "'Sora', sans-serif", fontWeight: 900, fontSize: 18, color: '#0f172a', marginBottom: 8 }}>
+            <div style={{ fontFamily: "Fraunces, Georgia, serif", fontWeight: 600, fontSize: 18, color: '#16181d', marginBottom: 8 }}>
               Complete your Pre Test first
             </div>
-            <div style={{ color: '#64748b', fontSize: 14, lineHeight: 1.7 }}>
+            <div style={{ color: '#565a63', fontSize: 14, lineHeight: 1.7 }}>
               Take the {examConfig.label} Pre Test to unlock extra practice tests.
               They'll help you target weak areas and measure your progress.
             </div>
@@ -168,9 +168,9 @@ export default function ExtraTests() {
               onClick={() => navigate(viewHref('/dashboard'))}
               style={{
                 marginTop: 20, padding: '10px 24px', borderRadius: 12, border: 'none',
-                background: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
-                color: '#fff', fontSize: 14, fontWeight: 800, cursor: 'pointer',
-                boxShadow: '0 3px 12px rgba(14,165,233,.3)',
+                background: '#0284c7',
+                color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               }}
             >
               Go to Dashboard
@@ -189,18 +189,18 @@ export default function ExtraTests() {
             >
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '5px 14px', borderRadius: 20,
-                background: 'rgba(14,165,233,.08)', color: '#0369a1',
-                fontSize: 12, fontWeight: 800,
+                padding: '5px 14px', borderRadius: 12,
+                background: 'rgba(2,132,199,.08)', color: '#0284c7',
+                fontSize: 12, fontWeight: 600,
               }}>
                 {extraTests.length} test{extraTests.length !== 1 ? 's' : ''} available
               </span>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '5px 14px', borderRadius: 20,
-                background: completedExtra.length > 0 ? 'rgba(16,185,129,.08)' : 'rgba(148,163,184,.08)',
-                color: completedExtra.length > 0 ? '#047857' : '#64748b',
-                fontSize: 12, fontWeight: 800,
+                padding: '5px 14px', borderRadius: 12,
+                background: completedExtra.length > 0 ? 'rgba(16,185,129,.08)' : 'rgba(138,143,152,.08)',
+                color: completedExtra.length > 0 ? '#047857' : '#565a63',
+                fontSize: 12, fontWeight: 600,
               }}>
                 {completedExtra.length}/{extraTests.length} completed
               </span>
@@ -222,19 +222,19 @@ export default function ExtraTests() {
                     transition={{ duration: 0.35, delay: i * 0.06 }}
                     style={{
                       background: '#fff',
-                      borderRadius: 18,
-                      border: done ? '1.5px solid rgba(16,185,129,.25)' : '1.5px solid rgba(14,165,233,.12)',
+                      borderRadius: 12,
+                      border: done ? '1.5px solid rgba(16,185,129,.25)' : '1.5px solid rgba(2,132,199,.12)',
                       padding: '24px',
-                      boxShadow: '0 2px 12px rgba(15,23,42,.06)',
+                      boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                       transition: 'all .2s ease',
                       display: 'flex', flexDirection: 'column', gap: 14,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = '0 6px 24px rgba(14,165,233,.12)'
+                      e.currentTarget.style.boxShadow = '0 1px 3px rgba(22,24,29,.06)'
                       e.currentTarget.style.transform = 'translateY(-2px)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = '0 2px 12px rgba(15,23,42,.06)'
+                      e.currentTarget.style.boxShadow = '0 1px 3px rgba(22,24,29,.06)'
                       e.currentTarget.style.transform = 'translateY(0)'
                     }}
                   >
@@ -243,26 +243,26 @@ export default function ExtraTests() {
                         <div style={{
                           width: 40, height: 40, borderRadius: 12,
                           background: done
-                            ? 'linear-gradient(135deg, #10b981, #059669)'
-                            : 'linear-gradient(135deg, #0f172a, #1e3a8a)',
+                            ? '#10b981'
+                            : '#16181d',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           flexShrink: 0,
                         }}>
                           <Icon name={done ? 'check' : 'test'} size={20} style={{ color: '#fff' }} />
                         </div>
                         <div>
-                          <div style={{ fontWeight: 900, fontSize: 16, color: '#0f172a', lineHeight: 1.3 }}>
+                          <div style={{ fontWeight: 600, fontSize: 16, color: '#16181d', lineHeight: 1.3 }}>
                             {t.label}
                           </div>
-                          <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600, marginTop: 2 }}>
+                          <div style={{ fontSize: 12, color: '#8a8f98', fontWeight: 600, marginTop: 2 }}>
                             {examConfig.label} &middot; Full timed test
                           </div>
                         </div>
                       </div>
                       <span style={{
-                        fontSize: 11, fontWeight: 900, padding: '4px 10px', borderRadius: 999,
-                        background: done ? 'rgba(16,185,129,.1)' : prog ? 'rgba(245,158,11,.1)' : 'rgba(148,163,184,.06)',
-                        color: done ? '#10b981' : prog ? '#f59e0b' : '#94a3b8',
+                        fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 999,
+                        background: done ? 'rgba(16,185,129,.1)' : prog ? 'rgba(245,158,11,.1)' : 'rgba(138,143,152,.06)',
+                        color: done ? '#10b981' : prog ? '#f59e0b' : '#8a8f98',
                         whiteSpace: 'nowrap',
                       }}>
                         {done ? 'COMPLETED' : prog ? 'IN PROGRESS' : 'OPTIONAL'}
@@ -276,9 +276,9 @@ export default function ExtraTests() {
                           disabled={readOnlyView}
                           style={{
                             padding: '10px 20px', borderRadius: 12, border: 'none',
-                            background: 'linear-gradient(135deg, #f59e0b, #f97316)',
-                            color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer',
-                            boxShadow: '0 3px 12px rgba(245,158,11,.3)',
+                            background: '#d97706',
+                            color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                           }}
                         >
                           Resume →
@@ -290,9 +290,9 @@ export default function ExtraTests() {
                             disabled={readOnlyView || isStarting}
                             style={{
                               padding: '10px 20px', borderRadius: 12, border: 'none',
-                              background: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
-                              color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer',
-                              boxShadow: '0 3px 12px rgba(14,165,233,.3)',
+                              background: '#0284c7',
+                              color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                               opacity: readOnlyView ? 0.5 : 1,
                             }}
                           >
@@ -308,9 +308,9 @@ export default function ExtraTests() {
                           }}
                           style={{
                             padding: '10px 20px', borderRadius: 12,
-                            border: '1.5px solid rgba(14,165,233,.2)',
-                            background: '#fff', color: '#0ea5e9',
-                            fontSize: 13, fontWeight: 800, cursor: 'pointer',
+                            border: '1.5px solid rgba(2,132,199,.2)',
+                            background: '#fff', color: '#0284c7',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
                           }}
                         >
                           View Results →
@@ -318,18 +318,18 @@ export default function ExtraTests() {
                       )}
                       {!done && !prog && (
                         <a
-                          href={t.pdfUrl}
+                          href={t.cbUrl}
                           target="_blank"
                           rel="noreferrer"
                           style={{
                             padding: '10px 16px', borderRadius: 12,
-                            border: '1.5px solid rgba(148,163,184,.2)',
-                            background: '#fff', color: '#64748b',
+                            border: '1.5px solid rgba(138,143,152,.2)',
+                            background: '#fff', color: '#565a63',
                             fontSize: 13, fontWeight: 700, cursor: 'pointer',
                             textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5,
                           }}
                         >
-                          <Icon name="eye" size={14} /> Preview PDF
+                          <Icon name="eye" size={14} /> View on College Board ↗
                         </a>
                       )}
                     </div>
@@ -340,15 +340,15 @@ export default function ExtraTests() {
                         animate={{ opacity: 1, height: 'auto' }}
                         transition={{ duration: 0.25 }}
                         style={{
-                          background: 'rgba(14,165,233,.04)',
-                          border: '1px solid rgba(14,165,233,.12)',
+                          background: 'rgba(2,132,199,.04)',
+                          border: '1px solid rgba(2,132,199,.12)',
                           borderRadius: 12, padding: 14,
                         }}
                       >
-                        <div style={{ fontWeight: 900, color: '#0f172a', marginBottom: 6, fontSize: 14 }}>
+                        <div style={{ fontWeight: 600, color: '#16181d', marginBottom: 6, fontSize: 14 }}>
                           Start this test now?
                         </div>
-                        <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                        <div style={{ fontSize: 13, color: '#565a63', lineHeight: 1.6 }}>
                           This is a full timed {examConfig.label} test. Once you start, your timer runs. You can pause and resume later.
                         </div>
                         <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
@@ -356,8 +356,8 @@ export default function ExtraTests() {
                             onClick={() => setConfirmTestId(null)}
                             style={{
                               padding: '8px 16px', borderRadius: 10,
-                              border: '1.5px solid #e2e8f0', background: '#fff',
-                              color: '#475569', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                              border: '1.5px solid #e4e0d5', background: '#fff',
+                              color: '#3f434b', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                             }}
                           >
                             Cancel
@@ -367,9 +367,9 @@ export default function ExtraTests() {
                             disabled={isStarting}
                             style={{
                               padding: '8px 16px', borderRadius: 10, border: 'none',
-                              background: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
-                              color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer',
-                              boxShadow: '0 2px 8px rgba(14,165,233,.3)',
+                              background: '#0284c7',
+                              color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                             }}
                           >
                             {isStarting ? 'Starting...' : 'Start'}
@@ -384,9 +384,9 @@ export default function ExtraTests() {
 
             {extraTests.length === 0 && (
               <div style={{
-                textAlign: 'center', padding: '48px 32px', borderRadius: 20,
-                background: '#fff', border: '1.5px dashed rgba(148,163,184,.2)',
-                color: '#64748b', fontSize: 14, lineHeight: 1.7,
+                textAlign: 'center', padding: '48px 32px', borderRadius: 12,
+                background: '#fff', border: '1.5px dashed rgba(138,143,152,.2)',
+                color: '#565a63', fontSize: 14, lineHeight: 1.7,
               }}>
                 No extra tests available for {examConfig.label} yet.
               </div>

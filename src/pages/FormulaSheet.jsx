@@ -189,93 +189,13 @@ const SAT_READING = [
   },
 ]
 
-const ACT_EXTRA_MATH = [
-  {
-    title: 'Trigonometry',
-    items: [
-      { label: 'SOH CAH TOA', formula: 'sin = opp/hyp, cos = adj/hyp, tan = opp/adj' },
-      { label: 'Reciprocal Functions', formula: 'csc = 1/sin, sec = 1/cos, cot = 1/tan' },
-      { label: 'Pythagorean Identity', formula: 'sin²θ + cos²θ = 1' },
-      { label: 'Unit Circle Key Values', formula: '0°=0, 30°=π/6, 45°=π/4, 60°=π/3, 90°=π/2' },
-      { label: 'Law of Sines', formula: 'a/sinA = b/sinB = c/sinC' },
-      { label: 'Law of Cosines', formula: 'c² = a² + b² − 2ab·cosC' },
-      { label: 'Radians ↔ Degrees', formula: 'degrees × (π/180) = radians', note: '180° = π radians' },
-    ],
-  },
-  {
-    title: 'Logarithms',
-    items: [
-      { label: 'Definition', formula: 'log_b(x) = y means b^y = x' },
-      { label: 'Product Rule', formula: 'log(ab) = log(a) + log(b)' },
-      { label: 'Quotient Rule', formula: 'log(a/b) = log(a) − log(b)' },
-      { label: 'Power Rule', formula: 'log(aⁿ) = n·log(a)' },
-      { label: 'Change of Base', formula: 'log_b(x) = log(x) / log(b)' },
-    ],
-  },
-  {
-    title: 'Matrices & Complex Numbers',
-    items: [
-      { label: 'Matrix Addition', formula: 'Add corresponding entries' },
-      { label: 'Scalar Multiplication', formula: 'Multiply each entry by the scalar' },
-      { label: '2×2 Determinant', formula: 'ad − bc for [[a,b],[c,d]]' },
-      { label: 'Complex Number i', formula: 'i = √(−1), i² = −1, i³ = −i, i⁴ = 1', note: 'Pattern repeats every 4' },
-      { label: 'Multiplying Complex', formula: '(a+bi)(c+di) = (ac−bd) + (ad+bc)i', note: 'FOIL and replace i² with −1' },
-    ],
-  },
-]
-
-const ACT_SCIENCE = [
-  {
-    title: 'Data Representation',
-    items: [
-      { label: 'Read the Axes', formula: 'Always check labels, units, and scales first' },
-      { label: 'Identify Trends', formula: 'Direct (both increase) vs Inverse (one up, one down)' },
-      { label: 'Interpolation', formula: 'Estimate values BETWEEN given data points' },
-      { label: 'Extrapolation', formula: 'Extend the trend BEYOND the given data', note: 'Less reliable than interpolation' },
-    ],
-  },
-  {
-    title: 'Research Summaries',
-    items: [
-      { label: 'Variables', formula: 'Independent = what\'s changed; Dependent = what\'s measured' },
-      { label: 'Control Group', formula: 'The baseline group with no treatment applied' },
-      { label: 'Constants', formula: 'Everything kept the same EXCEPT the independent variable' },
-      { label: 'Sample Size', formula: 'Larger sample = more reliable results' },
-    ],
-  },
-  {
-    title: 'Conflicting Viewpoints',
-    items: [
-      { label: 'Find the Core Claim', formula: 'What does each scientist/student argue?' },
-      { label: 'Find Agreements', formula: 'What facts do both sides accept?' },
-      { label: 'Find Differences', formula: 'Where exactly do they disagree?' },
-      { label: 'New Evidence', formula: 'Which viewpoint would new data support or weaken?' },
-    ],
-  },
-]
-
-const ACT_ENGLISH_EXTRA = [
-  {
-    title: 'Rhetorical Skills',
-    items: [
-      { label: 'Author\'s Purpose', formula: 'Why is this paragraph/sentence included?', note: 'Think about the bigger argument' },
-      { label: 'Adding/Deleting', formula: 'Does it support the main idea? Is it relevant?', note: 'If it\'s off-topic or redundant, delete it' },
-      { label: 'Sentence Placement', formula: 'Look for logical flow and transition clues', note: 'Pronouns and transitions hint at correct order' },
-      { label: 'Opening/Closing', formula: 'Intro should set up the topic; conclusion should wrap the main idea' },
-    ],
-  },
-]
-
 /* ════════════════════════════════════════════════════════════
    Section color map
    ════════════════════════════════════════════════════════════ */
 const SECTION_COLORS = {
-  'Math Formulas': { bg: '#0ea5e9', icon: 'math' },
+  'Math Formulas': { bg: '#0284c7', icon: 'math' },
   'Grammar & Writing Rules': { bg: '#8b5cf6', icon: 'guide' },
   'Reading Strategies': { bg: '#f59e0b', icon: 'eye' },
-  'Trigonometry & Advanced Math': { bg: '#06b6d4', icon: 'math' },
-  'Science Strategies': { bg: '#10b981', icon: 'activity' },
-  'Rhetorical Skills': { bg: '#ec4899', icon: 'sparkle' },
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -288,27 +208,17 @@ export default function FormulaSheet() {
   const { profile } = useAuth()
   const location = useLocation()
   const examParam = new URLSearchParams(location.search).get('exam')
-  const exam = examParam || getInitialPreferredExam(profile) || 'sat'
+  const exam = examParam === 'sat' ? examParam : getInitialPreferredExam(profile) || 'sat'
   const [openSections, setOpenSections] = useState({})
   const [searchQuery, setSearchQuery] = useState('')
 
   const toggle = (key) => setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }))
 
-  const sections = useMemo(() => {
-    const s = [
-      { name: 'Math Formulas', groups: SAT_MATH },
-      { name: 'Grammar & Writing Rules', groups: SAT_GRAMMAR },
-      { name: 'Reading Strategies', groups: SAT_READING },
-    ]
-    if (exam === 'act') {
-      s.push(
-        { name: 'Trigonometry & Advanced Math', groups: ACT_EXTRA_MATH },
-        { name: 'Science Strategies', groups: ACT_SCIENCE },
-        { name: 'Rhetorical Skills', groups: ACT_ENGLISH_EXTRA },
-      )
-    }
-    return s
-  }, [exam])
+  const sections = useMemo(() => [
+    { name: 'Math Formulas', groups: SAT_MATH },
+    { name: 'Grammar & Writing Rules', groups: SAT_GRAMMAR },
+    { name: 'Reading Strategies', groups: SAT_READING },
+  ], [])
 
   // Filter by search
   const filteredSections = useMemo(() => {
@@ -349,11 +259,11 @@ export default function FormulaSheet() {
             style={{ marginBottom: 28 }}
           >
             <div style={{
-              background: 'linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%)',
-              borderRadius: 20, padding: '32px 34px', color: '#fff', marginBottom: 24,
+              background: '#16181d',
+              borderRadius: 12, padding: '32px 34px', color: '#fff', marginBottom: 24,
             }}>
               <h1 style={{
-                fontFamily: "'Sora', sans-serif", fontSize: 26, fontWeight: 900, color: '#fff',
+                fontFamily: "Fraunces, Georgia, serif", fontSize: 26, fontWeight: 600, color: '#fff',
                 display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8,
               }}>
                 <Icon name="folder" size={24} />
@@ -368,7 +278,7 @@ export default function FormulaSheet() {
             <div style={{ position: 'relative', marginBottom: 4 }}>
               <Icon name="search" size={16} style={{
                 position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                color: '#94a3b8', pointerEvents: 'none',
+                color: '#8a8f98', pointerEvents: 'none',
               }} />
               <input
                 type="text"
@@ -377,12 +287,12 @@ export default function FormulaSheet() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%', padding: '12px 16px 12px 40px', borderRadius: 12,
-                  border: '1px solid #e2e8f0', fontSize: 14, fontFamily: "'DM Sans', sans-serif",
+                  border: '1px solid #e4e0d5', fontSize: 14, fontFamily: "'DM Sans', sans-serif",
                   background: '#fff', outline: 'none', boxSizing: 'border-box',
                   transition: 'border-color .2s',
                 }}
-                onFocus={(e) => { e.target.style.borderColor = '#0ea5e9' }}
-                onBlur={(e) => { e.target.style.borderColor = '#e2e8f0' }}
+                onFocus={(e) => { e.target.style.borderColor = '#0284c7' }}
+                onBlur={(e) => { e.target.style.borderColor = '#e4e0d5' }}
               />
             </div>
           </motion.div>
@@ -390,7 +300,7 @@ export default function FormulaSheet() {
           {/* Sections */}
           <motion.div variants={stagger} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {filteredSections.map((sec) => {
-              const color = SECTION_COLORS[sec.name] || { bg: '#64748b', icon: 'info' }
+              const color = SECTION_COLORS[sec.name] || { bg: '#565a63', icon: 'info' }
               return (
                 <motion.div key={sec.name} variants={fadeUp}>
                   {/* Section header */}
@@ -406,7 +316,7 @@ export default function FormulaSheet() {
                       <Icon name={color.icon} size={16} style={{ color: '#fff' }} />
                     </div>
                     <span style={{
-                      fontFamily: "'Sora', sans-serif", fontWeight: 900, fontSize: 16, color: '#0f172a',
+                      fontFamily: "Fraunces, Georgia, serif", fontWeight: 600, fontSize: 16, color: '#16181d',
                     }}>
                       {sec.name}
                     </span>
@@ -416,14 +326,6 @@ export default function FormulaSheet() {
                     }}>
                       {sec.groups.reduce((s, g) => s + g.items.length, 0)} items
                     </span>
-                    {exam === 'act' && (sec.name === 'Trigonometry & Advanced Math' || sec.name === 'Science Strategies' || sec.name === 'Rhetorical Skills') && (
-                      <span style={{
-                        fontSize: 10, fontWeight: 800, color: '#fff', background: '#f59e0b',
-                        padding: '2px 8px', borderRadius: 99, textTransform: 'uppercase', letterSpacing: '.5px',
-                      }}>
-                        ACT Only
-                      </span>
-                    )}
                   </div>
 
                   {/* Groups within section */}
@@ -433,32 +335,32 @@ export default function FormulaSheet() {
                       const isOpen = openSections[key] !== false // default open
                       return (
                         <div key={group.title} style={{
-                          background: '#fff', borderRadius: 14,
-                          border: '1px solid #e2e8f0', overflow: 'hidden',
-                          boxShadow: '0 1px 4px rgba(14,165,233,.04)',
+                          background: '#fff', borderRadius: 12,
+                          border: '1px solid #e4e0d5', overflow: 'hidden',
+                          boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                         }}>
                           <button
                             onClick={() => toggle(key)}
                             style={{
                               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                               padding: '14px 18px', border: 'none', background: 'none', cursor: 'pointer',
-                              borderBottom: isOpen ? '1px solid #f1f5f9' : 'none',
+                              borderBottom: isOpen ? '1px solid #f3f0e9' : 'none',
                             }}
                           >
                             <span style={{
-                              fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 14, color: '#1e293b',
+                              fontFamily: "Fraunces, Georgia, serif", fontWeight: 600, fontSize: 14, color: '#16181d',
                             }}>
                               {group.title}
                             </span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                              <span style={{ fontSize: 11, color: '#8a8f98', fontWeight: 600 }}>
                                 {group.items.length}
                               </span>
                               <span style={{
                                 transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
                                 transition: 'transform .2s', display: 'inline-flex',
                               }}>
-                                <Icon name="arrowRight" size={12} style={{ color: '#94a3b8' }} />
+                                <Icon name="arrowRight" size={12} style={{ color: '#8a8f98' }} />
                               </span>
                             </div>
                           </button>
@@ -478,18 +380,18 @@ export default function FormulaSheet() {
                                       key={i}
                                       style={{
                                         padding: '10px 0',
-                                        borderBottom: i < group.items.length - 1 ? '1px solid #f8fafc' : 'none',
+                                        borderBottom: i < group.items.length - 1 ? '1px solid #f7f5ef' : 'none',
                                         display: 'flex', flexDirection: 'column', gap: 4,
                                       }}
                                     >
                                       <div style={{
-                                        fontSize: 12, fontWeight: 700, color: '#64748b',
+                                        fontSize: 12, fontWeight: 700, color: '#565a63',
                                         textTransform: 'uppercase', letterSpacing: '.3px',
                                       }}>
                                         {item.label}
                                       </div>
                                       <div style={{
-                                        fontSize: 15, fontWeight: 600, color: '#0f172a',
+                                        fontSize: 15, fontWeight: 600, color: '#16181d',
                                         fontFamily: "ui-serif, Charter, Georgia, Cambria, 'Times New Roman', serif",
                                         letterSpacing: '.2px',
                                       }}>
@@ -497,7 +399,7 @@ export default function FormulaSheet() {
                                       </div>
                                       {item.note && (
                                         <div style={{
-                                          fontSize: 12, color: '#94a3b8', fontStyle: 'italic', lineHeight: 1.4,
+                                          fontSize: 12, color: '#8a8f98', fontStyle: 'italic', lineHeight: 1.4,
                                         }}>
                                           {item.note}
                                         </div>
@@ -519,7 +421,7 @@ export default function FormulaSheet() {
 
           {filteredSections.length === 0 && (
             <div style={{
-              textAlign: 'center', padding: '60px 20px', color: '#94a3b8',
+              textAlign: 'center', padding: '60px 20px', color: '#8a8f98',
             }}>
               <Icon name="search" size={32} style={{ marginBottom: 12, opacity: 0.4 }} />
               <div style={{ fontSize: 15, fontWeight: 600 }}>No results for "{searchQuery}"</div>

@@ -8,7 +8,6 @@ import { getAnswerKeyBySection } from '../data/answerKeys.js'
 import { buildAdaptiveSchedule, loadSatTestDate, loadStudyPrefs, dayLabels, normalizeWeakTopics } from '../lib/studyPlan.js'
 import BrandLink from '../components/BrandLink.jsx'
 import Icon from '../components/AppIcons.jsx'
-import ExamSwitcher from '../components/ExamSwitcher.jsx'
 import TopResourceNav from '../components/TopResourceNav.jsx'
 import { getExamConfigForTest, getScoreColumnsForExam, calcWeakTopicsForTest } from '../data/examData.js'
 import { loadDashboardViewData } from '../lib/dashboardData.js'
@@ -44,12 +43,12 @@ function SectionBreakdown({ answers, keyBySection, moduleOrder, modules }) {
         const pct = Math.round((correct / s.total) * 100)
         return (
           <div key={s.key} className="card" style={{ padding: 16 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>{s.label}</div>
-            <div style={{ fontFamily: 'Sora,sans-serif', fontSize: 22, fontWeight: 800, color: '#1a2744' }}>{correct}/{s.total}</div>
-            <div style={{ height: 6, background: '#f1f5f9', borderRadius: 3, marginTop: 8, overflow: 'hidden' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#565a63', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>{s.label}</div>
+            <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 22, fontWeight: 600, color: '#16181d' }}>{correct}/{s.total}</div>
+            <div style={{ height: 6, background: '#f3f0e9', borderRadius: 3, marginTop: 8, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${pct}%`, background: pct >= 75 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444', borderRadius: 3, transition: 'width .8s ease' }} />
             </div>
-            <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>{pct}% correct · {answered} attempted</div>
+            <div style={{ fontSize: 12, color: '#8a8f98', marginTop: 4 }}>{pct}% correct · {answered} attempted</div>
           </div>
         )
       })}
@@ -67,7 +66,7 @@ function QuestionReview({ answers, keyBySection, guideHref, moduleOrder, modules
 
   return (
     <div className="card" style={{ marginBottom: 24 }}>
-      <h3 style={{ fontFamily: 'Sora,sans-serif', fontSize: 15, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+      <h3 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
         <Icon name="eye" size={17} />
         Question-by-Question Review
       </h3>
@@ -86,7 +85,7 @@ function QuestionReview({ answers, keyBySection, guideHref, moduleOrder, modules
         }
         if (wrongs.length === 0) return (
           <div key={mod} style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2744', marginBottom: 8 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#16181d', marginBottom: 8 }}>
               {modules?.[mod]?.label} — {modules?.[mod]?.module} <span style={{ color: '#10b981' }}>(Perfect)</span>
             </div>
           </div>
@@ -94,8 +93,8 @@ function QuestionReview({ answers, keyBySection, guideHref, moduleOrder, modules
         return (
           <div key={mod} style={{ marginBottom: 20 }}>
             <button onClick={() => setExpanded(expanded === mod ? null : mod)}
-              style={{ width: '100%', textAlign: 'left', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontFamily: 'Sora,sans-serif', fontSize: 13, fontWeight: 700 }}>
+              style={{ width: '100%', textAlign: 'left', background: '#f7f5ef', border: '1px solid #e4e0d5', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 13, fontWeight: 700 }}>
                 {modules?.[mod]?.label} — {modules?.[mod]?.module}
               </span>
               <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 700 }}>
@@ -108,17 +107,17 @@ function QuestionReview({ answers, keyBySection, guideHref, moduleOrder, modules
                   const chData = chapters?.[ch]
                   return (
                     <div key={q} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: '#fef2f2', borderRadius: 8, border: '1px solid #fecaca' }}>
-                      <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 800, fontSize: 15, color: '#dc2626', minWidth: 28 }}>Q{q}</div>
+                      <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, fontSize: 15, color: '#dc2626', minWidth: 28 }}>Q{q}</div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 12 }}>
                           Your answer: <strong style={{ color: '#dc2626' }}>{given || '—'}</strong>
                         </div>
                         {chData && (
-                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                          <div style={{ fontSize: 11, color: '#565a63', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                             <Icon name="guide" size={13} />
                             <span>Study Guide:</span>
-                            <Link to={guideHref(ch)} style={{ color: '#1a2744', fontWeight: 800 }}>
-                              {chData.code ? `ACT Module ${chapterDisplay(ch, chapters)}` : `Chapter ${chapterDisplay(ch, chapters)}`} — {chData.name}
+                            <Link to={guideHref(ch)} style={{ color: '#16181d', fontWeight: 600 }}>
+                              {`Chapter ${chapterDisplay(ch, chapters)}`} — {chData.name}
                             </Link>
                           </div>
                         )}
@@ -138,7 +137,7 @@ function QuestionReview({ answers, keyBySection, guideHref, moduleOrder, modules
 function ResultScheduleTaskLink({ task, viewHref }) {
   const done = !!task.completed
   const doneAccent = '#059669'
-  const accent = done ? doneAccent : (task.type === 'guide' ? '#1a2744' : task.type === 'mistakes' ? '#f59e0b' : '#0ea5e9')
+  const accent = done ? doneAccent : (task.type === 'guide' ? '#16181d' : task.type === 'mistakes' ? '#f59e0b' : '#0284c7')
   const icon = done ? 'check' : (task.type === 'guide' ? 'guide' : task.type === 'mistakes' ? 'mistakes' : 'results')
   return (
     <Link
@@ -148,10 +147,10 @@ function ResultScheduleTaskLink({ task, viewHref }) {
         alignItems: 'flex-start',
         gap: 10,
         padding: '10px 12px',
-        border: done ? '1px solid rgba(5,150,105,.3)' : '1px solid #e2e8f0',
+        border: done ? '1px solid rgba(5,150,105,.3)' : '1px solid #e4e0d5',
         borderRadius: 12,
         textDecoration: 'none',
-        color: done ? '#059669' : '#0f172a',
+        color: done ? '#059669' : '#16181d',
         background: done ? 'rgba(5,150,105,.06)' : 'white',
       }}
     >
@@ -169,8 +168,8 @@ function ResultScheduleTaskLink({ task, viewHref }) {
         <Icon name={icon} size={15} />
       </span>
       <span style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 900, color: done ? '#059669' : '#1a2744', lineHeight: 1.35 }}>{done && '✓ '}{task.title}</div>
-        <div style={{ fontSize: 12, color: done ? '#6ee7b7' : '#64748b', lineHeight: 1.5, marginTop: 2 }}>{task.subtitle}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: done ? '#059669' : '#16181d', lineHeight: 1.35 }}>{done && '✓ '}{task.title}</div>
+        <div style={{ fontSize: 12, color: done ? '#6ee7b7' : '#565a63', lineHeight: 1.5, marginTop: 2 }}>{task.subtitle}</div>
       </span>
     </Link>
   )
@@ -187,8 +186,8 @@ export default function Results() {
   const [loading, setLoading] = useState(true)
   const exam = attempt
     ? getExamConfigForTest(attempt.test_id).exam
-    : (requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user))
-  const examConfig = getExamConfigForTest(attempt?.test_id || (exam === 'act' ? 'act1' : 'pre_test'))
+    : (requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user))
+  const examConfig = getExamConfigForTest(attempt?.test_id || 'pre_test')
   const [prefs, setPrefs] = useState(() => loadStudyPrefs(viewUserId, exam))
   const [satDate, setSatDate] = useState(() => loadSatTestDate(viewUserId, exam))
   const [studiedMap, setStudiedMap] = useState({})
@@ -196,8 +195,6 @@ export default function Results() {
   const [allMistakes, setAllMistakes] = useState([])
   // showDatePrompt removed — handled by /setup-plan screen
   const viewHref = (path) => withViewUser(withExam(path, exam), viewUserId, isAdminPreview)
-  const satHref = withViewUser(withExam('/dashboard', 'sat'), viewUserId, isAdminPreview)
-  const actHref = withViewUser(withExam('/dashboard', 'act'), viewUserId, isAdminPreview)
   const readOnlyView = isAdminPreview
 
   useEffect(() => {
@@ -339,7 +336,7 @@ export default function Results() {
   if (loading) return (
     <div className="app-layout has-sidebar">
       <Sidebar currentExam={exam} />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, height: '100vh', color: '#64748b' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, height: '100vh', color: '#565a63' }}>
         Loading results…
       </div>
     </div>
@@ -369,10 +366,10 @@ export default function Results() {
         {isAdminPreview && (() => {
           const isTutorUser = profile?.role === "tutor"
           return (
-          <div className="card" style={{ marginBottom: 16, background: "linear-gradient(135deg, rgba(26,39,68,.96), rgba(30,58,138,.94))", color: "white" }}>
+          <div className="card" style={{ marginBottom: 16, background: "#16181d", color: "white" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
               <div>
-                <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 4 }}>{isTutorUser ? "Tutor View" : "Admin View"}</div>
+                <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{isTutorUser ? "Tutor View" : "Admin View"}</div>
                 <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.88 }}>
                   {"You\u0027re viewing this student\u0027s post-test results in read-only mode."}
                 </div>
@@ -390,7 +387,7 @@ export default function Results() {
             {(currentTestConfig?.label || 'Pre Test')} — Score
           </div>
           <div className="results-total">{scores.composite || scores.total || '—'}</div>
-          <div className="results-label">{exam === 'act' ? 'ACT composite' : 'out of 1600'}</div>
+          <div className="results-label">out of 1600</div>
           <div className="section-scores">
             {scoreColumns.filter((column) => column.key !== 'total').map((column, index, arr) => (
               <div key={column.key} style={{ display: 'contents' }}>
@@ -415,12 +412,12 @@ export default function Results() {
         </div>
 
         {isPriorScore && (
-          <div className="card" style={{ marginBottom: 24, padding: 20, background: 'linear-gradient(135deg, rgba(14,165,233,.06), rgba(99,102,241,.04))', border: '1px solid rgba(14,165,233,.15)' }}>
+          <div className="card" style={{ marginBottom: 24, padding: 20, background: '#faf9f6', border: '1px solid rgba(2,132,199,.15)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Icon name="info" size={18} style={{ color: '#0ea5e9' }} />
+              <Icon name="info" size={18} style={{ color: '#0284c7' }} />
               <div>
-                <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 800, fontSize: 14, color: '#0f172a', marginBottom: 2 }}>Prior Score Entry</div>
-                <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+                <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, fontSize: 14, color: '#16181d', marginBottom: 2 }}>Prior Score Entry</div>
+                <div style={{ fontSize: 13, color: '#565a63', lineHeight: 1.6 }}>
                   This score was manually entered, not taken on the platform. Detailed insights like section breakdowns, weak topics, and question review are only available for tests taken here.
                 </div>
               </div>
@@ -432,7 +429,7 @@ export default function Results() {
 	        {!isPriorScore && (keyBySection ? (
 	          <SectionBreakdown answers={answers} keyBySection={keyBySection} moduleOrder={examConfig.moduleOrder} modules={examConfig.modules} />
 	        ) : (
-	          <div className="card" style={{ marginBottom: 24, color: '#64748b', lineHeight: 1.7 }}>
+	          <div className="card" style={{ marginBottom: 24, color: '#565a63', lineHeight: 1.7 }}>
 	            Detailed module-by-module review isn't available for this test yet.
 	          </div>
 	        ))}
@@ -440,18 +437,18 @@ export default function Results() {
 	        {/* Weak topics */}
 	        {!isPriorScore && isPreTest && weakTopics.length > 0 && (
           <div className="card" style={{ marginBottom: 24 }}>
-            <h3 style={{ fontFamily: 'Sora,sans-serif', fontSize: 15, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
               <Icon name="warning" size={17} />
               Top Weak Areas
             </h3>
-            <p style={{ fontSize: 13, color: '#64748b', marginBottom: 12 }}>
+            <p style={{ fontSize: 13, color: '#565a63', marginBottom: 12 }}>
               Focus on these first — they're already prioritized in your study plan.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {weakTopics.slice(0, 5).map((t, i) => (
-                <div key={t.ch} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                  <div style={{ width: 26, height: 26, borderRadius: 8, background: i < 2 ? '#fef2f2' : '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: i < 2 ? '#dc2626' : '#f59e0b', flexShrink: 0 }}>{t.count}</div>
-                  <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#1a2744' }}>{t.name}</div>
+                <div key={t.ch} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#f7f5ef', borderRadius: 10, border: '1px solid #e4e0d5' }}>
+                  <div style={{ width: 26, height: 26, borderRadius: 8, background: i < 2 ? '#fef2f2' : '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: i < 2 ? '#dc2626' : '#f59e0b', flexShrink: 0 }}>{t.count}</div>
+                  <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#16181d' }}>{t.name}</div>
                 </div>
               ))}
             </div>
@@ -461,7 +458,7 @@ export default function Results() {
 	        {/* Domain chart */}
 	        {!isPriorScore && isPreTest && Object.keys(domainCounts).length > 0 && (
           <div className="card" style={{ marginBottom: 24 }}>
-            <h3 style={{ fontFamily: 'Sora,sans-serif', fontSize: 15, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
               <Icon name="chart" size={17} />
               Missed Questions by Domain
             </h3>
@@ -471,7 +468,7 @@ export default function Results() {
                 plugins: { legend: { display: false } },
                 scales: {
                   x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 } } },
-                  y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Sans', size: 11 } } }
+                  y: { grid: { color: '#eceadf' }, ticks: { font: { family: 'DM Sans', size: 11 } } }
                 }
               }} />
             </div>
@@ -482,11 +479,11 @@ export default function Results() {
         {!isPriorScore && <div className="card" style={{ marginBottom: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, gap: 16, flexWrap: 'wrap' }}>
             <div>
-              <h3 style={{ fontFamily: 'Sora,sans-serif', fontSize: 15, fontWeight: 800, marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h3 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 600, marginBottom: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon name="calendar" size={17} />
                 Smart Journey Planner
               </h3>
-              <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 13, color: '#565a63', lineHeight: 1.6 }}>
                 Instead of a static weekly plan, your next steps update from this test's weak topics, your availability, and your target {examConfig.label} date.
               </p>
             </div>
@@ -495,25 +492,25 @@ export default function Results() {
             </Link>
           </div>
 
-          <div style={{ border: '1px solid #e2e8f0', borderRadius: 14, padding: 14, background: '#f8fafc', marginBottom: 14 }}>
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', fontSize: 12, color: '#64748b' }}>
+          <div style={{ border: '1px solid #e4e0d5', borderRadius: 12, padding: 14, background: '#f7f5ef', marginBottom: 14 }}>
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', fontSize: 12, color: '#565a63' }}>
               {satDate && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Icon name="calendar" size={14} />
-                  <span style={{ fontWeight: 900 }}>Test date:</span>
-                  <span style={{ color: '#0f172a', fontWeight: 700 }}>{new Date(satDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span style={{ fontWeight: 600 }}>Test date:</span>
+                  <span style={{ color: '#16181d', fontWeight: 700 }}>{new Date(satDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontWeight: 900 }}>Study days:</span>
-                <span style={{ color: '#0f172a', fontWeight: 700 }}>
+                <span style={{ fontWeight: 600 }}>Study days:</span>
+                <span style={{ color: '#16181d', fontWeight: 700 }}>
                   {dayLabels().filter((_, i) => prefs?.days?.[i]).join(', ') || 'None set'}
                 </span>
               </div>
             </div>
-            <div style={{ marginTop: 10, fontSize: 12, color: journeySchedule?.needsMoreTime ? '#92400e' : '#64748b', lineHeight: 1.6 }}>
+            <div style={{ marginTop: 10, fontSize: 12, color: journeySchedule?.needsMoreTime ? '#92400e' : '#565a63', lineHeight: 1.6 }}>
               {journeySchedule?.needsMoreTime
-                ? <>Plan for about <b>{journeySchedule.requiredMinutesPerDay} minutes on each study day</b> to stay on track. You can adjust your date and availability from the <Link to={viewHref('/calendar')} style={{ color: '#0ea5e9', fontWeight: 700 }}>Calendar</Link>.</>
+                ? <>Plan for about <b>{journeySchedule.requiredMinutesPerDay} minutes on each study day</b> to stay on track. You can adjust your date and availability from the <Link to={viewHref('/calendar')} style={{ color: '#0284c7', fontWeight: 700 }}>Calendar</Link>.</>
                 : <>This plan updates from your latest results. Missed days roll forward automatically.</>}
             </div>
           </div>
@@ -523,26 +520,26 @@ export default function Results() {
               <div
                 key={day.key}
                 style={{
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 14,
+                  border: '1px solid #e4e0d5',
+                  borderRadius: 12,
                   padding: 14,
-                  background: idx === 0 ? 'linear-gradient(135deg, rgba(14,165,233,.10), rgba(99,102,241,.10))' : '#f8fafc',
+                  background: idx === 0 ? '#f3f0e9' : '#f7f5ef',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', marginBottom: 10 }}>
                   <div>
-                    <div style={{ fontWeight: 900, color: '#1a2744' }}>
+                    <div style={{ fontWeight: 600, color: '#16181d' }}>
                       {idx === 0 ? 'Today' : idx === 1 ? 'Following Study Day' : 'Coming Up'}
                     </div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{day.label}</div>
+                    <div style={{ fontSize: 12, color: '#565a63', marginTop: 2 }}>{day.label}</div>
                   </div>
                   <div style={{
                     fontSize: 11,
-                    fontWeight: 900,
+                    fontWeight: 600,
                     padding: '4px 10px',
                     borderRadius: 999,
-                    background: day.focus === 'Reading' ? 'rgba(59,130,246,.12)' : day.focus === 'Math' ? 'rgba(16,185,129,.12)' : 'rgba(148,163,184,.14)',
-                    color: day.focus === 'Reading' ? '#2563eb' : day.focus === 'Math' ? '#059669' : '#64748b',
+                    background: day.focus === 'Reading' ? 'rgba(2,132,199,.12)' : day.focus === 'Math' ? 'rgba(16,185,129,.12)' : 'rgba(138,143,152,.14)',
+                    color: day.focus === 'Reading' ? '#2563eb' : day.focus === 'Math' ? '#059669' : '#565a63',
                   }}>
                     {day.focus}
                   </div>
@@ -551,7 +548,7 @@ export default function Results() {
                   {day.tasks.length ? day.tasks.map((task) => (
                     <ResultScheduleTaskLink key={task.id} task={task} viewHref={viewHref} />
                   )) : (
-                    <div style={{ padding: '12px', border: '1px dashed #cbd5e1', borderRadius: 12, color: '#64748b', fontSize: 12, lineHeight: 1.6 }}>
+                    <div style={{ padding: '12px', border: '1px dashed #cbd5e1', borderRadius: 12, color: '#565a63', fontSize: 12, lineHeight: 1.6 }}>
                       No required tasks for this day. Use it as a catch-up or light review day.
                     </div>
                   )}

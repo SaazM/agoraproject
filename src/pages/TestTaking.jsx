@@ -2,11 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.jsx'
 import { supabase } from '../lib/supabase.js'
-import PDFPage from '../components/PDFPage.jsx'
-import PDFSectionStack from '../components/PDFSectionStack.jsx'
 import { PDF_PAGE_MAP, answerMatches, isMultipleChoiceAnswer } from '../data/testData.js'
 import { getTestConfig } from '../data/tests.js'
-import { extractAnswerKeyFromPdf } from '../lib/answerKeyExtract.js'
 import { EXTRA_PDF_PAGE_MAPS } from '../data/extraPdfPageMaps.js'
 import { getAnswerKeyBySection } from '../data/answerKeys.js'
 import { saveMistakes, ensureReviewItems } from '../lib/mistakesStore.js'
@@ -15,8 +12,6 @@ import {
   getChoiceOptionsForQuestion,
   getDefaultModuleTimeRemaining,
   getExamConfigForTest,
-  getPdfViewerModeForTest,
-  getSectionPageRangesForTest,
   scoreAttemptFromKey,
 } from '../data/examData.js'
 
@@ -99,7 +94,7 @@ function BreakScreen({ nextModule, onContinue, modules }) {
     return `rgb(${r},${g},${b})`
   })()
 
-  const timerColor = fraction > 0.33 ? '#0f172a' : fraction > 0.15 ? '#b45309' : '#dc2626'
+  const timerColor = fraction > 0.33 ? '#16181d' : fraction > 0.15 ? '#b45309' : '#dc2626'
   const glowOpacity = fraction < 0.2 ? 0.35 : 0
 
   return (
@@ -116,7 +111,7 @@ function BreakScreen({ nextModule, onContinue, modules }) {
           <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="break-svg-ring">
             {/* Track */}
             <circle cx={SIZE / 2} cy={SIZE / 2} r={R}
-              fill="none" stroke="#e2e8f0" strokeWidth={STROKE} />
+              fill="none" stroke="#e4e0d5" strokeWidth={STROKE} />
             {/* Glow layer for urgency */}
             {glowOpacity > 0 && (
               <circle cx={SIZE / 2} cy={SIZE / 2} r={R}
@@ -173,8 +168,6 @@ export default function TestTaking() {
   const [timerLeft, setTimerLeft] = useState(null)
   const [showBreak, setShowBreak] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [pdfOffsetsByTest, setPdfOffsetsByTest] = useState({}) // { [testId]: { rw_m1: 0, ... } } (0-based page offsets)
-  const [pdfOverridesByTest, setPdfOverridesByTest] = useState({}) // { [testId]: { rw_m1: { [qNum]: pageIndex }, ... } }
   const saveTimer = useRef(null)
   const lastSaveAt = useRef(0)
   const pendingSave = useRef(null)
@@ -214,73 +207,10 @@ export default function TestTaking() {
     }
   }
 
-  useEffect(() => {
-    try {
-      const rawV2 = localStorage.getItem('agora_pdf_offsets_v2')
-      if (rawV2) { setPdfOffsetsByTest(JSON.parse(rawV2) || {}); return }
-      const rawV1 = localStorage.getItem('agora_pdf_offsets_v1')
-      if (rawV1) {
-        const legacy = JSON.parse(rawV1) || {}
-        setPdfOffsetsByTest({ pre_test: legacy })
-      }
-    } catch {}
-  }, [])
-
-  useEffect(() => {
-    try { localStorage.setItem('agora_pdf_offsets_v2', JSON.stringify(pdfOffsetsByTest || {})) } catch {}
-  }, [pdfOffsetsByTest])
-
-  useEffect(() => {
-    try {
-      const rawV2 = localStorage.getItem('agora_pdf_overrides_v2')
-      if (rawV2) { setPdfOverridesByTest(JSON.parse(rawV2) || {}); return }
-      const rawV1 = localStorage.getItem('agora_pdf_overrides_v1')
-      if (rawV1) {
-        const legacy = JSON.parse(rawV1) || {}
-        setPdfOverridesByTest({ pre_test: legacy })
-      }
-    } catch {}
-  }, [])
-
-  useEffect(() => {
-    try { localStorage.setItem('agora_pdf_overrides_v2', JSON.stringify(pdfOverridesByTest || {})) } catch {}
-  }, [pdfOverridesByTest])
-
   const currentTestId = attempt?.test_id || testConfig?.id || 'pre_test'
   const examConfig = getExamConfigForTest(currentTestId)
   const moduleOrder = examConfig.moduleOrder || []
   const modules = examConfig.modules || {}
-  const viewerMode = getPdfViewerModeForTest(currentTestId)
-  const sectionRanges = getSectionPageRangesForTest(currentTestId) || {}
-  const pdfOffsets = pdfOffsetsByTest?.[currentTestId] || {}
-  const pdfOverrides = pdfOverridesByTest?.[currentTestId] || {}
-
-  function setPdfOffsetFor(moduleId, nextOffset) {
-    setPdfOffsetsByTest(prev => ({
-      ...(prev || {}),
-      [currentTestId]: { ...(prev?.[currentTestId] || {}), [moduleId]: nextOffset }
-    }))
-  }
-
-  function setPdfOverrideFor(moduleId, qNum, pageIndex) {
-    setPdfOverridesByTest(prev => ({
-      ...(prev || {}),
-      [currentTestId]: {
-        ...(prev?.[currentTestId] || {}),
-        [moduleId]: { ...(prev?.[currentTestId]?.[moduleId] || {}), [qNum]: pageIndex }
-      }
-    }))
-  }
-
-  function clearPdfOverrideFor(moduleId, qNum) {
-    setPdfOverridesByTest(prev => {
-      const next = { ...(prev || {}) }
-      const mod = { ...(next?.[currentTestId]?.[moduleId] || {}) }
-      delete mod[qNum]
-      next[currentTestId] = { ...(next?.[currentTestId] || {}), [moduleId]: mod }
-      return next
-    })
-  }
 
   useEffect(() => {
     if (!supabase || !user?.id) return
@@ -360,101 +290,15 @@ export default function TestTaking() {
   }, [attemptId, user?.id, navigate])
 
   useEffect(() => {
-    if (!supabase || !attempt?.test_id) return
-    let cancelled = false
+    if (!attempt?.test_id) return
     const cfg = getTestConfig(attempt.test_id) || getTestConfig('pre_test')
     const builtIn = getAnswerKeyBySection(cfg?.id)
     if (builtIn) {
-      // Sanity check: optional tests must have a full 120-question key.
-      if (cfg?.id && cfg.id !== 'pre_test' && builtIn) {
-        const total = Object.values(builtIn || {}).reduce((sum, sectionKey) => sum + Object.keys(sectionKey || {}).length, 0)
-        if (total < 110) {
-          if (!cancelled) {
-            setKeyBySection(null)
-            setKeyStatus({ loading: false, msg: 'Answer key is incomplete for this test build. Please contact the admin.' })
-          }
-          return
-        }
-      }
-      if (!cancelled) {
-        setKeyBySection(builtIn)
-        setKeyStatus({ loading: false, msg: '' })
-      }
-      return () => {
-        cancelled = true
-      }
-    }
-
-    const CACHE_KEY = 'agora_answer_keys_cache_v1'
-    const readCache = (testId) => {
-      try {
-        const raw = localStorage.getItem(CACHE_KEY)
-        const obj = raw ? JSON.parse(raw) : {}
-        return obj?.[testId] || null
-      } catch {
-        return null
-      }
-    }
-    const writeCache = (testId, keyObj) => {
-      try {
-        const raw = localStorage.getItem(CACHE_KEY)
-        const obj = raw ? JSON.parse(raw) : {}
-        obj[testId] = keyObj
-        localStorage.setItem(CACHE_KEY, JSON.stringify(obj))
-      } catch {}
-    }
-
-    const cached = readCache(cfg.id)
-    if (cached) {
-      if (!cancelled) {
-        setKeyBySection(cached)
-        setKeyStatus({ loading: false, msg: '' })
-      }
-      return () => {
-        cancelled = true
-      }
-    }
-
-    setKeyStatus({ loading: true, msg: 'Loading answer key…' })
-    ;(async () => {
-      // 1) Try Supabase (if the admin imported keys)
-      try {
-        const { data } = await supabase.from('test_answer_keys').select('*').eq('test_id', cfg.id).single()
-        if (data?.answer_key) {
-          if (cancelled) return
-          setKeyBySection(data.answer_key)
-          writeCache(cfg.id, data.answer_key)
-          setKeyStatus({ loading: false, msg: '' })
-          return
-        }
-      } catch {}
-
-      // 2) Built-in fallback: parse the bundled AK PDF (no admin setup required)
-      if (cfg.akUrl) {
-        try {
-          const res = await fetch(cfg.akUrl)
-          if (!res.ok) throw new Error('Could not fetch bundled answer key.')
-          const buf = new Uint8Array(await res.arrayBuffer())
-          const parsed = await extractAnswerKeyFromPdf(buf)
-          if (cancelled) return
-          setKeyBySection(parsed)
-          writeCache(cfg.id, parsed)
-          setKeyStatus({ loading: false, msg: '' })
-          return
-        } catch (e) {
-          if (cancelled) return
-          setKeyBySection(null)
-          setKeyStatus({ loading: false, msg: `Could not load answer key: ${e?.message || 'unknown error'}` })
-          return
-        }
-      }
-
-      if (cancelled) return
+      setKeyBySection(builtIn)
+      setKeyStatus({ loading: false, msg: '' })
+    } else {
       setKeyBySection(null)
-      setKeyStatus({ loading: false, msg: 'Missing answer key.' })
-    })()
-    return () => {
-      cancelled = true
+      setKeyStatus({ loading: false, msg: 'Answer key is missing for this test build. Please contact the admin.' })
     }
   }, [attempt?.test_id])
 
@@ -566,7 +410,6 @@ export default function TestTaking() {
   }
 
   function shouldShowBreakBetween(fromModule, toModule) {
-    if (examConfig.exam === 'act') return fromModule === 'act_math' && toModule === 'act_reading'
     return fromModule === 'rw_m2' && toModule === 'math_m1'
   }
 
@@ -755,25 +598,17 @@ export default function TestTaking() {
   }
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Sora,sans-serif', color: '#64748b' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Fraunces, Georgia, serif', color: '#565a63' }}>
       Loading test…
     </div>
   )
 
-  if (keyStatus.loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Sora,sans-serif', color: '#64748b' }}>
-        Loading answer key…
-      </div>
-    )
-  }
-
   if (!keyBySection && keyStatus.msg) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: '#f1f5f9' }}>
-        <div style={{ maxWidth: 720, width: '100%', background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: 20 }}>
-          <div style={{ fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>Missing answer key</div>
-          <div style={{ color: '#64748b', lineHeight: 1.6, fontSize: 14, marginBottom: 12 }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: '#f3f0e9' }}>
+        <div style={{ maxWidth: 720, width: '100%', background: 'white', border: '1px solid #e4e0d5', borderRadius: 12, padding: 20 }}>
+          <div style={{ fontWeight: 600, color: '#16181d', marginBottom: 8 }}>Missing answer key</div>
+          <div style={{ color: '#565a63', lineHeight: 1.6, fontSize: 14, marginBottom: 12 }}>
             {keyStatus.msg}
           </div>
           <button className="btn btn-primary" onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
@@ -791,59 +626,30 @@ export default function TestTaking() {
   const mod = modules[currentModule]
   if (!mod) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Sora,sans-serif', color: '#64748b' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Fraunces, Georgia, serif', color: '#565a63' }}>
         Loading test section…
       </div>
     )
   }
   const totalQ = mod.questions
+
+  // The tests themselves live on the College Board site — we only collect answers here.
+  // The per-question page maps still describe the official PDFs, so we can point
+  // students at the right page of the College Board PDF for the current question.
+  const cbUrl = testConfig?.cbUrl || ''
+  const cbLabel = testConfig?.cbLabel || 'the SAT practice test'
   const pageMap = (testConfig?.id === 'pre_test')
     ? (PDF_PAGE_MAP[currentModule] || {})
     : (EXTRA_PDF_PAGE_MAPS?.[testConfig?.id]?.[currentModule] || {})
-  const basePdfPage = (() => {
-    if (Number.isFinite(Number(pageMap?.[currentQ]))) return pageMap[currentQ]
+  const pdfPage = (() => {
+    if (Number.isFinite(Number(pageMap?.[currentQ]))) return Number(pageMap[currentQ])
     // Fallback: use the nearest previous mapped question page.
     for (let q = currentQ - 1; q >= 1; q--) {
-      if (Number.isFinite(Number(pageMap?.[q]))) return pageMap[q]
+      if (Number.isFinite(Number(pageMap?.[q]))) return Number(pageMap[q])
     }
-    // For ACT (no per-question map): estimate from section range
-    const sr = Array.isArray(sectionRanges?.[currentModule]) ? sectionRanges[currentModule] : null
-    if (sr) {
-      const progress = (currentQ - 1) / Math.max(1, totalQ)
-      return sr[0] + Math.floor(progress * (sr[1] - sr[0] + 1))
-    }
-    return 0
+    return null
   })()
-  const pdfOffset = Number(pdfOffsets?.[currentModule] || 0)
-  const overridePage = pdfOverrides?.[currentModule]?.[currentQ]
-  const pdfPage = Math.max(0, Number.isFinite(Number(overridePage)) ? Number(overridePage) : (basePdfPage + pdfOffset))
-  const sectionRange = Array.isArray(sectionRanges?.[currentModule]) ? sectionRanges[currentModule] : null
-
-  // Estimate scroll ratio within the target page for multi-question pages
-  const scrollRatio = (() => {
-    if (viewerMode !== 'stack') return 0
-    // For SAT: use page map to find which questions share this page
-    const pm = (testConfig?.id === 'pre_test')
-      ? (PDF_PAGE_MAP[currentModule] || {})
-      : (EXTRA_PDF_PAGE_MAPS?.[testConfig?.id]?.[currentModule] || {})
-    if (Object.keys(pm).length) {
-      const qsOnPage = Object.entries(pm).filter(([, p]) => p === pdfPage).map(([q]) => Number(q)).sort((a, b) => a - b)
-      if (qsOnPage.length > 1) {
-        const pos = qsOnPage.indexOf(currentQ)
-        return pos > 0 ? (pos / qsOnPage.length) * 0.8 : 0
-      }
-      return 0
-    }
-    // For ACT: estimate by question progress within section
-    const totalQuestions = mod.questions
-    if (sectionRange) {
-      const pageCount = sectionRange[1] - sectionRange[0] + 1
-      const progress = (currentQ - 1) / totalQuestions
-      const offset = progress * pageCount
-      return Math.max(0, Math.min(0.92, offset - Math.floor(offset)))
-    }
-    return 0
-  })()
+  const cbPageUrl = cbUrl && pdfPage != null ? `${cbUrl}#page=${pdfPage + 1}` : cbUrl
 
   const modAnswers = answers[currentModule] || {}
   const currentAnswer = modAnswers[currentQ]
@@ -871,13 +677,13 @@ export default function TestTaking() {
   })()
 
   return (
-    <div className={`test-layout${examConfig.exam === 'act' ? ' test-layout-act' : ''}`}>
+    <div className="test-layout">
       {/* Header */}
       <div className="test-header">
-	        <div className="test-header-left">
-	          <div className="test-section-label">{mod.section} · {testConfig?.label || 'Pre Test'}</div>
-	          <div className="test-module-label">{mod.label} — {mod.module}</div>
-	        </div>
+        <div className="test-header-left">
+          <div className="test-section-label">{mod.section} · {testConfig?.label || 'Pre Test'}</div>
+          <div className="test-module-label">{mod.label} — {mod.module}</div>
+        </div>
         <Timer
           key={currentModule}
           seconds={moduleTimeLeft[currentModule] || mod.time}
@@ -887,7 +693,7 @@ export default function TestTaking() {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, minWidth: 160 }}>
           <div style={{
             fontSize: 12,
-            fontWeight: 800,
+            fontWeight: 600,
             color: paceLabel === 'On pace' ? 'rgba(255,255,255,.75)' : (delta > 0 ? '#86efac' : '#fecaca'),
             background: 'rgba(255,255,255,.08)',
             border: '1px solid rgba(255,255,255,.14)',
@@ -906,131 +712,53 @@ export default function TestTaking() {
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,.55)' }}>
             {Object.keys(modAnswers).length}/{totalQ} answered
           </div>
-          {/* Study Guide button removed per user request */}
           {isLastModule && (
             <button className="btn" onClick={submitTest} disabled={submitting}
-              style={{ background: '#f59e0b', color: '#1a2744', fontWeight: 700, padding: '7px 16px', fontSize: 13 }}>
+              style={{ background: '#f59e0b', color: '#16181d', fontWeight: 700, padding: '7px 16px', fontSize: 13 }}>
               {submitting ? 'Submitting…' : 'Submit Test'}
             </button>
           )}
         </div>
       </div>
 
-	      {/* Body */}
-	      <div className="test-body">
-	        {/* PDF Panel */}
-	        <div className="test-pdf-panel">
-	          <div style={{ width: '100%', maxWidth: 760 }}>
-	            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-	              <div style={{ fontSize: 12, color: '#64748b', fontWeight: 800 }}>
-                  {viewerMode === 'stack' && sectionRange ? (
-                    <>
-                      Pages <span style={{ color: '#0f172a' }}>{sectionRange[0] + 1}–{sectionRange[1] + 1}</span>
-                      <span style={{ color: '#94a3b8', marginLeft: 8 }}>· Q{currentQ} on page {pdfPage + 1}</span>
-                    </>
-                  ) : profile?.role === 'admin' ? (
-                    <>
-                      PDF page <span style={{ color: '#0f172a' }}>{pdfPage + 1}</span>
-                      <span style={{ color: '#94a3b8', fontWeight: 700 }}>
-                        {Number.isFinite(Number(overridePage)) ? ' · (override)' : ` · offset ${pdfOffset >= 0 ? `+${pdfOffset}` : pdfOffset}`}
-                      </span>
-                    </>
-                  ) : null}
-	              </div>
-	              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                  {profile?.role === 'admin' && (
-                    <a
-                      className="btn btn-outline"
-                      style={{ padding: '6px 10px', fontSize: 12 }}
-                      href={testConfig?.pdfUrl || '/practice-test-11.pdf'}
-                      target="_blank"
-                      rel="noreferrer"
-                      title="Open the full test PDF in a new tab"
-                    >
-                      Open PDF →
-                    </a>
-                  )}
-                  {profile?.role === 'admin' && testConfig?.akUrl && (
-                    <a
-                      className="btn btn-outline"
-                      style={{ padding: '6px 10px', fontSize: 12 }}
-                      href={testConfig.akUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      title="Admin-only: open the answer key PDF in a new tab"
-	                    >
-	                      Open AK →
-	                    </a>
-	                  )}
-                  {profile?.role === 'admin' && viewerMode === 'single' && (
-                    <>
-	                  <button
-	                    className="btn btn-outline"
-	                    style={{ padding: '6px 10px', fontSize: 12 }}
-	                    onClick={() => {
-	                      const page = window.prompt('Set the PDF page number for this question (1-based):', String(pdfPage + 1))
-	                      const n = Number(String(page || '').trim())
-	                      if (!Number.isFinite(n) || n < 1) return
-	                      const idx = Math.max(0, Math.floor(n - 1))
-	                      setPdfOverrideFor(currentModule, currentQ, idx)
-	                    }}
-	                    title="If the mapping is glitchy, set an exact PDF page for this question"
-	                  >
-	                    Set page
-	                  </button>
-	                  {Number.isFinite(Number(overridePage)) && (
-	                    <button
-	                      className="btn btn-outline"
-	                      style={{ padding: '6px 10px', fontSize: 12 }}
-	                      onClick={() => clearPdfOverrideFor(currentModule, currentQ)}
-	                      title="Remove the per-question page override"
-	                    >
-	                      Clear override
-	                    </button>
-	                  )}
-	                  <button
-	                    className="btn btn-outline"
-	                    style={{ padding: '6px 10px', fontSize: 12 }}
-	                    onClick={() => setPdfOffsetFor(currentModule, Number(pdfOffsets?.[currentModule] || 0) - 1)}
-	                    title="If the PDF is behind, decrease the offset"
-	                  >
-	                    −1 page
-	                  </button>
-	                  <button
-	                    className="btn btn-outline"
-	                    style={{ padding: '6px 10px', fontSize: 12 }}
-	                    onClick={() => setPdfOffsetFor(currentModule, Number(pdfOffsets?.[currentModule] || 0) + 1)}
-	                    title="If the PDF is ahead, increase the offset"
-	                  >
-	                    +1 page
-	                  </button>
-	                  <button
-	                    className="btn btn-outline"
-	                    style={{ padding: '6px 10px', fontSize: 12 }}
-	                    onClick={() => setPdfOffsetFor(currentModule, 0)}
-	                    title="Reset PDF alignment for this module"
-	                  >
-	                    Reset
-	                  </button>
-                    </>
-                  )}
-	              </div>
-	            </div>
-              {viewerMode === 'stack' && sectionRange ? (
-                <PDFSectionStack
-                  key={`${currentModule}:${sectionRange[0]}-${sectionRange[1]}`}
-                  pdfUrl={testConfig?.pdfUrl || '/practice-test-11.pdf'}
-                  startPage={sectionRange[0]}
-                  endPage={sectionRange[1]}
-                  initialPageIndex={pdfPage}
-                  initialScrollRatio={scrollRatio}
-                  containerStyle={{ width: '100%', height: 'auto', overflowY: 'visible' }}
-                />
-              ) : (
-	              <PDFPage key={`${currentModule}:${pdfPage}`} pdfUrl={testConfig?.pdfUrl || '/practice-test-11.pdf'} pageIndex={pdfPage} />
+      {/* Body */}
+      <div className="test-body">
+        {/* Test source panel — the questions live on the College Board site */}
+        <div className="test-pdf-panel">
+          <div style={{ width: '100%', maxWidth: 560 }}>
+            <div style={{ background: 'white', border: '1px solid #e4e0d5', borderRadius: 12, padding: 24, boxShadow: '0 1px 3px rgba(22,24,29,.06)' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: '#0284c7', marginBottom: 8 }}>
+                Official College Board Test
+              </div>
+              <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 20, fontWeight: 600, color: '#16181d', marginBottom: 6 }}>
+                {cbLabel}
+              </div>
+              <div style={{ color: '#3f434b', fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
+                The questions for this test are on the College Board website. Keep it open in a
+                second tab, read each question there, and record your answers on this page —
+                this tab keeps your timer, pacing, and progress.
+              </div>
+              <a
+                className="btn btn-primary"
+                href={cbPageUrl || cbUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 600 }}
+              >
+                Open {cbLabel} ↗
+              </a>
+              {pdfPage != null && (
+                <div style={{ marginTop: 14, padding: '10px 14px', background: '#f3f0e9', borderRadius: 10, fontSize: 13, color: '#3f434b', fontWeight: 600 }}>
+                  Question {currentQ} is on page {pdfPage + 1} of the test PDF.
+                </div>
               )}
-	          </div>
-	        </div>
+              <div style={{ marginTop: 14, fontSize: 12, color: '#8a8f98', lineHeight: 1.6 }}>
+                Tip: put the two tabs side by side. If the PDF doesn't jump to the page, scroll
+                to the page shown above.
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Answer Panel */}
         <div className="test-answer-panel">
@@ -1062,7 +790,7 @@ export default function TestTaking() {
           <div className="answer-choices">
             {isFR ? (
               <div>
-                <div style={{ fontSize: 13, color: '#64748b', marginBottom: 10 }}>
+                <div style={{ fontSize: 13, color: '#565a63', marginBottom: 10 }}>
                   Enter your answer (numbers or simple expressions):
                 </div>
                 <input
@@ -1073,12 +801,12 @@ export default function TestTaking() {
                   onChange={e => setAnswer(currentQ, e.target.value)}
                   autoComplete="off"
                 />
-                <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>
+                <div style={{ fontSize: 12, color: '#8a8f98', marginTop: 6 }}>
                   Equivalent answers count, including fractions and comma-formatted numbers. Examples: <code>75</code>, <code>1/2</code>, <code>.5</code>, <code>15,000</code>, <code>pi</code> (or <code>π</code>), <code>2^3</code>, <code>3*pi/2</code>
                 </div>
               </div>
             ) : (
-              <div className={`choice-grid ${examConfig.exam === 'act' ? 'act' : 'sat'}`}>
+              <div className="choice-grid sat">
                 {choices.map(letter => (
                   <button
                     key={letter}
@@ -1086,7 +814,7 @@ export default function TestTaking() {
                     onClick={() => setAnswer(currentQ, letter)}
                   >
                     <span className="choice-letter">{letter}</span>
-                    <span style={{ paddingTop: 4, fontWeight: 800 }}>Choose {letter}</span>
+                    <span style={{ paddingTop: 4, fontWeight: 600 }}>Choose {letter}</span>
                   </button>
                 ))}
               </div>
@@ -1109,7 +837,7 @@ export default function TestTaking() {
                 </button>
               )}
             </div>
-            <div style={{ fontSize: 11, color: '#94a3b8' }}>
+            <div style={{ fontSize: 11, color: '#8a8f98' }}>
               {currentQ}/{totalQ}
             </div>
           </div>

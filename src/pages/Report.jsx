@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase.js'
 import { motion } from 'framer-motion'
 import BrandLink from '../components/BrandLink.jsx'
 import Icon from '../components/AppIcons.jsx'
-import ExamSwitcher from '../components/ExamSwitcher.jsx'
 import Sidebar from '../components/Sidebar.jsx'
 import { loadDashboardViewData } from '../lib/dashboardData.js'
 import { TESTS, getTestsForExam, getExamFromTestId, normalizeTestId } from '../data/tests.js'
@@ -32,22 +31,22 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 /* ── helpers ─────────────────────────────────────────── */
 
 const cardStyle = {
-  border: '1px solid rgba(15,23,42,.10)',
-  borderRadius: 16,
+  border: '1px solid rgba(22,24,29,.10)',
+  borderRadius: 12,
   padding: 20,
   background: 'white',
   marginBottom: 18,
 }
 
 const headingStyle = {
-  fontFamily: 'Sora,sans-serif',
+  fontFamily: 'Fraunces, Georgia, serif',
   fontSize: 15,
-  fontWeight: 800,
+  fontWeight: 600,
   marginBottom: 12,
   display: 'flex',
   alignItems: 'center',
   gap: 8,
-  color: '#0f172a',
+  color: '#16181d',
   letterSpacing: '0.02em',
 }
 
@@ -125,7 +124,7 @@ export default function Report() {
   const [loading, setLoading] = useState(true)
 
   const chosenExam = chooseDashboardExam({ user, attempts, explicitExam: requestedExam })
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : chosenExam
+  const exam = requestedExam === 'sat' ? requestedExam : chosenExam
   const examConfig = getExamConfig(exam)
   const examTests = getTestsForExam(exam)
   const chaptersForExam = getChaptersForExam(exam)
@@ -287,13 +286,13 @@ export default function Report() {
         return t?.shortLabel || t?.label || 'Test'
       }),
       datasets: [{
-        label: exam === 'act' ? 'ACT Composite' : 'SAT Total',
+        label: 'SAT Total',
         data: sorted.map((e) => Number(e.scores.total || e.scores.composite || 0)),
-        borderColor: '#0ea5e9',
-        backgroundColor: 'rgba(14,165,233,.15)',
+        borderColor: '#0284c7',
+        backgroundColor: 'rgba(2,132,199,.15)',
         tension: 0.3,
         pointRadius: 5,
-        pointBackgroundColor: '#0ea5e9',
+        pointBackgroundColor: '#0284c7',
       }],
     }
   }, [completedWithScores, exam])
@@ -358,8 +357,8 @@ export default function Report() {
         <Sidebar currentExam={exam} />
         <div className="page fade-up">
           <div style={{ ...cardStyle, padding: 18 }}>
-            <div style={{ fontWeight: 900, color: '#1a2744', marginBottom: 6 }}>Not authorized</div>
-            <div style={{ color: '#64748b', fontSize: 13, lineHeight: 1.6 }}>
+            <div style={{ fontWeight: 600, color: '#16181d', marginBottom: 6 }}>Not authorized</div>
+            <div style={{ color: '#565a63', fontSize: 13, lineHeight: 1.6 }}>
               This report link is restricted.
             </div>
           </div>
@@ -372,7 +371,7 @@ export default function Report() {
     return (
       <div className="app-layout has-sidebar">
         <Sidebar currentExam={exam} />
-        <div className="page fade-up" style={{ textAlign: 'center', paddingTop: 80, color: '#64748b' }}>
+        <div className="page fade-up" style={{ textAlign: 'center', paddingTop: 80, color: '#565a63' }}>
           Building report...
         </div>
       </div>
@@ -382,7 +381,7 @@ export default function Report() {
   const statBoxStyle = { display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }
   const iconBoxStyle = {
     width: 40, height: 40, borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    background: 'rgba(15,23,42,.08)', color: '#0f172a',
+    background: 'rgba(22,24,29,.08)', color: '#16181d',
   }
   const darkIconBoxStyle = { ...iconBoxStyle, background: 'rgba(255,255,255,.15)', color: 'white' }
 
@@ -393,10 +392,10 @@ export default function Report() {
 
         {/* Admin / Tutor preview banner */}
         {isAdminPreview && (
-          <motion.div {...stagger(0)} style={{ ...cardStyle, background: 'linear-gradient(135deg, rgba(26,39,68,.96), rgba(30,58,138,.94))', color: 'white' }}>
+          <motion.div {...stagger(0)} style={{ ...cardStyle, background: '#16181d', color: 'white' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
               <div>
-                <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 4 }}>{isTutor ? 'Tutor View' : 'Admin View'}</div>
+                <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{isTutor ? 'Tutor View' : 'Admin View'}</div>
                 <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.88 }}>
                   {"You're viewing this student's report. Use the result links below to open the same detailed post-test screens they see."}
                 </div>
@@ -411,11 +410,11 @@ export default function Report() {
         {/* ── Header ─────────────────────────────────── */}
         <motion.div {...fadeUp} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
-            <h1 style={{ fontFamily: 'Sora,sans-serif', fontSize: 22, fontWeight: 900, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 10, letterSpacing: '0.01em' }}>
+            <h1 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 22, fontWeight: 600, color: '#16181d', margin: 0, display: 'flex', alignItems: 'center', gap: 10, letterSpacing: '0.01em' }}>
               <Icon name="report" size={22} />
               Progress Report
             </h1>
-            <p style={{ color: '#64748b', marginTop: 4, fontSize: 13, lineHeight: 1.6 }}>
+            <p style={{ color: '#565a63', marginTop: 4, fontSize: 13, lineHeight: 1.6 }}>
               Your complete {exam.toUpperCase()} performance stats and progress
               {reportData?.generated_at && <> &middot; Generated {new Date(reportData.generated_at).toLocaleString()}</>}
             </p>
@@ -452,7 +451,7 @@ export default function Report() {
         <motion.div {...stagger(1)} className="stats-grid" style={{ marginBottom: 24 }}>
           {[
             { label: 'Tests Completed', val: completed.length, icon: 'check', dark: false },
-            { label: exam === 'act' ? 'Best Composite' : 'Best Score', val: best ? best.scores.total : '—', icon: 'sparkle', dark: Boolean(best) },
+            { label: 'Best Score', val: best ? best.scores.total : '—', icon: 'sparkle', dark: Boolean(best) },
             { label: 'Most Recent', val: recent ? recent.scores.total : '—', icon: 'results', dark: false },
             { label: 'Improvement', val: improvement !== null ? `${improvement > 0 ? '+' : ''}${improvement}` : '—', icon: 'trend', dark: improvement !== null && improvement > 0 },
             ...sectionAvgs.map((s) => ({ label: `Avg ${s.label}`, val: s.avg ?? '—', icon: 'target', dark: false })),
@@ -463,19 +462,19 @@ export default function Report() {
             <div key={s.label} className={`stat-box${s.dark ? ' dark' : ''}`} style={{
               ...statBoxStyle,
               ...(s.dark ? {} : idx % 2 === 0
-                ? { borderTop: '3px solid #1e3a8a' }
-                : { borderTop: '3px solid #0ea5e9' }),
+                ? { borderTop: '3px solid #0284c7' }
+                : { borderTop: '3px solid #0284c7' }),
             }}>
               <div style={s.dark ? darkIconBoxStyle : idx % 2 === 0
-                ? { ...iconBoxStyle, background: 'rgba(30,58,138,.10)', color: '#1e3a8a' }
-                : { ...iconBoxStyle, background: 'rgba(14,165,233,.10)', color: '#0ea5e9' }
+                ? { ...iconBoxStyle, background: 'rgba(2,132,199,.10)', color: '#0284c7' }
+                : { ...iconBoxStyle, background: 'rgba(2,132,199,.10)', color: '#0284c7' }
               }>
                 <Icon name={s.icon} size={20} />
               </div>
               <div>
                 <div className="stat-label">{s.label}</div>
                 <div className="stat-num" style={{ fontSize: 22 }}>{s.val}</div>
-                {s.sub && <div className="stat-sub" style={{ fontSize: 11, color: '#94a3b8' }}>{s.sub}</div>}
+                {s.sub && <div className="stat-sub" style={{ fontSize: 11, color: '#8a8f98' }}>{s.sub}</div>}
               </div>
             </div>
           ))}
@@ -501,7 +500,7 @@ export default function Report() {
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 12, color: '#64748b', fontSize: 13 }}>
+            <div style={{ marginTop: 12, color: '#565a63', fontSize: 13 }}>
               Due reviews: {reportData.summary.due_reviews} &middot; Optional tests completed: {reportData.summary.completed_extra}
             </div>
           </motion.div>
@@ -521,7 +520,7 @@ export default function Report() {
                 plugins: { legend: { labels: { font: { family: 'DM Sans', size: 12 } } } },
                 scales: {
                   x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 10 } } },
-                  y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Sans', size: 10 } }, beginAtZero: false },
+                  y: { grid: { color: '#eceadf' }, ticks: { font: { family: 'DM Sans', size: 10 } }, beginAtZero: false },
                 },
               }} />
             </div>
@@ -542,7 +541,7 @@ export default function Report() {
                 plugins: { legend: { labels: { font: { family: 'DM Sans', size: 11 } } } },
                 scales: {
                   x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 10 } } },
-                  y: { grid: { color: '#f1f5f9' }, ticks: { font: { family: 'DM Sans', size: 10 } }, beginAtZero: false },
+                  y: { grid: { color: '#eceadf' }, ticks: { font: { family: 'DM Sans', size: 10 } }, beginAtZero: false },
                 },
               }} />
             </div>
@@ -558,7 +557,7 @@ export default function Report() {
               Top Weak Areas
             </h3>
             {topWeakTopics.length === 0 && (
-              <p style={{ color: '#94a3b8', fontSize: 13 }}>No weak topics detected yet. Complete a test to see your weak areas.</p>
+              <p style={{ color: '#8a8f98', fontSize: 13 }}>No weak topics detected yet. Complete a test to see your weak areas.</p>
             )}
             {topWeakTopics.map((topic, i) => {
               const chMeta = chaptersForExam?.[topic.ch] || {}
@@ -567,7 +566,7 @@ export default function Report() {
               return (
                 <div key={topic.ch} style={{
                   display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0',
-                  borderBottom: i < topWeakTopics.length - 1 ? '1px solid #f1f5f9' : 'none',
+                  borderBottom: i < topWeakTopics.length - 1 ? '1px solid #f3f0e9' : 'none',
                 }}>
                   <span style={{
                     width: 28, height: 28, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
@@ -576,8 +575,8 @@ export default function Report() {
                     {i + 1}
                   </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2744' }}>{label}</div>
-                    {domain && <div style={{ fontSize: 11, color: '#94a3b8' }}>{domain}</div>}
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#16181d' }}>{label}</div>
+                    {domain && <div style={{ fontSize: 11, color: '#8a8f98' }}>{domain}</div>}
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: '#ef4444', flexShrink: 0 }}>
                     {topic.count} missed
@@ -594,7 +593,7 @@ export default function Report() {
               Test History
             </h3>
             {testHistory.length === 0 && (
-              <p style={{ color: '#94a3b8', fontSize: 13 }}>No completed tests yet.</p>
+              <p style={{ color: '#8a8f98', fontSize: 13 }}>No completed tests yet.</p>
             )}
             <div style={{ display: 'grid', gap: 8 }}>
               {testHistory.map((t) => (
@@ -603,18 +602,18 @@ export default function Report() {
                   to={viewHref(`/results/${t.id}`)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-                    padding: '10px 12px', border: '1px solid rgba(14,165,233,.15)', borderRadius: 10, textDecoration: 'none', color: '#0f172a',
+                    padding: '10px 12px', border: '1px solid rgba(2,132,199,.15)', borderRadius: 10, textDecoration: 'none', color: '#16181d',
                     background: 'white',
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 700 }}>{t.label}</div>
-                    <div style={{ fontSize: 11, color: '#94a3b8' }}>{t.date}</div>
+                    <div style={{ fontSize: 11, color: '#8a8f98' }}>{t.date}</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                    <span style={{ fontSize: 18, fontWeight: 900, color: '#1a2744' }}>{t.total}</span>
+                    <span style={{ fontSize: 18, fontWeight: 600, color: '#16181d' }}>{t.total}</span>
                     {t.sections.map((s) => (
-                      <span key={s.label} style={{ fontSize: 11, color: '#64748b', textAlign: 'center' }}>
+                      <span key={s.label} style={{ fontSize: 11, color: '#565a63', textAlign: 'center' }}>
                         <div style={{ fontWeight: 600 }}>{s.val}</div>
                         <div style={{ fontSize: 9, opacity: 0.7 }}>{s.label}</div>
                       </span>
@@ -633,17 +632,17 @@ export default function Report() {
             Study Guide Progress
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
-            <div style={{ flex: 1, height: 10, borderRadius: 5, background: '#f1f5f9', overflow: 'hidden' }}>
+            <div style={{ flex: 1, height: 10, borderRadius: 5, background: '#f3f0e9', overflow: 'hidden' }}>
               <div style={{
                 width: `${Math.min(100, studiedPct)}%`, height: '100%', borderRadius: 5,
-                background: studiedPct >= 100 ? '#059669' : '#0ea5e9', transition: 'width .5s ease',
+                background: studiedPct >= 100 ? '#059669' : '#0284c7', transition: 'width .5s ease',
               }} />
             </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: studiedPct >= 100 ? '#059669' : '#1a2744', flexShrink: 0 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: studiedPct >= 100 ? '#059669' : '#16181d', flexShrink: 0 }}>
               {studiedCount}/{examConfig.guideCompletionTarget} modules
             </span>
           </div>
-          <div style={{ fontSize: 12, color: '#94a3b8' }}>
+          <div style={{ fontSize: 12, color: '#8a8f98' }}>
             {studiedPct >= 100
               ? 'All study guide modules completed!'
               : `${examConfig.guideCompletionTarget - studiedCount} modules remaining`}
@@ -657,7 +656,7 @@ export default function Report() {
             Mistake Review Progress
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
-            <div style={{ flex: 1, height: 10, borderRadius: 5, background: '#f1f5f9', overflow: 'hidden' }}>
+            <div style={{ flex: 1, height: 10, borderRadius: 5, background: '#f3f0e9', overflow: 'hidden' }}>
               <div style={{
                 width: `${mistakesForExam.length ? Math.min(100, Math.round((validatedCount / mistakesForExam.length) * 100)) : 0}%`,
                 height: '100%', borderRadius: 5,
@@ -665,11 +664,11 @@ export default function Report() {
                 transition: 'width .5s ease',
               }} />
             </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: validatedCount === mistakesForExam.length && mistakesForExam.length > 0 ? '#059669' : '#1a2744', flexShrink: 0 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: validatedCount === mistakesForExam.length && mistakesForExam.length > 0 ? '#059669' : '#16181d', flexShrink: 0 }}>
               {validatedCount}/{mistakesForExam.length} reviewed
             </span>
           </div>
-          <div style={{ fontSize: 12, color: '#94a3b8' }}>
+          <div style={{ fontSize: 12, color: '#8a8f98' }}>
             {mistakesForExam.length === 0
               ? 'No mistakes recorded yet.'
               : validatedCount === mistakesForExam.length
@@ -685,17 +684,17 @@ export default function Report() {
               <Icon name="test" size={17} />
               Detailed Test Screens
             </h3>
-            <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 12 }}>
+            <p style={{ fontSize: 13, color: '#565a63', lineHeight: 1.6, marginBottom: 12 }}>
               Open the exact post-test results pages for each completed test.
             </p>
             <div style={{ display: 'grid', gap: 10 }}>
               {completedAttempts.slice(0, 8).map((attempt) => {
                 const label = TESTS.find(t => t.id === (attempt.test_id === 'practice_test_11' ? 'pre_test' : attempt.test_id))?.label || attempt.test_id
                 return (
-                  <div key={attempt.id} style={{ border: '1px solid rgba(14,165,233,.15)', borderRadius: 14, padding: 14, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div key={attempt.id} style={{ border: '1px solid rgba(2,132,199,.15)', borderRadius: 12, padding: 14, display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontWeight: 900, color: '#1a2744' }}>{label}</div>
-                      <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
+                      <div style={{ fontWeight: 600, color: '#16181d' }}>{label}</div>
+                      <div style={{ fontSize: 13, color: '#565a63', marginTop: 4 }}>
                         {new Date(attempt.started_at).toLocaleDateString()} &middot; Total {resolveScores(attempt)?.total || resolveScores(attempt)?.composite || '—'}
                       </div>
                     </div>

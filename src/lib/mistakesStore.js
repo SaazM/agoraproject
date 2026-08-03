@@ -165,12 +165,8 @@ export function computeDueCount(reviewItems, now = new Date(), { exam = '' } = {
   for (const [key, it] of Object.entries(reviewItems || {})) {
     // Skip already-validated items
     if (it?.last_correct === true) continue
-    // Filter by exam if specified (key format: "test_id:section:q_num")
-    if (exam) {
-      const isAct = key.startsWith('act')
-      if (exam === 'act' && !isAct) continue
-      if (exam === 'sat' && isAct) continue
-    }
+    // Skip legacy ACT items (key format: "test_id:section:q_num")
+    if (key.startsWith('act')) continue
     const due = new Date(it?.due_at || 0).getTime()
     if (Number.isFinite(due) && due <= t) n += 1
   }

@@ -38,12 +38,6 @@ function truncate(text, max = 120) {
 
 function sectionFamily(exam, section) {
   const key = String(section || '').toLowerCase()
-  if (exam === 'act') {
-    if (key.includes('english')) return 'english'
-    if (key.includes('math')) return 'math'
-    if (key.includes('reading')) return 'reading'
-    if (key.includes('science')) return 'science'
-  }
   if (key.includes('rw')) return 'reading-writing'
   if (key.includes('math')) return 'math'
   return 'general'
@@ -317,177 +311,6 @@ function buildMathHints(parsed, { qNum, isMC, chapterName, concepts, answerChoic
   return [h1, h2, h3]
 }
 
-function buildReadingHints(parsed, { qNum, chapterName, concepts }) {
-  const { rwTask, askType, askTarget, quotedPhrases, passageSnippets, references, questionSentence } = parsed
-  const conceptTitles = (concepts || []).map(c => c?.title).filter(Boolean)
-
-  // ── Hint 1 ──
-  let h1 = ''
-  const taskStrategies = {
-    'main-idea': `This question asks for the main idea or central claim. Don't get distracted by details — ask yourself: "What is the ONE point the entire passage is making?" Skim the first and last sentences of each paragraph for the big picture.`,
-    'author-purpose': `This asks about the author's purpose. Ask yourself WHY the author wrote this — to inform, persuade, compare, criticize, or describe? Look at the overall structure and tone of the passage.`,
-    'vocabulary-in-context': `This is a vocabulary-in-context question${quotedPhrases.length ? ` about "${quotedPhrases[0]}"` : ''}. The correct answer depends on how the word/phrase is used in THIS specific passage, not its most common dictionary meaning.`,
-    'evidence-support': `This asks which evidence best supports a claim. Go back to the passage and find the specific sentence or lines that directly prove or back up the stated claim. The right answer will be the most direct, concrete evidence.`,
-    'inference': `This is an inference question. The answer won't be stated directly — you need to figure out what the passage IMPLIES. But don't go too far: the correct inference is strongly supported by what's actually written.`,
-    'sentence-function': `This asks what a sentence does in the passage. Think about its structural role: Does it introduce a new idea? Provide evidence? Offer a counterargument? Transition to a new topic?`,
-    'data-rhetoric': `This question involves data from a graph, chart, or table alongside the passage text.${references.length ? ` Focus on ${references[0]} and` : ''} identify the specific data point that answers the question.`,
-  }
-
-  if (rwTask && taskStrategies[rwTask]) {
-    h1 = taskStrategies[rwTask]
-  } else if (references.length) {
-    h1 = `Go back to ${references[0]} in the passage. The answer to this question is directly tied to what you find there. Read that section carefully before looking at the answer choices.`
-  } else if (quotedPhrases.length) {
-    h1 = `The question references "${truncate(quotedPhrases[0], 80)}". Go back to where this appears in the passage and read the surrounding sentences to understand the context.`
-  } else if (askTarget) {
-    h1 = `This question asks about ${truncate(askTarget, 80)}. Locate the specific part of the passage that addresses this and read it carefully before choosing.`
-  } else {
-    h1 = `Before looking at the answer choices, go back to the passage and find the specific section that answers this question. ${chapterName ? `This is a ${chapterName} question — ` : ''}the correct answer will be directly supported by the text.`
-  }
-
-  // ── Hint 2 ──
-  let h2 = ''
-  if (rwTask === 'vocabulary-in-context' && quotedPhrases.length) {
-    h2 = `Replace "${quotedPhrases[0]}" with each answer choice in the original sentence. Which one preserves the author's meaning in this specific context? The passage's topic and tone should help you eliminate choices that don't fit.`
-  } else if (rwTask === 'evidence-support') {
-    h2 = `For each answer choice, ask: "Does this sentence/passage DIRECTLY support the claim?" Eliminate any choice that is true but doesn't specifically address the question. The best evidence is the most direct and specific connection.`
-  } else if (rwTask === 'inference') {
-    h2 = `Test each answer choice: Can you point to specific words or sentences in the passage that lead to this conclusion? If you can't find textual support, eliminate that choice. The correct inference requires evidence, not just plausibility.`
-  } else if (passageSnippets.quoted.length) {
-    h2 = `Focus on the passage text "${truncate(passageSnippets.quoted[0], 80)}". This is a key detail. How does it connect to what the question is asking? The correct answer will align closely with this specific wording.`
-  } else if (references.length) {
-    h2 = `In ${references[0]}, identify the key claim or detail. Now compare each answer choice against that specific part of the text. Eliminate any choice that goes beyond what the passage actually states.`
-  } else {
-    h2 = `Narrow it down to two choices, then compare them head-to-head. Which one is more precisely supported by the passage's actual wording?${conceptTitles.length ? ` Think about the concept of ${conceptTitles[0]}.` : ''} Avoid choices that are "true in general" but not supported by THIS passage.`
-  }
-
-  // ── Hint 3 ──
-  let h3 = ''
-  if (rwTask === 'vocabulary-in-context') {
-    h3 = `The answer is the word/phrase that means the same thing as ${quotedPhrases.length ? `"${quotedPhrases[0]}"` : 'the tested word'} in THIS sentence. Substitute your answer into the passage and read it — the meaning of the sentence should stay exactly the same.`
-  } else if (rwTask === 'main-idea') {
-    h3 = `The main idea should cover the WHOLE passage, not just one paragraph. Eliminate any choice that is too narrow (only about one detail) or too broad (goes beyond what the passage discusses). The correct answer captures the passage's central argument or topic.`
-  } else if (rwTask === 'author-purpose') {
-    h3 = `Think about the passage structure: what does the author do in the beginning, middle, and end? The purpose is the overall goal.${passageSnippets.keySentences.length ? ` The passage includes statements like "${truncate(passageSnippets.keySentences[0], 60)}" — what is the author trying to accomplish with this?` : ''} Choose the answer that describes the WHY, not just the WHAT.`
-  } else {
-    h3 = `Find the single sentence or phrase in the passage that most directly answers the question.${quotedPhrases.length ? ` Look near "${truncate(quotedPhrases[0], 60)}".` : ''}${references.length ? ` Focus on ${references[0]}.` : ''} The correct answer will practically paraphrase or directly match that part of the passage. If you can't point to supporting text, reconsider your choice.`
-  }
-
-  return [h1, h2, h3]
-}
-
-function buildEnglishHints(parsed, { qNum, chapterName, concepts }) {
-  const { rwTask, quotedPhrases, passageSnippets, references, questionSentence, lower } = parsed
-  const conceptTitles = (concepts || []).map(c => c?.title).filter(Boolean)
-
-  // ── Hint 1 ──
-  let h1 = ''
-  const taskStrategies = {
-    'transition': `This question asks you to choose the best transition.${quotedPhrases.length ? ` Near "${truncate(quotedPhrases[0], 60)}", ` : ' '}read the sentence before and after the blank. What is the logical relationship — contrast (but/however), continuation (also/furthermore), cause-effect (therefore/consequently), or example (for instance)?`,
-    'punctuation': `This is a punctuation question. Read the full sentence and identify the grammatical structures on each side of the punctuation mark. Is it separating two complete sentences? Setting off a nonessential phrase? Introducing a list? The grammar determines the correct punctuation.`,
-    'sentence-placement': `This asks about sentence placement. Read the sentence and ask: what does it refer to? It should go immediately after the sentence that introduces the concept it discusses, and before any sentence that builds on its information.`,
-    'sentence-combining': `This asks you to combine sentences. The best version keeps all the important information from both sentences while being grammatically correct and concise. Eliminate choices that change the meaning, are redundant, or create run-ons.`,
-    'sentence-function': `Ask what role this sentence plays in the paragraph. Is it a topic sentence, a supporting detail, a transition, or a conclusion? The correct answer describes the sentence's structural purpose.`,
-    'completion': `Read the surrounding context to determine what information logically fits in the blank. The correct completion should match the paragraph's topic, tone, and level of specificity.`,
-  }
-
-  if (rwTask && taskStrategies[rwTask]) {
-    h1 = taskStrategies[rwTask]
-  } else if (/concise|wordy|redundan/.test(lower)) {
-    h1 = `This is a conciseness question. The shortest answer that preserves the full meaning is usually correct. Eliminate choices that repeat ideas already stated elsewhere in the sentence or paragraph.`
-  } else if (/subject.?verb|agreement|verb.?tense/.test(lower) || chapterName?.toLowerCase().includes('agreement')) {
-    h1 = `This tests subject-verb agreement or verb tense. Find the actual subject of the sentence (ignore phrases between the subject and verb), then make sure the verb matches in number and tense.`
-  } else if (/pronoun|antecedent|its|their|they/.test(lower) || chapterName?.toLowerCase().includes('pronoun')) {
-    h1 = `This tests pronoun usage. Identify what the pronoun refers to (its antecedent), then check that the pronoun matches in number and clarity. If "they" or "it" could refer to multiple things, the pronoun is ambiguous.`
-  } else if (/parallel|structure/.test(lower) || chapterName?.toLowerCase().includes('parallel')) {
-    h1 = `This tests parallel structure. Find the list or comparison in the sentence, then make sure every item follows the same grammatical pattern (all nouns, all -ing verbs, all infinitives, etc.).`
-  } else if (/modifier|modifying|dangling|misplaced/.test(lower)) {
-    h1 = `This tests modifier placement. A modifier must be right next to the word it describes. Check: does the phrase after the comma or dash actually modify the word immediately next to it?`
-  } else if (chapterName) {
-    h1 = `This is a ${chapterName} question. Read the sentence with the underlined portion and one sentence on each side. Before looking at the choices, decide what the underlined section needs to accomplish — grammar, clarity, or flow.`
-  } else {
-    h1 = `Read the sentence with the underlined part and the sentences around it. Determine what's being tested: grammar, punctuation, word choice, or sentence structure. Then eliminate choices that have clear errors.`
-  }
-
-  // ── Hint 2 ──
-  let h2 = ''
-  if (rwTask === 'transition') {
-    h2 = `Cover the answer choices. Based on the surrounding sentences, write down what type of transition you expect (contrast, continuation, cause-effect, etc.). Then find the choice that matches your prediction.${quotedPhrases.length ? ` The context around "${truncate(quotedPhrases[0], 50)}" should guide you.` : ''}`
-  } else if (rwTask === 'punctuation') {
-    h2 = `Test whether each side of the punctuation mark is a complete sentence. Two complete sentences need a period, semicolon, or comma + conjunction — never just a comma (that's a comma splice). A semicolon and period are interchangeable; a comma alone is not.`
-  } else if (/concise|wordy/.test(lower)) {
-    h2 = `Compare the choices: which one says the same thing in fewer words without losing meaning? If two words mean the same thing in context, one of them is redundant and should be cut.`
-  } else if (passageSnippets.keySentences.length) {
-    h2 = `Read the surrounding text: "${truncate(passageSnippets.keySentences[0], 80)}". Plug each answer choice into this context and listen for what sounds complete, grammatically correct, and not redundant.`
-  } else {
-    h2 = `Plug each answer choice into the sentence and read it in full. Eliminate any choice that creates a grammatical error, changes the intended meaning, or sounds awkward in context.${conceptTitles.length ? ` The grammar rule being tested is related to ${conceptTitles[0]}.` : ''}`
-  }
-
-  // ── Hint 3 ──
-  let h3 = ''
-  if (rwTask === 'transition') {
-    h3 = `The sentence before the blank and the sentence after give you the relationship. If they present opposing ideas, use a contrast word (however, nevertheless). If the second supports or adds to the first, use a continuation word (furthermore, additionally). If one causes the other, use a cause-effect word (therefore, consequently). Pick the choice that creates this exact relationship.`
-  } else if (rwTask === 'punctuation') {
-    h3 = `Here's the decision tree: (1) Two complete sentences on both sides → use period, semicolon, or comma + FANBOYS conjunction. (2) Nonessential information → set off with commas, dashes, or parentheses. (3) A list or explanation follows → use a colon. Apply this to the sentence and select the correct punctuation.`
-  } else if (/concise/.test(lower)) {
-    h3 = `Choose the shortest option that preserves the complete meaning. If "NO CHANGE" is longer than another option that says the same thing, eliminate it. The answer is almost always the most concise, non-redundant version.`
-  } else {
-    h3 = `Read your chosen answer back into the full paragraph. It should be (1) grammatically correct, (2) clear in meaning, (3) consistent in style with the rest of the passage, and (4) not redundant. If it fails any of these, try the next choice.${chapterName ? ` Apply the ${chapterName} rule directly.` : ''}`
-  }
-
-  return [h1, h2, h3]
-}
-
-function buildScienceHints(parsed, { qNum, chapterName, concepts }) {
-  const { scienceInfo, references, numbers, askType, askTarget, quotedPhrases, questionSentence, lower } = parsed
-  const { temps, units, experimentRef, scientistRef, studyRef, figureRef, trendWords } = scienceInfo
-  const conceptTitles = (concepts || []).map(c => c?.title).filter(Boolean)
-
-  // ── Hint 1 ──
-  let h1 = ''
-  if (scientistRef.length >= 2) {
-    h1 = `This question involves ${scientistRef.join(' and ')} — they have different viewpoints or hypotheses. Read each scientist's claim carefully and identify exactly where they agree and disagree before looking at the answer choices.`
-  } else if (experimentRef.length) {
-    h1 = `Focus on ${experimentRef[0]}. Identify what was being tested (independent variable), what was measured (dependent variable), and what was kept the same (controlled variables). The answer depends on understanding this experimental setup.`
-  } else if (figureRef.length) {
-    h1 = `Start with ${figureRef[0]}. Read the title, axis labels, and units before looking at any data points. Understanding what the figure shows is more important than any individual value.`
-  } else if (trendWords.length) {
-    h1 = `The question asks about a ${trendWords[0]} trend. Look at the data to see if values go up, go down, or stay the same as the independent variable changes. Focus on the overall pattern, not individual data points.`
-  } else {
-    h1 = `Identify which figure, table, or passage section contains the data you need. Read the labels, units, and any descriptions before trying to answer. On ACT Science, most errors happen because students look at the wrong data source.`
-  }
-
-  // ── Hint 2 ──
-  let h2 = ''
-  if (figureRef.length && numbers.length) {
-    h2 = `In ${figureRef[0]}, locate the specific values ${numbers.slice(0, 3).join(', ')}${units.length ? ` (measured in ${units[0]})` : ''}. Trace the data at ${numbers[0]} on the axis and read the corresponding value.${askTarget ? ` You're looking for ${truncate(askTarget, 60)}.` : ''}`
-  } else if (experimentRef.length && numbers.length) {
-    h2 = `In ${experimentRef[0]}, find the trial or condition with ${numbers.slice(0, 2).join(' and ')}${temps.length ? ` at ${temps[0]}` : ''}. Compare the result at that point to what the question asks about.`
-  } else if (scientistRef.length >= 2) {
-    h2 = `Compare ${scientistRef[0]}'s claim directly to ${scientistRef[1]}'s claim. ${askTarget ? `The question asks about ${truncate(askTarget, 60)} — ` : ''}find the specific sentence where each scientist addresses this point. Their disagreement often comes down to one key detail.`
-  } else if (trendWords.length && references.length) {
-    h2 = `In ${references[0]}, track how the dependent variable changes as the independent variable ${trendWords[0]}s.${numbers.length ? ` Focus on the data at ${numbers.slice(0, 2).join(' and ')}.` : ''} Describe the trend in simple terms before matching it to an answer choice.`
-  } else if (numbers.length) {
-    h2 = `The question references the values ${numbers.slice(0, 4).join(', ')}${units.length ? ` (${units.join(', ')})` : ''}. Find exactly where these appear in the data and determine the relationship between them.`
-  } else {
-    h2 = `${references.length ? `In ${references[0]}, ` : ''}identify the specific data point or comparison the question asks about.${conceptTitles.length ? ` This relates to ${conceptTitles[0]}.` : ''} Trace the values carefully through the data — many wrong answers come from reading the wrong row/column.`
-  }
-
-  // ── Hint 3 ──
-  let h3 = ''
-  if (figureRef.length && numbers.length) {
-    h3 = `Go to ${figureRef[0]} and put your finger on ${numbers[0]} on the x-axis (or find it in the table). Read straight across/up to find the corresponding y-value.${numbers.length >= 2 ? ` Then do the same for ${numbers[1]} and compare the two values.` : ''} The answer is the choice that matches this specific data reading${units.length ? `, keeping units in ${units[0]}` : ''}.`
-  } else if (scientistRef.length >= 2) {
-    h3 = `For each answer choice, check: would ${scientistRef[0]} agree? Would ${scientistRef[1]} agree? The correct answer is the only one that matches the specific scientist's stated position. Their claims are usually clearly stated in their respective paragraphs — quote their exact words to yourself.`
-  } else if (experimentRef.length) {
-    h3 = `In ${experimentRef[0]}, the independent variable was changed and the dependent variable was measured.${temps.length ? ` At ${temps[0]}, ` : ' '}${numbers.length ? `the data shows values of ${numbers.slice(0, 3).join(', ')}.` : 'look at what the data shows.'} The correct answer directly reflects what this data demonstrates — don't add interpretation beyond what the numbers show.`
-  } else {
-    h3 = `The answer is directly readable from the data.${references.length ? ` In ${references[0]}, ` : ''}${numbers.length ? `look at ${numbers.slice(0, 3).join(', ')} and ` : ''}read the exact values. Don't overthink the science — the ACT Science section tests data reading more than scientific knowledge. Pick the answer that most precisely matches what the data shows.`
-  }
-
-  return [h1, h2, h3]
-}
-
 function buildRWHints(parsed, { qNum, chapterName, concepts, isMC }) {
   const { rwTask, askType, askTarget, quotedPhrases, passageSnippets, references, questionSentence, lower } = parsed
   const conceptTitles = (concepts || []).map(c => c?.title).filter(Boolean)
@@ -621,17 +444,8 @@ export function buildQuestionHintLadder({
     case 'math':
       rawHints = buildMathHints(parsed, opts)
       break
-    case 'reading':
-      rawHints = buildReadingHints(parsed, opts)
-      break
-    case 'english':
-      rawHints = buildEnglishHints(parsed, opts)
-      break
     case 'reading-writing':
       rawHints = buildRWHints(parsed, opts)
-      break
-    case 'science':
-      rawHints = buildScienceHints(parsed, opts)
       break
     default:
       rawHints = buildGeneralHints(parsed, opts)

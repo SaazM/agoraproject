@@ -6,7 +6,6 @@ import { freeResponseMatches } from '../data/testData.js'
 import { getStudiedTopics, setStudiedTopic, setChapterGuidePractice, markChapterGuideStarted } from '../lib/studyProgress.js'
 import BrandLink from '../components/BrandLink.jsx'
 import Icon from '../components/AppIcons.jsx'
-import ExamSwitcher from '../components/ExamSwitcher.jsx'
 import TopResourceNav from '../components/TopResourceNav.jsx'
 import { getChaptersForExam, getGuideContentForExam } from '../data/examData.js'
 import { useToast } from '../components/Toast.jsx'
@@ -17,7 +16,6 @@ import { hasUnlockedResources } from '../lib/pretestGate.js'
 import Sidebar from '../components/Sidebar.jsx'
 import LessonPlayer from '../components/LessonPlayer.jsx'
 import SAT_LESSON_CONTENT from '../data/satLessonContent.js'
-import ACT_LESSON_CONTENT from '../data/actLessonContent.js'
 
 /* Navbar removed — using Sidebar */
 
@@ -35,7 +33,7 @@ function DomainList({ domains, selectedId, onSelect, completedMap, practiceByCha
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {Object.entries(domains).map(([domain, chs]) => (
         <div key={domain}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 8, background: '#1e293b', padding: '8px 14px', borderRadius: 8 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '.8px', marginBottom: 8, background: '#16181d', padding: '8px 14px', borderRadius: 8 }}>
             {domain}
           </div>
           <motion.div
@@ -73,7 +71,7 @@ function DomainList({ domains, selectedId, onSelect, completedMap, practiceByCha
                     padding: '12px 14px',
                     borderRadius: 12,
                     border: selectedId === ch.id ? '2px solid #f59e0b' : `1.5px solid ${statusBorder}`,
-                    borderLeft: selectedId === ch.id ? '4px solid #1e3a8a' : `3px solid ${done ? '#10b981' : inProgress ? '#f59e0b' : 'transparent'}`,
+                    borderLeft: selectedId === ch.id ? '4px solid #0284c7' : `3px solid ${done ? '#10b981' : inProgress ? '#f59e0b' : 'transparent'}`,
                     background: hasGuide ? statusBg : 'white',
                     cursor: 'pointer',
                     overflow: 'hidden',
@@ -81,14 +79,14 @@ function DomainList({ domains, selectedId, onSelect, completedMap, practiceByCha
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                    <div style={{ fontWeight: 900, color: '#0f172a', flex: '1 1 auto', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.25 }}>
+                    <div style={{ fontWeight: 600, color: '#16181d', flex: '1 1 auto', minWidth: 0, overflowWrap: 'anywhere', lineHeight: 1.25 }}>
                       {(ch.code || ch.id)}: {ch.name}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                       {hasGuide && (
                         <span style={{
                           fontSize: 11,
-                          fontWeight: 900,
+                          fontWeight: 600,
                           padding: '3px 10px',
                           borderRadius: 999,
                           background: 'rgba(255,255,255,.7)',
@@ -107,20 +105,20 @@ function DomainList({ domains, selectedId, onSelect, completedMap, practiceByCha
                           display: 'inline-flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: done ? 'rgba(16,185,129,.12)' : inProgress ? 'rgba(245,158,11,.14)' : hasGuide ? 'rgba(239,68,68,.12)' : 'rgba(148,163,184,.12)',
-                          color: done ? '#10b981' : inProgress ? '#f59e0b' : hasGuide ? '#ef4444' : '#94a3b8',
+                          background: done ? 'rgba(16,185,129,.12)' : inProgress ? 'rgba(245,158,11,.14)' : hasGuide ? 'rgba(239,68,68,.12)' : 'rgba(138,143,152,.12)',
+                          color: done ? '#10b981' : inProgress ? '#f59e0b' : hasGuide ? '#ef4444' : '#8a8f98',
                         }}
                       >
                         <Icon name={done ? 'check' : inProgress ? 'clock' : hasGuide ? 'warning' : 'task'} size={14} />
                       </span>
                     </div>
                   </div>
-                  <div style={{ marginTop: 6, fontSize: 12, color: '#64748b' }}>{ch.domain}{ch.page ? ` · Guide p.${ch.page}` : ''}</div>
-                  <div style={{ marginTop: 'auto', paddingTop: 8, fontSize: 11, color: hasGuide ? '#10b981' : '#94a3b8', fontWeight: 800 }}>
+                  <div style={{ marginTop: 6, fontSize: 12, color: '#565a63' }}>{ch.domain}{ch.page ? ` · Guide p.${ch.page}` : ''}</div>
+                  <div style={{ marginTop: 'auto', paddingTop: 8, fontSize: 11, color: hasGuide ? '#10b981' : '#8a8f98', fontWeight: 600 }}>
                     {hasGuide ? 'Full guide + practice' : 'Guide coming soon'}
                   </div>
                   {hasGuide && (
-                    <div style={{ marginTop: 8, fontSize: 11, color: '#64748b', fontWeight: 800 }}>
+                    <div style={{ marginTop: 8, fontSize: 11, color: '#565a63', fontWeight: 600 }}>
                       Practice: {Math.min(25, correctCount)}/25 correct
                     </div>
                   )}
@@ -134,16 +132,16 @@ function DomainList({ domains, selectedId, onSelect, completedMap, practiceByCha
                         gap: 5,
                         padding: '4px 12px',
                         borderRadius: 999,
-                        background: 'rgba(14,165,233,.10)',
-                        border: '1px solid rgba(14,165,233,.25)',
-                        color: '#0ea5e9',
+                        background: 'rgba(2,132,199,.10)',
+                        border: '1px solid rgba(2,132,199,.25)',
+                        color: '#0284c7',
                         fontSize: 11,
-                        fontWeight: 800,
+                        fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'background .15s',
                       }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(14,165,233,.18)' }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(14,165,233,.10)' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(2,132,199,.18)' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(2,132,199,.10)' }}
                     >
                       <span style={{ fontSize: 10, lineHeight: 1 }}>&#9654;</span>
                       AI Lesson
@@ -329,19 +327,19 @@ function PracticeProblem({ problem, idx, onAnswered, answered, concepts, exam, c
   }), [exam, chapter, concepts, idx, isMC, problem?.q])
 
   return (
-    <div className={show ? (isCorrect ? 'answer-feedback-correct' : 'answer-feedback-wrong') : ''} style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14, background: 'white' }}>
+    <div className={show ? (isCorrect ? 'answer-feedback-correct' : 'answer-feedback-wrong') : ''} style={{ border: '1px solid #e4e0d5', borderRadius: 12, padding: 14, background: 'white' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
-        <div style={{ fontWeight: 800, color: '#1a2744' }}>
+        <div style={{ fontWeight: 600, color: '#16181d' }}>
           {problem?.mode === 'redo' ? `Mastery Redo ${problem?.redoIndex || 1}` : `Core Problem ${idx + 1}`}
         </div>
-        <div style={{ fontSize: 12, color: answered ? '#10b981' : '#94a3b8', fontWeight: 800 }}>
+        <div style={{ fontSize: 12, color: answered ? '#10b981' : '#8a8f98', fontWeight: 600 }}>
           {answered ? 'Completed' : 'Not completed'}
         </div>
       </div>
-      <div className="study-rich-text" style={{ fontSize: 13, lineHeight: 1.65, color: '#0f172a', whiteSpace: 'pre-line' }}>
+      <div className="study-rich-text" style={{ fontSize: 13, lineHeight: 1.65, color: '#16181d', whiteSpace: 'pre-line' }}>
         {renderStudyMathText(problem?.q, `practice-q-${idx}`)}
       </div>
-      <div style={{ marginTop: 10, fontSize: 12, color: '#94a3b8' }}>
+      <div style={{ marginTop: 10, fontSize: 12, color: '#8a8f98' }}>
         Pick your answer, then click <b>Check</b> to submit it.
       </div>
       {isMC && (
@@ -360,21 +358,21 @@ function PracticeProblem({ problem, idx, onAnswered, answered, concepts, exam, c
                 textAlign: 'left',
                 padding: '10px 12px',
                 borderRadius: 10,
-                border: choice === label ? '2px solid #1a2744' : '1px solid #e2e8f0',
-                background: '#f8fafc',
+                border: choice === label ? '2px solid #16181d' : '1px solid #e4e0d5',
+                background: '#f7f5ef',
                 cursor: 'pointer',
                 fontSize: 13,
                 lineHeight: 1.5,
               }}
             >
-              <span style={{ fontWeight: 900, marginRight: 8 }}>{label}.</span> <span className="study-rich-text">{renderStudyMathText(text, `choice-${idx}-${label}`)}</span>
+              <span style={{ fontWeight: 600, marginRight: 8 }}>{label}.</span> <span className="study-rich-text">{renderStudyMathText(text, `choice-${idx}-${label}`)}</span>
             </button>
           ))}
         </div>
       )}
       {!isMC && (
         <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 12, color: '#64748b', marginBottom: 8 }}>
+          <div style={{ fontSize: 12, color: '#565a63', marginBottom: 8 }}>
             Open response: enter only the value/expression. Equivalent answers count, including fractions and comma-formatted numbers. Examples: <code>75</code>, <code>1/2</code>, <code>0.5</code>, <code>15,000</code>, <code>pi</code>, <code>3*pi/2</code>, <code>2^3</code>.
           </div>
           <input
@@ -418,14 +416,14 @@ function PracticeProblem({ problem, idx, onAnswered, answered, concepts, exam, c
           </button>
         )}
         {show && (
-          <div style={{ fontSize: 12, fontWeight: 800, color: isCorrect ? '#10b981' : '#ef4444' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: isCorrect ? '#10b981' : '#ef4444' }}>
             {isCorrect ? 'Correct' : 'Not quite'}
           </div>
         )}
       </div>
       {show && !isCorrect && (
         <div style={{ marginTop: 10, background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 10, padding: 12, fontSize: 13, lineHeight: 1.65, color: '#7c2d12' }}>
-          <div style={{ fontWeight: 900, marginBottom: 6 }}>Hint ladder (no answer given)</div>
+          <div style={{ fontWeight: 600, marginBottom: 6 }}>Hint ladder (no answer given)</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
             {[1, 2, 3].map((n) => (
               <button
@@ -453,7 +451,7 @@ function PracticeProblem({ problem, idx, onAnswered, answered, concepts, exam, c
         </div>
       )}
       {(reveal || isCorrect) && (
-        <div style={{ marginTop: 10, background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: 12, fontSize: 13, lineHeight: 1.6, color: '#334155' }}>
+        <div style={{ marginTop: 10, background: '#f7f5ef', border: '1px solid #e4e0d5', borderRadius: 10, padding: 12, fontSize: 13, lineHeight: 1.6, color: '#3f434b' }}>
           <strong>Explanation:</strong> <span className="study-rich-text">{renderStudyMathText(problem?.exp, `exp-${idx}`)}</span>
         </div>
       )}
@@ -466,7 +464,7 @@ export default function Guide() {
   const navigate = useNavigate()
   const location = useLocation()
   const requestedExam = useMemo(() => String(new URLSearchParams(location.search || '').get('exam') || '').toLowerCase(), [location.search])
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
   const chapters = useMemo(() => getChaptersForExam(exam), [exam])
   const guideContent = useMemo(() => getGuideContentForExam(exam), [exam])
   const { viewUserId, isAdminPreview } = useMemo(
@@ -479,10 +477,9 @@ export default function Guide() {
   const [completedMap, setCompletedMap] = useState({})
   const [practiceByChapter, setPracticeByChapter] = useState({})
   const [lessonChapter, setLessonChapter] = useState(null)
-  const lessonData = exam === 'act' ? ACT_LESSON_CONTENT : SAT_LESSON_CONTENT
+  const lessonData = SAT_LESSON_CONTENT
   const viewHref = (path) => withViewUser(withExam(path, exam), viewUserId, isAdminPreview)
   const satHref = withViewUser(withExam('/dashboard', 'sat'), viewUserId, isAdminPreview)
-  const actHref = withViewUser(withExam('/dashboard', 'act'), viewUserId, isAdminPreview)
   const showResourceNav = hasUnlockedResources(viewUserId, exam)
 
   useEffect(() => {
@@ -575,8 +572,8 @@ export default function Guide() {
       <Sidebar currentExam={exam} />
       <div className="page fade-up">
         {isAdminPreview && (
-          <div className="card" style={{ marginBottom: 16, background: 'linear-gradient(135deg, rgba(26,39,68,.96), rgba(30,58,138,.94))', color: 'white' }}>
-            <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 4 }}>Admin View</div>
+          <div className="card" style={{ marginBottom: 16, background: '#16181d', color: 'white' }}>
+            <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>Admin View</div>
             <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.88 }}>
               You're viewing this student's Study Guide in read-only mode, so their progress won't change while you troubleshoot.
             </div>
@@ -584,23 +581,23 @@ export default function Guide() {
         )}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 18 }}>
 	          <div>
-	            <h1 style={{ fontFamily: 'Sora,sans-serif', fontSize: 22, fontWeight: 900, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 10 }}>
+	            <h1 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 22, fontWeight: 600, color: '#16181d', display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Icon name="guide" size={20} />
                 Study Guide
               </h1>
-	            <div style={{ color: '#64748b', marginTop: 4, fontSize: 13 }}>
-	              Work through {exam === 'act' ? 'modules' : 'chapters'}, complete practice, and mark each one done. To mark one complete, you must get all 25 practice questions correct.
+	            <div style={{ color: '#565a63', marginTop: 4, fontSize: 13 }}>
+	              Work through chapters, complete practice, and mark each one done. To mark one complete, you must get all 25 practice questions correct.
 	            </div>
 	          </div>
-          <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: '12px 14px', minWidth: 280 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#0f172a', fontWeight: 800 }}>
+          <div style={{ background: 'white', border: '1px solid #e4e0d5', borderRadius: 12, padding: '12px 14px', minWidth: 280 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#16181d', fontWeight: 600 }}>
               <span>Progress</span>
-              <span style={{ color: '#1e3a8a' }}>{completedCount}/{totalChapters}</span>
+              <span style={{ color: '#0284c7' }}>{completedCount}/{totalChapters}</span>
             </div>
-            <div style={{ height: 8, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden', marginTop: 8 }}>
+            <div style={{ height: 8, background: '#f3f0e9', borderRadius: 999, overflow: 'hidden', marginTop: 8 }}>
               <div style={{ height: '100%', width: `${pct}%`, background: '#10b981', transition: 'width .6s ease' }} />
             </div>
-            <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 8 }}>{pct}% of chapters completed</div>
+            <div style={{ fontSize: 12, color: '#8a8f98', marginTop: 8 }}>{pct}% of chapters completed</div>
           </div>
         </div>
 
@@ -615,10 +612,10 @@ export default function Guide() {
             <div className="card" style={{ marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ fontFamily: 'Sora,sans-serif', fontSize: 18, fontWeight: 900, color: '#1a2744' }}>
-                    {exam === 'act' ? `ACT Module ${selectedLabel}` : `Chapter ${selectedLabel}`}: {ch?.name}
+                  <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 18, fontWeight: 600, color: '#16181d' }}>
+                    Chapter {selectedLabel}: {ch?.name}
                   </div>
-                  <div style={{ marginTop: 6, color: '#64748b', fontSize: 13 }}>{ch?.domain}{ch?.page ? ` · Guide p.${ch?.page}` : ''}</div>
+                  <div style={{ marginTop: 6, color: '#565a63', fontSize: 13 }}>{ch?.domain}{ch?.page ? ` · Guide p.${ch?.page}` : ''}</div>
                   {lessonData?.[selectedId] && (
                     <button
                       onClick={() => setLessonChapter(selectedId)}
@@ -629,16 +626,16 @@ export default function Guide() {
                         gap: 6,
                         padding: '6px 14px',
                         borderRadius: 999,
-                        background: 'rgba(14,165,233,.10)',
-                        border: '1px solid rgba(14,165,233,.30)',
-                        color: '#0ea5e9',
+                        background: 'rgba(2,132,199,.10)',
+                        border: '1px solid rgba(2,132,199,.30)',
+                        color: '#0284c7',
                         fontSize: 12,
-                        fontWeight: 800,
+                        fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'background .15s',
                       }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(14,165,233,.18)' }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(14,165,233,.10)' }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(2,132,199,.18)' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(2,132,199,.10)' }}
                     >
                       <span style={{ fontSize: 11, lineHeight: 1 }}>&#9654;</span>
                       AI Lesson
@@ -655,8 +652,8 @@ export default function Guide() {
                     opacity: (isAdminPreview || (!allCorrect && !completedMap[selectedId])) ? .6 : 1,
                     cursor: (isAdminPreview || (!allCorrect && !completedMap[selectedId])) ? 'not-allowed' : 'pointer',
                     background: completedMap[selectedId] ? '#10b981' : '#f59e0b',
-                    color: '#1a2744',
-                    fontWeight: 800
+                    color: '#16181d',
+                    fontWeight: 600
                   }}
                   onClick={async () => {
                     if (isAdminPreview) return
@@ -684,21 +681,21 @@ export default function Guide() {
             </div>
 
             {!content ? (
-              <div className="card" style={{ padding: 18, color: '#64748b' }}>
+              <div className="card" style={{ padding: 18, color: '#565a63' }}>
                 This chapter guide isn't available yet.
               </div>
             ) : (
               <>
                 <div className="card" style={{ marginBottom: 16 }}>
-                  <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 900, marginBottom: 10, color: '#1a2744' }}>Guide</div>
-                  <div className="study-rich-text" style={{ color: '#334155', lineHeight: 1.9, fontSize: 15, whiteSpace: 'pre-line', fontFamily: 'ui-serif, Charter, Georgia, Cambria, \"Times New Roman\", Times, serif' }}>
+                  <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, marginBottom: 10, color: '#16181d' }}>Guide</div>
+                  <div className="study-rich-text" style={{ color: '#3f434b', lineHeight: 1.9, fontSize: 15, whiteSpace: 'pre-line', fontFamily: 'ui-serif, Charter, Georgia, Cambria, \"Times New Roman\", Times, serif' }}>
                     {renderStudyMathText(content.intro, `intro-${selectedId}`)}
                   </div>
                   <div style={{ marginTop: 14, display: 'grid', gap: 10 }}>
                     {(content.concepts || []).map((c, i) => (
-                      <div key={i} style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14, background: '#f8fafc' }}>
-                        <div style={{ fontWeight: 900, color: '#1a2744', marginBottom: 6 }}>{c.title}</div>
-                        <div className="study-rich-text" style={{ color: '#334155', lineHeight: 1.85, fontSize: 14, fontFamily: 'ui-serif, Charter, Georgia, Cambria, \"Times New Roman\", Times, serif' }}>
+                      <div key={i} style={{ border: '1px solid #e4e0d5', borderRadius: 12, padding: 14, background: '#f7f5ef' }}>
+                        <div style={{ fontWeight: 600, color: '#16181d', marginBottom: 6 }}>{c.title}</div>
+                        <div className="study-rich-text" style={{ color: '#3f434b', lineHeight: 1.85, fontSize: 14, fontFamily: 'ui-serif, Charter, Georgia, Cambria, \"Times New Roman\", Times, serif' }}>
                           {renderStudyMathText(c.body, `concept-${selectedId}-${i}`)}
                         </div>
                       </div>
@@ -707,17 +704,17 @@ export default function Guide() {
                 </div>
 
 	                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
-	                  <div style={{ fontFamily: 'Sora,sans-serif', fontSize: 16, fontWeight: 900, color: '#1a2744', display: 'flex', alignItems: 'center', gap: 8 }}>
+	                  <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 16, fontWeight: 600, color: '#16181d', display: 'flex', alignItems: 'center', gap: 8 }}>
                       <Icon name="target" size={18} />
                       Practice Problems
                     </div>
-	                  <div style={{ fontSize: 12, color: '#64748b', fontWeight: 800 }}>
+	                  <div style={{ fontSize: 12, color: '#565a63', fontWeight: 600 }}>
 	                    {Object.values(selectedGuideMap || {}).filter(Boolean).length}/{expandedProblems.length} correct
 	                  </div>
 	                </div>
-	                <div className="card" style={{ marginBottom: 12, background: '#f8fafc', borderStyle: 'dashed' }}>
-	                  <div style={{ fontWeight: 900, color: '#1a2744', marginBottom: 6 }}>How many to do in this chapter</div>
-	                  <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.7 }}>
+	                <div className="card" style={{ marginBottom: 12, background: '#f7f5ef', borderStyle: 'dashed' }}>
+	                  <div style={{ fontWeight: 600, color: '#16181d', marginBottom: 6 }}>How many to do in this chapter</div>
+	                  <div style={{ fontSize: 13, color: '#3f434b', lineHeight: 1.7 }}>
 	                    Complete <b>25 core questions</b> to reach the full <b>25/25</b> target to lock the skill in before the chapter counts as complete.
 	                  </div>
 	                </div>
@@ -777,12 +774,12 @@ export default function Guide() {
             style={{
               position: 'relative',
               background: 'white',
-              borderRadius: 16,
+              borderRadius: 12,
               width: '100%',
               maxWidth: 720,
               maxHeight: '90vh',
               overflow: 'auto',
-              boxShadow: '0 20px 60px rgba(0,0,0,.3)',
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
             }}
           >
             <button
@@ -796,15 +793,15 @@ export default function Guide() {
                 width: 32,
                 height: 32,
                 borderRadius: 999,
-                border: '1px solid #e2e8f0',
+                border: '1px solid #e4e0d5',
                 background: 'white',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 18,
-                color: '#64748b',
-                fontWeight: 700,
+                color: '#565a63',
+                fontWeight: 600,
                 zIndex: 1,
                 boxShadow: '0 1px 4px rgba(0,0,0,.08)',
               }}

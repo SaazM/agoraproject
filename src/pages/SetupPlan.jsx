@@ -49,7 +49,7 @@ export default function SetupPlan() {
 
   if (loading || !attempt || !exam) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#64748b', fontFamily: 'Sora,sans-serif' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', color: '#565a63', fontFamily: 'Fraunces, Georgia, serif' }}>
         Loading…
       </div>
     )
@@ -59,19 +59,19 @@ export default function SetupPlan() {
   const anyDaySelected = days.some(Boolean)
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(170deg, #0f172a 0%, #1e3a5f 40%, #0ea5e9 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ width: '100%', maxWidth: 560, background: 'white', borderRadius: 24, boxShadow: '0 25px 60px rgba(0,0,0,.25)', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#16181d', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div style={{ width: '100%', maxWidth: 560, background: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(22,24,29,.06)', overflow: 'hidden' }}>
         {/* Header */}
-        <div style={{ padding: '36px 32px 24px', background: 'linear-gradient(135deg, rgba(14,165,233,.08), rgba(99,102,241,.06))' }}>
+        <div style={{ padding: '36px 32px 24px', background: '#faf9f6' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 14, background: 'linear-gradient(135deg, #0ea5e9, #6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
               <Icon name="calendar" size={22} />
             </div>
             <div>
-              <div style={{ fontFamily: 'Sora,sans-serif', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>
+              <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 20, fontWeight: 600, color: '#16181d' }}>
                 Set Up Your Study Plan
               </div>
-              <div style={{ fontSize: 13, color: '#64748b', marginTop: 2 }}>
+              <div style={{ fontSize: 13, color: '#565a63', marginTop: 2 }}>
                 One quick step before your results
               </div>
             </div>
@@ -81,10 +81,10 @@ export default function SetupPlan() {
         <div style={{ padding: '24px 32px 36px' }}>
           {/* Test Date */}
           <div style={{ marginBottom: 28 }}>
-            <label style={{ display: 'block', fontFamily: 'Sora,sans-serif', fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>
+            <label style={{ display: 'block', fontFamily: 'Fraunces, Georgia, serif', fontSize: 14, fontWeight: 600, color: '#16181d', marginBottom: 8 }}>
               When is your {examConfig.label} test?
             </label>
-            <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 12 }}>
+            <div style={{ fontSize: 13, color: '#565a63', lineHeight: 1.6, marginBottom: 12 }}>
               Enter your official or estimated test date. We'll build a personalized day-by-day plan to get you ready.
             </div>
             <input
@@ -103,7 +103,7 @@ export default function SetupPlan() {
                 fontSize: 15,
                 background: 'white',
                 boxSizing: 'border-box',
-                color: '#0f172a',
+                color: '#16181d',
               }}
             />
             {(() => {
@@ -113,7 +113,7 @@ export default function SetupPlan() {
               if (!future.length) return null
               return (
                 <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 6, fontWeight: 700 }}>
+                  <div style={{ fontSize: 12, color: '#8a8f98', marginBottom: 6, fontWeight: 700 }}>
                     Upcoming official {examConfig.label} dates:
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -129,10 +129,10 @@ export default function SetupPlan() {
                           padding: '6px 12px',
                           fontSize: 12,
                           fontWeight: 800,
-                          border: testDate === d.date ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0',
+                          border: testDate === d.date ? '2px solid #0284c7' : '1.5px solid #e4e0d5',
                           borderRadius: 8,
-                          background: testDate === d.date ? 'rgba(14,165,233,.10)' : 'white',
-                          color: testDate === d.date ? '#0369a1' : '#64748b',
+                          background: testDate === d.date ? 'rgba(2,132,199,.10)' : 'white',
+                          color: testDate === d.date ? '#0284c7' : '#565a63',
                           cursor: 'pointer',
                         }}
                       >
@@ -147,10 +147,10 @@ export default function SetupPlan() {
 
           {/* Available Days */}
           <div style={{ marginBottom: 28 }}>
-            <div style={{ fontFamily: 'Sora,sans-serif', fontSize: 14, fontWeight: 800, color: '#0f172a', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 14, fontWeight: 600, color: '#16181d', marginBottom: 8 }}>
               Which days can you study?
             </div>
-            <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6, marginBottom: 12 }}>
+            <div style={{ fontSize: 13, color: '#565a63', lineHeight: 1.6, marginBottom: 12 }}>
               Select the days you're available each week. Your schedule adapts automatically if you miss a day.
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -173,10 +173,10 @@ export default function SetupPlan() {
                       padding: '12px 6px',
                       fontSize: 13,
                       fontWeight: 800,
-                      border: enabled ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0',
+                      border: enabled ? '2px solid #0284c7' : '1.5px solid #e4e0d5',
                       borderRadius: 12,
-                      background: enabled ? 'rgba(14,165,233,.10)' : 'white',
-                      color: enabled ? '#0369a1' : '#94a3b8',
+                      background: enabled ? 'rgba(2,132,199,.10)' : 'white',
+                      color: enabled ? '#0284c7' : '#8a8f98',
                       cursor: 'pointer',
                       transition: 'all .15s',
                     }}
@@ -198,7 +198,7 @@ export default function SetupPlan() {
               padding: '15px',
               fontSize: 16,
               fontWeight: 800,
-              borderRadius: 14,
+              borderRadius: 12,
               opacity: (!testDate || !anyDaySelected) ? 0.5 : 1,
             }}
           >
@@ -206,7 +206,7 @@ export default function SetupPlan() {
           </button>
 
           {(!testDate || !anyDaySelected) && (
-            <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: '#94a3b8' }}>
+            <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12, color: '#8a8f98' }}>
               {!testDate ? 'Pick a test date to continue' : 'Select at least one study day'}
             </div>
           )}

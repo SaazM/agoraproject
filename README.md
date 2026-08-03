@@ -1,6 +1,6 @@
 # The Agora Project
 
-A full-featured SAT & ACT test preparation platform built with React, Vite, and Supabase. Students take timed practice tests, get personalized study plans, review mistakes, track progress, and explore college admissions — all from one dashboard.
+A full-featured SAT test preparation platform built with React, Vite, and Supabase. Students take timed practice tests (linked from the official College Board practice-test PDFs), get personalized study plans, review mistakes, track progress, and explore college admissions — all from one dashboard.
 
 Live at: [theagoraproject.app](https://theagoraproject.app)
 
@@ -103,8 +103,7 @@ The first thing visitors see. Public — no login required. Features:
 - 3D floating educational tools (pencils, calculators, rulers, books, protractors, bar graphs) built with Three.js and React Three Fiber
 - Animated logo that slides up from the bottom
 - Feature overview, how-it-works timeline, animated stat counters
-- SAT vs ACT comparison cards
-- Interactive exam coverage toggle (click SAT or ACT to see what sections are covered)
+- SAT coverage overview
 - Mock dashboard preview in a browser frame
 - About Us section
 - Sign In / Get Started buttons that link to `/login`
@@ -112,37 +111,37 @@ The first thing visitors see. Public — no login required. Features:
 ### Onboarding Flow
 
 1. **Sign Up** (`/login`) — create an account, pick Student or Tutor role, enter name and school
-2. **Choose Exam** (`/choose-test`) — pick SAT or ACT (can switch anytime from the sidebar)
-3. **Pick Test Date** (`/pick-test-date`) — select your upcoming test date from the official schedule
-4. **Prior Score** (`/prior-score`, optional) — enter a previous score. This populates your score tiles but still lets you take the full diagnostic pre-test later
-5. **Dashboard** (`/dashboard`) — your home base
+2. **Pick Test Date** (`/pick-test-date`) — select your upcoming test date from the official schedule
+3. **Prior Score** (`/prior-score`, optional) — enter a previous score. This populates your score tiles but still lets you take the full diagnostic pre-test later
+4. **Dashboard** (`/dashboard`) — your home base
 
 ### Dashboard (`/dashboard`)
 
 The main hub after login. Shows:
 - Score overview tiles: Best Score, Highest Test, Most Recent, Improvement, Percentile, Superscore
 - Pre-test CTA (if you haven't taken the diagnostic yet — even if you entered a prior score)
-- Resource cards linking to every feature (Study Guide, Practice, Mistakes, Strategies, Extra Tests, Calendar, College Recruiting, Compare Tests, Formula Sheet, Journey, Tasks)
+- Resource cards linking to every feature (Study Guide, Practice, Mistakes, Strategies, Extra Tests, Calendar, College Recruiting, Formula Sheet, Journey, Tasks)
 - Score trend chart (appears after first completed test)
 - Recent test attempts with scores and dates
 - Study progress by chapter with completion percentages
 
 ### Test Taking (`/test/:attemptId`)
 
-Full-screen timed test experience:
-- Per-section countdown timers
-- Module-by-module navigation
+Full-screen timed answer-sheet experience. The test questions themselves are NOT hosted on
+this site: each test links out to the official College Board practice-test PDF, which students
+open in a second tab. This site provides the timer, answer sheet, and scoring:
+- Per-section countdown timers and pacing indicator
+- Module-by-module navigation with a link to the College Board PDF (with the current question's page number)
 - Break screens between sections
 - Answer auto-saving (every answer is saved to Supabase immediately)
 - Question flagging for review
-- Supports SAT format (2 Reading & Writing modules + 2 Math modules, adaptive) and ACT format (English + Math + Reading + Science)
+- SAT format: 2 Reading & Writing modules + 2 Math modules
 
-**Available tests:**
-- 1 SAT Pre-Test (diagnostic)
-- 1 SAT Final Test
-- 5 extra SAT practice tests (SAT 1–5)
-- 10 ACT practice tests (ACT 1–10)
-- Total: 17 full-length practice tests
+**Available tests** (all official College Board practice tests):
+- Pre-Test (diagnostic) → SAT Practice Test #11
+- Final Test → SAT Practice Test #4
+- Skill Builder Tests 1–5 → SAT Practice Tests #5, #6, #7, #8, #10
+- Total: 7 full-length practice tests
 
 ### Results (`/results/:attemptId`)
 
@@ -156,7 +155,7 @@ After completing a test:
 ### Study Guide (`/guide`)
 
 Interactive chapter-by-chapter lessons:
-- Organized by domain (Reading & Writing, Math for SAT; English, Math, Reading, Science for ACT)
+- Organized by domain (Reading & Writing, Math)
 - Each chapter has: lesson content, strategy tips, and embedded practice questions
 - Progress tracking per chapter (percentage complete)
 - Search and filter
@@ -165,7 +164,7 @@ Interactive chapter-by-chapter lessons:
 ### More Practice (`/practice`)
 
 Extra practice question bank:
-- 100+ additional questions per exam
+- 100+ additional questions
 - Filter by chapter/topic
 - Answer choices with immediate feedback (green for correct, red for wrong)
 - Retry button for incorrect answers
@@ -175,24 +174,21 @@ Extra practice question bank:
 ### Formula Sheet (`/formulas`)
 
 Quick-reference cheat sheet:
-- **SAT sections**: Math Formulas (8 groups), Grammar & Writing Rules (5 groups), Reading Strategies (3 groups)
-- **ACT-only sections**: Trigonometry & Advanced Math (3 groups), Science Strategies (3 groups), Rhetorical Skills (1 group)
+- Math Formulas (8 groups), Grammar & Writing Rules (5 groups), Reading Strategies (3 groups)
 - Search bar to filter formulas
 - Collapsible accordion sections
-- Exam toggle (SAT shows 3 sections, ACT shows all 6)
 
 ### Test Strategies (`/strategies`)
 
 Section-by-section strategy guides:
 - Reading strategies, Writing & Language tips, Math approaches
-- ACT Science reasoning strategies (ACT only)
 - Timing advice, elimination techniques, common traps
 - Accordion FAQ format
 
 ### Extra Tests (`/extra-tests`)
 
 Additional full-length practice tests beyond the diagnostic:
-- SAT 1–5 and ACT 1–10
+- Skill Builder Tests 1–5
 - Status tracking (available, completed, locked)
 - Start/resume buttons
 - Completed tests show scores
@@ -201,7 +197,7 @@ Additional full-length practice tests beyond the diagnostic:
 
 Mistake review system:
 - Every wrong answer from every test is captured
-- View original question (PDF rendered) alongside your answer vs. correct answer
+- Link to the original question in the College Board PDF (with page number) alongside your answer vs. correct answer
 - Context-specific hints generated from question content
 - Personal notes per mistake
 - Spaced repetition scheduling (mistakes resurface at optimal intervals)
@@ -338,8 +334,7 @@ sat-thrive/
 │   │   ├── Settings.jsx            # Account settings
 │   │   ├── About.jsx               # Feature overview
 │   │   ├── Welcome.jsx             # Onboarding slideshow
-│   │   ├── ChooseTest.jsx          # SAT vs ACT selection
-│   │   ├── CompareTests.jsx        # Side-by-side exam comparison
+│   │   ├── ChooseTest.jsx          # Sets SAT preference, forwards to onboarding
 │   │   ├── Admin.jsx               # Admin panel
 │   │   ├── TutorDashboard.jsx      # Tutor view
 │   │   ├── Share.jsx               # Public shareable report
@@ -350,32 +345,27 @@ sat-thrive/
 │   │   ├── PriorScore.jsx          # Prior score entry
 │   │   ├── Overview.jsx            # Redirect to /report
 │   │   └── FinalTest.jsx           # Redirect to /dashboard
-│   ├── components/                 # 14 shared components
-│   │   ├── Sidebar.jsx             # Navigation sidebar with exam toggle
+│   ├── components/                 # shared components
+│   │   ├── Sidebar.jsx             # Navigation sidebar
 │   │   ├── AppIcons.jsx            # 40+ SVG icon library
 │   │   ├── Toast.jsx               # Toast notification system
 │   │   ├── AppErrorBoundary.jsx    # Error boundary
-│   │   ├── PDFPage.jsx             # PDF renderer with zoom/crop
 │   │   ├── LessonPlayer.jsx        # AI tutor with text-to-speech
 │   │   ├── AnimateOnScroll.jsx     # Scroll-triggered animations
 │   │   ├── AnimatedNumber.jsx      # Animated number transitions
 │   │   ├── BrandLink.jsx           # Logo link
-│   │   ├── ExamSwitcher.jsx        # SAT/ACT toggle
 │   │   ├── TopResourceNav.jsx      # Quick resource links
 │   │   ├── UserMenu.jsx            # User dropdown
-│   │   ├── PasswordInput.jsx       # Password field with toggle
-│   │   └── PDFSectionStack.jsx     # PDF page carousel
-│   ├── data/                       # 22 data files
-│   │   ├── tests.js                # Test catalog (SAT + ACT, 17 tests)
+│   │   └── PasswordInput.jsx       # Password field with toggle
+│   ├── data/                       # data files
+│   │   ├── tests.js                # Test catalog (7 SAT tests, College Board links)
 │   │   ├── testData.js             # SAT answer keys, chapters, scoring
-│   │   ├── actData.js              # ACT answer keys, chapters, scoring
 │   │   ├── examData.js             # Unified exam config, scoring, percentiles
 │   │   ├── collegeData.js          # 780+ college database
 │   │   ├── guideContent.js         # SAT study guide lessons
-│   │   ├── actGuideContent.js      # ACT study guide lessons
 │   │   ├── practiceQuestionBank.js # Combined practice question bank
-│   │   └── ... (14 more data files)
-│   ├── lib/                        # 13 utility modules
+│   │   └── ... (more data files)
+│   ├── lib/                        # utility modules
 │   │   ├── supabase.js             # Supabase client initialization
 │   │   ├── studyPlan.js            # Adaptive schedule builder
 │   │   ├── mistakesStore.js        # Mistake tracking + spaced repetition
@@ -387,8 +377,7 @@ sat-thrive/
 │   │   ├── questionHints.js        # Hint generation
 │   │   ├── progressMetrics.js      # Streak and level calculation
 │   │   ├── validate.js             # Input validation
-│   │   ├── viewAs.js               # Admin preview mode
-│   │   └── answerKeyExtract.js     # PDF answer key extraction
+│   │   └── viewAs.js               # Admin preview mode
 │   ├── hooks/
 │   │   └── useAuth.jsx             # Auth context (user, profile, sign in/out)
 │   ├── App.jsx                     # Routing, lazy loading, transitions
@@ -417,10 +406,11 @@ These are the only two environment variables needed. Never commit `.env.local` t
 
 ### Add a new practice test
 
-1. Add the test PDF to `public/`
+Tests are not hosted on this site — each entry links to an official College Board practice-test PDF.
+
+1. Add the test entry to `src/data/tests.js` with its College Board `cbUrl`/`cbLabel`
 2. Add the answer key to `src/data/extraAnswerKeys.js`
-3. Add the test entry to `src/data/tests.js`
-4. Add page mappings to `src/data/extraPdfPageMaps.js`
+3. Add page mappings to `src/data/extraPdfPageMaps.js` (used to point students at the right PDF page per question)
 
 ### Change the landing page
 
@@ -428,7 +418,7 @@ Edit `src/pages/Landing.jsx`. The 3D objects are defined as React Three Fiber co
 
 ### Modify the study guide content
 
-Edit `src/data/guideContent.js` (SAT) or `src/data/actGuideContent.js` (ACT).
+Edit `src/data/guideContent.js`.
 
 ### Update college data
 
@@ -446,7 +436,6 @@ Edit `src/data/collegeData.js`. Each college has: name, rank, location, size, co
 | College logos not showing | Check that `vercel.json` CSP `img-src` includes `https://*.edu https://*.google.com https://icon.horse https://icons.duckduckgo.com` |
 | Build fails on Vercel | Make sure you're using Node 18+. In Vercel settings, set Node.js version to 18.x or higher |
 | "ERESOLVE" dependency error | Run `npm install --legacy-peer-deps` |
-| PDF not rendering | `pdfjs-dist` is excluded from Vite optimization — this is intentional in `vite.config.js` |
 
 ---
 

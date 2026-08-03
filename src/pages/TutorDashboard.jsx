@@ -113,9 +113,9 @@ function getInitials(name) {
 
 const cardBase = {
   background: '#ffffff',
-  borderRadius: 16,
-  border: '1px solid rgba(14,165,233,.12)',
-  boxShadow: '0 2px 12px rgba(15,23,42,.05)',
+  borderRadius: 12,
+  border: '1px solid rgba(2,132,199,.12)',
+  boxShadow: '0 1px 3px rgba(22,24,29,.06)',
 }
 
 const kpiCard = {
@@ -128,7 +128,7 @@ const kpiCard = {
 
 const kpiLabel = {
   fontSize: 11,
-  color: '#64748b',
+  color: '#565a63',
   fontWeight: 600,
   textTransform: 'uppercase',
   letterSpacing: '.5px',
@@ -137,16 +137,16 @@ const kpiLabel = {
 
 const kpiBig = {
   fontSize: 30,
-  fontWeight: 800,
-  color: '#0f172a',
-  fontFamily: 'Sora, sans-serif',
+  fontWeight: 600,
+  color: '#16181d',
+  fontFamily: 'Fraunces, Georgia, serif',
 }
 
 const sectionTitle = {
-  fontFamily: 'Sora, sans-serif',
+  fontFamily: 'Fraunces, Georgia, serif',
   fontSize: 15,
   fontWeight: 700,
-  color: '#0f172a',
+  color: '#16181d',
   margin: '0 0 16px 0',
   display: 'flex',
   alignItems: 'center',
@@ -330,13 +330,8 @@ export default function TutorDashboard() {
 
     // Determine primary exam per user (whichever has more attempts)
     const examByUser = new Map()
-    for (const [uid, userAttempts] of attemptsByUser) {
-      let sat = 0, act = 0
-      for (const a of userAttempts) {
-        const ex = getExamFromTestId(normalizeTestId(a.test_id))
-        if (ex === 'act') act++; else sat++
-      }
-      examByUser.set(uid, act > sat ? 'act' : 'sat')
+    for (const [uid] of attemptsByUser) {
+      examByUser.set(uid, 'sat')
     }
 
     // Compute study progress per user: unique tests taken / total tests available for that exam
@@ -414,7 +409,7 @@ export default function TutorDashboard() {
   /* ── analytics (unchanged logic) ────────────────────────── */
 
   const analytics = useMemo(() => {
-    const examMode = analyticsExam === 'act' ? 'act' : 'sat'
+    const examMode = 'sat'
     const scoreColumns = getScoreColumnsForExam(examMode)
     const now = Date.now()
     const recent7 = now - 7 * 86400000
@@ -482,18 +477,18 @@ export default function TutorDashboard() {
     const topChapters = Array.from(weakByChapter.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10)
     const allDays = Array.from(new Set([...attemptsByDay.keys(), ...completesByDay.keys()])).sort()
     const activitySeries = { labels: allDays, datasets: [
-      { label: 'Started', data: allDays.map(d => attemptsByDay.get(d) || 0), borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,.08)', pointRadius: 2, tension: 0.25, fill: true },
+      { label: 'Started', data: allDays.map(d => attemptsByDay.get(d) || 0), borderColor: '#0284c7', backgroundColor: 'rgba(2,132,199,.08)', pointRadius: 2, tension: 0.25, fill: true },
       { label: 'Completed', data: allDays.map(d => completesByDay.get(d) || 0), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,.06)', pointRadius: 2, tension: 0.25, fill: true },
     ]}
     const histogram = (() => {
-      const starts = examMode === 'act' ? [1, 6, 11, 16, 21, 26, 31] : [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600]
+      const starts = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600]
       const counts = new Array(starts.length).fill(0)
       for (const t of totals) {
-        const cl = examMode === 'act' ? clamp(t, 1, 36) : clamp(t, 400, 1600)
-        const idx = Math.min(starts.length - 1, Math.floor(examMode === 'act' ? (cl - 1) / 5 : (cl - 400) / 100))
+        const cl = clamp(t, 400, 1600)
+        const idx = Math.min(starts.length - 1, Math.floor((cl - 400) / 100))
         counts[idx] += 1
       }
-      return { labels: starts.map(s => examMode === 'act' ? `${s}-${Math.min(36, s + 4)}` : `${s}-${Math.min(1600, s + 99)}`), datasets: [{ label: 'Students', data: counts, backgroundColor: '#0ea5e9', borderRadius: 6, borderSkipped: false }] }
+      return { labels: starts.map(s => `${s}-${Math.min(1600, s + 99)}`), datasets: [{ label: 'Students', data: counts, backgroundColor: '#0284c7', borderRadius: 6, borderSkipped: false }] }
     })()
     const domainsChart = { labels: topDomains.map(([d]) => d), datasets: [{ label: 'Misses', data: topDomains.map(([, c]) => c), backgroundColor: topDomains.map((_, i) => ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#64748b'][i % 8]), borderRadius: 6, borderSkipped: false }] }
     const chaptersChart = { labels: topChapters.map(([ch]) => `Ch ${ch}`), datasets: [{ label: 'Misses', data: topChapters.map(([, c]) => c), backgroundColor: '#ef4444', borderRadius: 6, borderSkipped: false }] }
@@ -509,19 +504,19 @@ export default function TutorDashboard() {
   if (loading) return (
     <div className="app-layout has-sidebar">
       <Sidebar currentExam="sat" />
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, height: '100vh', color: '#64748b' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, height: '100vh', color: '#565a63' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #0ea5e9, #1e3a8a)', margin: '0 auto 12px', animation: 'pulse 1.5s ease-in-out infinite', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: '#0284c7', margin: '0 auto 12px', animation: 'pulse 1.5s ease-in-out infinite', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="students" size={20} style={{ color: 'white' }} />
           </div>
-          <span style={{ fontFamily: 'Sora, sans-serif', fontSize: 14 }}>Loading dashboard...</span>
+          <span style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 14 }}>Loading dashboard...</span>
         </div>
       </div>
     </div>
   )
 
   const s = analytics.summary
-  const chartOpts = (title, yMax) => ({ responsive: true, plugins: { legend: { display: true, labels: { color: '#64748b', font: { size: 11 } } }, tooltip: { backgroundColor: '#0f172a' } }, scales: { x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } }, y: { beginAtZero: true, max: yMax || undefined, ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#f1f5f9' } } } })
+  const chartOpts = (title, yMax) => ({ responsive: true, plugins: { legend: { display: true, labels: { color: '#565a63', font: { size: 11 } } }, tooltip: { backgroundColor: '#16181d' } }, scales: { x: { ticks: { color: '#8a8f98', font: { size: 10 } }, grid: { display: false } }, y: { beginAtZero: true, max: yMax || undefined, ticks: { color: '#8a8f98', font: { size: 10 } }, grid: { color: '#eceadf' } } } })
 
   return (
     <div className="app-layout has-sidebar">
@@ -530,18 +525,18 @@ export default function TutorDashboard() {
 
         {/* ── Header ──────────────────────────────────────── */}
         <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ marginBottom: 28 }}>
-          <h1 style={{ fontFamily: 'Sora, sans-serif', fontSize: 26, fontWeight: 900, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <h1 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 26, fontWeight: 600, color: '#16181d', margin: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{
               width: 40, height: 40, borderRadius: 12,
-              background: 'linear-gradient(135deg, #0ea5e9, #1e3a8a)',
+              background: '#0284c7',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', boxShadow: '0 4px 14px rgba(14,165,233,.3)',
+              color: 'white', boxShadow: '0 1px 3px rgba(22,24,29,.06)',
             }}>
               <Icon name="students" size={20} />
             </span>
             {profile?.affiliation || 'My Students'}
           </h1>
-          <p style={{ fontSize: 14, color: '#64748b', marginTop: 6, marginBottom: 0 }}>
+          <p style={{ fontSize: 14, color: '#565a63', marginTop: 6, marginBottom: 0 }}>
             {students.length} student{students.length !== 1 ? 's' : ''} enrolled
             {summaryStats.totalTestsWeek > 0 && <span> &middot; {summaryStats.totalTestsWeek} test{summaryStats.totalTestsWeek !== 1 ? 's' : ''} this week</span>}
           </p>
@@ -553,25 +548,25 @@ export default function TutorDashboard() {
           style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}
         >
           <motion.div variants={cardVariants} style={kpiCard}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #0ea5e9, #3b82f6)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#0284c7' }} />
             <div style={kpiLabel}>Total Students</div>
             <div style={kpiBig}>{summaryStats.totalStudents}</div>
           </motion.div>
           <motion.div variants={cardVariants} style={kpiCard}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #10b981, #059669)' }} />
             <div style={kpiLabel}>Avg Score Change</div>
-            <div style={{ ...kpiBig, color: summaryStats.avgImprovement > 0 ? '#059669' : summaryStats.avgImprovement < 0 ? '#dc2626' : '#0f172a' }}>
+            <div style={{ ...kpiBig, color: summaryStats.avgImprovement > 0 ? '#059669' : summaryStats.avgImprovement < 0 ? '#dc2626' : '#16181d' }}>
               {summaryStats.avgImprovement > 0 ? '+' : ''}{Math.round(summaryStats.avgImprovement) || '—'}
             </div>
           </motion.div>
           <motion.div variants={cardVariants} style={kpiCard}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#d97706' }} />
             <div style={kpiLabel}>Most Active</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', fontFamily: 'Sora, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: '#16181d', fontFamily: 'Fraunces, Georgia, serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {summaryStats.mostActiveStudent?.full_name || '—'}
             </div>
             {summaryStats.mostActiveCount > 0 && (
-              <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{summaryStats.mostActiveCount} test{summaryStats.mostActiveCount !== 1 ? 's' : ''} this week</div>
+              <div style={{ fontSize: 11, color: '#565a63', marginTop: 2 }}>{summaryStats.mostActiveCount} test{summaryStats.mostActiveCount !== 1 ? 's' : ''} this week</div>
             )}
           </motion.div>
           <motion.div variants={cardVariants} style={kpiCard}>
@@ -580,7 +575,7 @@ export default function TutorDashboard() {
             <div style={{ ...kpiBig, color: summaryStats.needAttention.length > 0 ? '#dc2626' : '#059669' }}>
               {summaryStats.needAttention.length}
             </div>
-            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>inactive 7+ days</div>
+            <div style={{ fontSize: 11, color: '#8a8f98', marginTop: 2 }}>inactive 7+ days</div>
           </motion.div>
         </motion.div>
 
@@ -589,10 +584,10 @@ export default function TutorDashboard() {
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
               padding: '8px 18px', borderRadius: 10,
-              border: tab === t.id ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0',
-              cursor: 'pointer', fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700,
-              background: tab === t.id ? 'rgba(14,165,233,.08)' : 'white',
-              color: tab === t.id ? '#0ea5e9' : '#64748b',
+              border: tab === t.id ? '2px solid #0284c7' : '1.5px solid #e4e0d5',
+              cursor: 'pointer', fontFamily: 'Fraunces, Georgia, serif', fontSize: 13, fontWeight: 700,
+              background: tab === t.id ? 'rgba(2,132,199,.08)' : 'white',
+              color: tab === t.id ? '#0284c7' : '#565a63',
               transition: 'all .2s',
             }}>
               <Icon name={t.icon} size={14} style={{ marginRight: 6, verticalAlign: '-2px' }} />{t.label}
@@ -629,30 +624,30 @@ export default function TutorDashboard() {
                     transition: 'box-shadow .2s, border-color .2s',
                     cursor: 'default',
                   }}
-                  whileHover={{ boxShadow: '0 6px 24px rgba(14,165,233,.12)', borderColor: 'rgba(14,165,233,.25)' }}
+                  whileHover={{ boxShadow: '0 1px 3px rgba(22,24,29,.06)', borderColor: 'rgba(2,132,199,.25)' }}
                   >
                     {/* Card header */}
-                    <div style={{ padding: '18px 20px 14px', display: 'flex', alignItems: 'center', gap: 14, borderBottom: '1px solid rgba(14,165,233,.08)' }}>
+                    <div style={{ padding: '18px 20px 14px', display: 'flex', alignItems: 'center', gap: 14, borderBottom: '1px solid rgba(2,132,199,.08)' }}>
                       {/* Avatar */}
                       <div style={{
                         width: 44, height: 44, borderRadius: 12,
                         background: avatarGradient(st.full_name || st.email),
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: 'white', fontFamily: 'Sora, sans-serif', fontSize: 15, fontWeight: 800,
+                        color: 'white', fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 600,
                         flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,.12)',
                       }}>
                         {getInitials(st.full_name || st.email)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontWeight: 700, fontSize: 15, color: '#16181d', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {st.full_name || '—'}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
                           <span style={{
                             fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px',
                             padding: '2px 8px', borderRadius: 6,
-                            background: exam === 'act' ? 'rgba(139,92,246,.1)' : 'rgba(14,165,233,.1)',
-                            color: exam === 'act' ? '#7c3aed' : '#0284c7',
+                            background: 'rgba(2,132,199,.1)',
+                            color: '#0284c7',
                           }}>
                             {exam.toUpperCase()}
                           </span>
@@ -669,8 +664,8 @@ export default function TutorDashboard() {
                       {/* Tunnel into student button */}
                       <Link to={`/dashboard?user=${st.id}`} style={{
                         padding: '6px 14px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 6,
-                        background: 'linear-gradient(135deg, #0ea5e9, #0284c7)', color: '#fff',
-                        textDecoration: 'none', fontSize: 11, fontWeight: 700, fontFamily: 'Sora, sans-serif',
+                        background: '#0284c7', color: '#fff',
+                        textDecoration: 'none', fontSize: 11, fontWeight: 700, fontFamily: 'Fraunces, Georgia, serif',
                         flexShrink: 0, transition: 'opacity .15s',
                       }} title="View this student's full account">
                         <Icon name="eye" size={13} />
@@ -684,15 +679,15 @@ export default function TutorDashboard() {
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
                         {/* Best Score */}
                         <div>
-                          <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px', marginBottom: 3 }}>Best Score</div>
+                          <div style={{ fontSize: 10, color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px', marginBottom: 3 }}>Best Score</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <span style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', fontFamily: 'Sora, sans-serif' }}>
+                            <span style={{ fontSize: 18, fontWeight: 600, color: '#16181d', fontFamily: 'Fraunces, Georgia, serif' }}>
                               {best?.total || '—'}
                             </span>
                             {trend && (
                               <span style={{
                                 fontSize: 14,
-                                color: trend.direction === 'up' ? '#059669' : trend.direction === 'down' ? '#dc2626' : '#94a3b8',
+                                color: trend.direction === 'up' ? '#059669' : trend.direction === 'down' ? '#dc2626' : '#8a8f98',
                                 lineHeight: 1,
                               }}>
                                 {trend.direction === 'up' ? '\u2191' : trend.direction === 'down' ? '\u2193' : '\u2192'}
@@ -702,15 +697,15 @@ export default function TutorDashboard() {
                         </div>
                         {/* Tests Taken */}
                         <div>
-                          <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px', marginBottom: 3 }}>Tests</div>
-                          <span style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', fontFamily: 'Sora, sans-serif' }}>
+                          <div style={{ fontSize: 10, color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px', marginBottom: 3 }}>Tests</div>
+                          <span style={{ fontSize: 18, fontWeight: 600, color: '#16181d', fontFamily: 'Fraunces, Georgia, serif' }}>
                             {userAttempts.length}
                           </span>
                         </div>
                         {/* This Week */}
                         <div>
-                          <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px', marginBottom: 3 }}>This Week</div>
-                          <span style={{ fontSize: 18, fontWeight: 800, color: testsWeek > 0 ? '#059669' : '#94a3b8', fontFamily: 'Sora, sans-serif' }}>
+                          <div style={{ fontSize: 10, color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px', marginBottom: 3 }}>This Week</div>
+                          <span style={{ fontSize: 18, fontWeight: 600, color: testsWeek > 0 ? '#059669' : '#8a8f98', fontFamily: 'Fraunces, Georgia, serif' }}>
                             {testsWeek}
                           </span>
                         </div>
@@ -719,10 +714,10 @@ export default function TutorDashboard() {
                       {/* Progress bar */}
                       <div style={{ marginBottom: 10 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                          <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px' }}>Study Progress</span>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: progressPercent >= 75 ? '#059669' : progressPercent >= 40 ? '#d97706' : '#64748b' }}>{progressPercent}%</span>
+                          <span style={{ fontSize: 10, color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.3px' }}>Study Progress</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: progressPercent >= 75 ? '#059669' : progressPercent >= 40 ? '#d97706' : '#565a63' }}>{progressPercent}%</span>
                         </div>
-                        <div style={{ height: 6, borderRadius: 3, background: '#f1f5f9', overflow: 'hidden' }}>
+                        <div style={{ height: 6, borderRadius: 3, background: '#f3f0e9', overflow: 'hidden' }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${progressPercent}%` }}
@@ -732,8 +727,8 @@ export default function TutorDashboard() {
                               background: progressPercent >= 75
                                 ? 'linear-gradient(90deg, #10b981, #059669)'
                                 : progressPercent >= 40
-                                  ? 'linear-gradient(90deg, #f59e0b, #d97706)'
-                                  : 'linear-gradient(90deg, #94a3b8, #64748b)',
+                                  ? '#d97706'
+                                  : '#8a8f98',
                             }}
                           />
                         </div>
@@ -741,17 +736,17 @@ export default function TutorDashboard() {
 
                       {/* Last active */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <span style={{ fontSize: 11, color: '#94a3b8' }}>
+                        <span style={{ fontSize: 11, color: '#8a8f98' }}>
                           <Icon name="clock" size={12} style={{ marginRight: 4, verticalAlign: '-2px' }} />
                           {lastActive ? relativeTime(new Date(lastActive).toISOString()) : 'No activity'}
                         </span>
                         {best?.display && (
-                          <span style={{ fontSize: 10, color: '#64748b', fontWeight: 600 }}>{best.display}</span>
+                          <span style={{ fontSize: 10, color: '#565a63', fontWeight: 600 }}>{best.display}</span>
                         )}
                       </div>
 
                       {/* Quick access links */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, paddingTop: 10, borderTop: '1px solid rgba(14,165,233,.08)' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, paddingTop: 10, borderTop: '1px solid rgba(2,132,199,.08)' }}>
                         {[
                           { label: 'Dashboard', icon: 'home', path: '/dashboard' },
                           { label: 'Guide', icon: 'guide', path: '/guide' },
@@ -762,7 +757,7 @@ export default function TutorDashboard() {
                         ].map(link => (
                           <Link key={link.label} to={`${link.path}?user=${st.id}`} style={{
                             padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4,
-                            background: 'rgba(14,165,233,.06)', color: '#0284c7', textDecoration: 'none',
+                            background: 'rgba(2,132,199,.06)', color: '#0284c7', textDecoration: 'none',
                             fontSize: 10, fontWeight: 600, transition: 'background .15s',
                           }}>
                             <Icon name={link.icon} size={11} />
@@ -775,9 +770,9 @@ export default function TutorDashboard() {
                 )
               })}
               {!students.length && (
-                <motion.div variants={cardVariants} style={{ ...cardBase, padding: 48, textAlign: 'center', color: '#94a3b8', gridColumn: '1 / -1' }}>
+                <motion.div variants={cardVariants} style={{ ...cardBase, padding: 48, textAlign: 'center', color: '#8a8f98', gridColumn: '1 / -1' }}>
                   <Icon name="students" size={32} style={{ marginBottom: 12, opacity: 0.4 }} />
-                  <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 15, fontWeight: 600 }}>No students enrolled yet</div>
+                  <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 600 }}>No students enrolled yet</div>
                   <div style={{ fontSize: 13, marginTop: 4 }}>Students with your affiliation will appear here.</div>
                 </motion.div>
               )}
@@ -789,7 +784,7 @@ export default function TutorDashboard() {
                 <h3 style={sectionTitle}>
                   <span style={{
                     width: 28, height: 28, borderRadius: 8,
-                    background: 'linear-gradient(135deg, #0ea5e9, #1e3a8a)',
+                    background: '#0284c7',
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                     color: 'white', fontSize: 13,
                   }}>
@@ -801,32 +796,32 @@ export default function TutorDashboard() {
                   {activityFeed.map((item, i) => (
                     <div key={item.id} style={{
                       padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 12,
-                      borderBottom: i < activityFeed.length - 1 ? '1px solid rgba(14,165,233,.06)' : 'none',
+                      borderBottom: i < activityFeed.length - 1 ? '1px solid rgba(2,132,199,.06)' : 'none',
                       transition: 'background .15s',
                     }}>
                       <div style={{
                         width: 32, height: 32, borderRadius: 8,
                         background: avatarGradient(item.student.full_name || item.student.email),
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: 'white', fontFamily: 'Sora, sans-serif', fontSize: 11, fontWeight: 800,
+                        color: 'white', fontFamily: 'Fraunces, Georgia, serif', fontSize: 11, fontWeight: 600,
                         flexShrink: 0,
                       }}>
                         {getInitials(item.student.full_name || item.student.email)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>{item.student.full_name || '—'}</span>
-                        <span style={{ fontSize: 13, color: '#64748b' }}> completed </span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: '#334155' }}>{item.label}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#16181d' }}>{item.student.full_name || '—'}</span>
+                        <span style={{ fontSize: 13, color: '#565a63' }}> completed </span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#3f434b' }}>{item.label}</span>
                         {item.score > 0 && (
                           <span style={{
                             fontSize: 11, fontWeight: 700, color: '#0284c7', marginLeft: 6,
-                            padding: '1px 6px', borderRadius: 4, background: 'rgba(14,165,233,.08)',
+                            padding: '1px 6px', borderRadius: 4, background: 'rgba(2,132,199,.08)',
                           }}>
                             {item.score}
                           </span>
                         )}
                       </div>
-                      <span style={{ fontSize: 11, color: '#94a3b8', flexShrink: 0 }}>{relativeTime(item.date)}</span>
+                      <span style={{ fontSize: 11, color: '#8a8f98', flexShrink: 0 }}>{relativeTime(item.date)}</span>
                     </div>
                   ))}
                 </div>
@@ -841,9 +836,9 @@ export default function TutorDashboard() {
         {tab === 'results' && (
           <motion.div initial="hidden" animate="show" variants={fadeUp} style={cardBase}>
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, color: '#334155' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, color: '#3f434b' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(14,165,233,.12)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.5px', color: '#64748b' }}>
+                  <tr style={{ borderBottom: '1px solid rgba(2,132,199,.12)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.5px', color: '#565a63' }}>
                     <th style={{ padding: '12px 16px', textAlign: 'left' }}>Student</th>
                     <th style={{ padding: '12px 16px', textAlign: 'left' }}>Test</th>
                     <th style={{ padding: '12px 16px', textAlign: 'center' }}>Date</th>
@@ -857,14 +852,14 @@ export default function TutorDashboard() {
                     const st = computed.studentById.get(a.user_id)
                     const total = attemptTotalScore(a)
                     return (
-                      <tr key={a.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background .15s' }}>
+                      <tr key={a.id} style={{ borderBottom: '1px solid #f3f0e9', transition: 'background .15s' }}>
                         <td style={{ padding: '12px 16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <div style={{
                               width: 28, height: 28, borderRadius: 7,
                               background: avatarGradient(st?.full_name || st?.email),
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              color: 'white', fontFamily: 'Sora, sans-serif', fontSize: 10, fontWeight: 800,
+                              color: 'white', fontFamily: 'Fraunces, Georgia, serif', fontSize: 10, fontWeight: 600,
                               flexShrink: 0,
                             }}>
                               {getInitials(st?.full_name || st?.email)}
@@ -873,11 +868,11 @@ export default function TutorDashboard() {
                           </div>
                         </td>
                         <td style={{ padding: '12px 16px' }}>{testLabel(a.test_id)}</td>
-                        <td style={{ padding: '12px 16px', textAlign: 'center', color: '#94a3b8' }}>{a.completed_at ? new Date(a.completed_at).toLocaleDateString() : '—'}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'center', color: '#8a8f98' }}>{a.completed_at ? new Date(a.completed_at).toLocaleDateString() : '—'}</td>
                         <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700 }}>{total || '—'}</td>
-                        <td style={{ padding: '12px 16px', color: '#64748b', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatTopWeakness(a)}</td>
+                        <td style={{ padding: '12px 16px', color: '#565a63', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatTopWeakness(a)}</td>
                         <td style={{ padding: '12px 16px', textAlign: 'center' }}>
-                          <Link to={`/results/${a.id}?user=${a.user_id}`} style={{ color: '#0ea5e9', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>View</Link>
+                          <Link to={`/results/${a.id}?user=${a.user_id}`} style={{ color: '#0284c7', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>View</Link>
                         </td>
                       </tr>
                     )
@@ -893,22 +888,12 @@ export default function TutorDashboard() {
         ═══════════════════════════════════════════════════ */}
         {tab === 'analytics' && (
           <motion.div initial="hidden" animate="show" variants={containerVariants} style={{ display: 'grid', gap: 20 }}>
-            {/* Exam toggle */}
-            <motion.div variants={cardVariants} style={{ display: 'flex', gap: 8 }}>
-              {['sat', 'act'].map((ex) => (
-                <button key={ex} onClick={() => setAnalyticsExam(ex)} style={{
-                  padding: '7px 20px', borderRadius: 8, cursor: 'pointer', fontFamily: 'Sora, sans-serif', fontSize: 13, fontWeight: 700,
-                  background: analyticsExam === ex ? '#0ea5e9' : 'white', color: analyticsExam === ex ? '#fff' : '#64748b', border: analyticsExam === ex ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0', transition: 'all .2s',
-                }}>{ex.toUpperCase()}</button>
-              ))}
-            </motion.div>
-
             {/* KPIs */}
             <motion.div variants={cardVariants} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
-              <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #0ea5e9, #3b82f6)' }} /><div style={kpiLabel}>Students</div><div style={kpiBig}>{students.length}</div></div>
+              <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#0284c7' }} /><div style={kpiLabel}>Students</div><div style={kpiBig}>{students.length}</div></div>
               <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #10b981, #059669)' }} /><div style={kpiLabel}>Active (7d)</div><div style={kpiBig}>{s.active7}</div></div>
-              <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #f59e0b, #d97706)' }} /><div style={kpiLabel}>Active (30d)</div><div style={kpiBig}>{s.active30}</div></div>
-              <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #8b5cf6, #7c3aed)' }} /><div style={kpiLabel}>Avg {s.exam === 'act' ? 'Composite' : 'Total'}</div><div style={kpiBig}>{s.avgTotal ? Math.round(s.avgTotal) : '—'}</div></div>
+              <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#d97706' }} /><div style={kpiLabel}>Active (30d)</div><div style={kpiBig}>{s.active30}</div></div>
+              <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #8b5cf6, #7c3aed)' }} /><div style={kpiLabel}>Avg Total</div><div style={kpiBig}>{s.avgTotal ? Math.round(s.avgTotal) : '—'}</div></div>
               <div style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #ec4899, #db2777)' }} /><div style={kpiLabel}>Median</div><div style={kpiBig}>{s.median ? Math.round(s.median) : '—'}</div></div>
               {analytics.scoreColumns.filter(c => c.key !== 'total').map((col) => (
                 <div key={col.key} style={kpiCard}><div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #06b6d4, #0891b2)' }} /><div style={kpiLabel}>Avg {col.label}</div><div style={kpiBig}>{s.avgSections?.[col.key] ? Math.round(s.avgSections[col.key]) : '—'}</div></div>
@@ -938,9 +923,9 @@ export default function TutorDashboard() {
               <motion.div variants={cardVariants} style={{ ...cardBase, padding: 20 }}>
                 <div style={{ ...kpiLabel, marginBottom: 12 }}>Test Summary</div>
                 <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, color: '#334155' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, color: '#3f434b' }}>
                     <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(14,165,233,.12)', fontSize: 10, textTransform: 'uppercase', color: '#94a3b8' }}>
+                      <tr style={{ borderBottom: '1px solid rgba(2,132,199,.12)', fontSize: 10, textTransform: 'uppercase', color: '#8a8f98' }}>
                         <th style={{ padding: '8px 10px', textAlign: 'left' }}>Test</th>
                         <th style={{ padding: '8px 10px', textAlign: 'center' }}>Attempts</th>
                         <th style={{ padding: '8px 10px', textAlign: 'center' }}>Avg Total</th>
@@ -952,7 +937,7 @@ export default function TutorDashboard() {
                     </thead>
                     <tbody>
                       {analytics.testRows.map((row) => (
-                        <tr key={row.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <tr key={row.id} style={{ borderBottom: '1px solid #f3f0e9' }}>
                           <td style={{ padding: '8px 10px', fontWeight: 600 }}>{row.label}</td>
                           <td style={{ padding: '8px 10px', textAlign: 'center' }}>{row.count}</td>
                           <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700 }}>{row.avgTotal ? Math.round(row.avgTotal) : '—'}</td>

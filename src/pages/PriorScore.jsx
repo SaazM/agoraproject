@@ -8,18 +8,11 @@ import { getExamConfig, getChaptersForExam } from '../data/examData.js'
 import { setUnlockedResources } from '../lib/pretestGate.js'
 import { supabase } from '../lib/supabase.js'
 
-const sf = 'Sora, sans-serif'
+const sf = 'Fraunces, Georgia, serif'
 
 const SAT_SECTIONS = [
   { key: 'rw', label: 'Reading & Writing', min: 200, max: 800, placeholder: '200–800' },
   { key: 'math', label: 'Math', min: 200, max: 800, placeholder: '200–800' },
-]
-
-const ACT_SECTIONS = [
-  { key: 'english', label: 'English', min: 1, max: 36, placeholder: '1–36' },
-  { key: 'math', label: 'Math', min: 1, max: 36, placeholder: '1–36' },
-  { key: 'reading', label: 'Reading', min: 1, max: 36, placeholder: '1–36' },
-  { key: 'science', label: 'Science', min: 1, max: 36, placeholder: '1–36' },
 ]
 
 const BENEFITS = [
@@ -34,7 +27,7 @@ export default function PriorScore() {
   const navigate = useNavigate()
   const location = useLocation()
   const requestedExam = new URLSearchParams(location.search).get('exam')
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
   const examConfig = useMemo(() => getExamConfig(exam), [exam])
   const userId = user?.id
 
@@ -47,10 +40,10 @@ export default function PriorScore() {
   if (profile?.role === 'tutor') return <Navigate to="/tutor" replace />
   if (profile?.role === 'admin') return <Navigate to="/admin" replace />
 
-  const sections = exam === 'act' ? ACT_SECTIONS : SAT_SECTIONS
-  const totalMin = exam === 'act' ? 1 : 400
-  const totalMax = exam === 'act' ? 36 : 1600
-  const totalLabel = exam === 'act' ? 'Composite Score (1–36)' : 'Total Score (400–1600)'
+  const sections = SAT_SECTIONS
+  const totalMin = 400
+  const totalMax = 1600
+  const totalLabel = 'Total Score (400–1600)'
 
   function isValidTotal(val) {
     const n = Number(val)
@@ -76,24 +69,13 @@ export default function PriorScore() {
     if (inputMode === 'total') {
       scores.total = Number(totalScore)
       // Estimate section scores from total
-      if (exam === 'act') {
-        const est = scores.total
-        scores.english = est; scores.math = est; scores.reading = est; scores.science = est
-        scores.composite = est
-      } else {
-        scores.rw = Math.round(scores.total / 2 / 10) * 10
-        scores.math = scores.total - scores.rw
-      }
+      scores.rw = Math.round(scores.total / 2 / 10) * 10
+      scores.math = scores.total - scores.rw
     } else {
       for (const s of sections) {
         scores[s.key] = Number(sectionScores[s.key])
       }
-      if (exam === 'act') {
-        scores.total = Math.round(sections.reduce((sum, s) => sum + Number(sectionScores[s.key] || 0), 0) / sections.length)
-        scores.composite = scores.total
-      } else {
-        scores.total = sections.reduce((sum, s) => sum + Number(sectionScores[s.key] || 0), 0)
-      }
+      scores.total = sections.reduce((sum, s) => sum + Number(sectionScores[s.key] || 0), 0)
     }
 
     // Build weak_topics = ALL chapters (since we have no real answers, assume everything needs study)
@@ -144,7 +126,7 @@ export default function PriorScore() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#0b1120',
+      background: '#16181d',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 20,
     }}>
@@ -156,30 +138,30 @@ export default function PriorScore() {
       >
         {/* Dark header */}
         <div style={{
-          background: 'linear-gradient(135deg, #0f172a, #1e3a5f)',
-          borderRadius: '28px 28px 0 0',
+          background: '#16181d',
+          borderRadius: '12px 12px 0 0',
           padding: '36px 36px 28px',
-          borderBottom: '2px solid rgba(14,165,233,.25)',
+          borderBottom: '2px solid rgba(2,132,199,.25)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
             <img src="/logo.png" alt="" width={36} height={36} style={{ borderRadius: 8 }} />
-            <span style={{ fontFamily: sf, fontSize: 19, fontWeight: 800, color: 'white' }}>
+            <span style={{ fontFamily: sf, fontSize: 19, fontWeight: 600, color: 'white' }}>
               The Agora <span style={{ color: '#f59e0b' }}>Project</span>
             </span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: 'linear-gradient(135deg, #0ea5e9, #3b82f6)',
+              width: 56, height: 56, borderRadius: 12,
+              background: '#0284c7',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 6px 24px rgba(14,165,233,.5)',
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               flexShrink: 0,
             }}>
               <Icon name="results" size={28} style={{ color: 'white' }} />
             </div>
             <div>
-              <div style={{ fontFamily: sf, fontSize: 24, fontWeight: 900, color: '#ffffff', letterSpacing: '-0.3px' }}>
+              <div style={{ fontFamily: sf, fontSize: 24, fontWeight: 600, color: '#ffffff', letterSpacing: '-0.3px' }}>
                 Have you taken the {examConfig.label} before?
               </div>
               <div style={{ fontSize: 14, color: 'rgba(255,255,255,.65)', marginTop: 4, lineHeight: 1.5 }}>
@@ -192,21 +174,21 @@ export default function PriorScore() {
         {/* White body */}
         <div style={{
           background: 'white',
-          borderRadius: '0 0 28px 28px',
+          borderRadius: '0 0 12px 12px',
           padding: '28px 36px 40px',
-          boxShadow: '0 30px 80px rgba(0,0,0,.3)',
+          boxShadow: '0 1px 3px rgba(22,24,29,.06)',
         }}>
 
           {/* ── Recommendation banner ── */}
           <div style={{
-            background: 'linear-gradient(135deg, rgba(16,185,129,.08), rgba(5,150,105,.04))',
+            background: 'rgba(16,185,129,.07)',
             border: '1.5px solid rgba(16,185,129,.2)',
-            borderRadius: 16,
+            borderRadius: 12,
             padding: '20px 22px',
             marginBottom: 24,
           }}>
             <div style={{
-              fontFamily: sf, fontSize: 15, fontWeight: 800, color: '#065f46',
+              fontFamily: sf, fontSize: 15, fontWeight: 600, color: '#065f46',
               marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8,
             }}>
               <Icon name="sparkle" size={18} style={{ color: '#059669' }} />
@@ -214,7 +196,7 @@ export default function PriorScore() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {BENEFITS.map((b, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#334155', lineHeight: 1.6 }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#3f434b', lineHeight: 1.6 }}>
                   <span style={{
                     width: 20, height: 20, borderRadius: 6,
                     background: '#059669', color: 'white',
@@ -239,12 +221,12 @@ export default function PriorScore() {
                 style={{
                   width: '100%',
                   padding: '18px 22px',
-                  fontSize: 16, fontWeight: 900, fontFamily: sf,
-                  border: 'none', borderRadius: 16,
-                  background: 'linear-gradient(135deg, #0ea5e9, #2563eb)',
+                  fontSize: 16, fontWeight: 600, fontFamily: sf,
+                  border: 'none', borderRadius: 12,
+                  background: '#0284c7',
                   color: 'white',
                   cursor: 'pointer',
-                  boxShadow: '0 8px 28px rgba(14,165,233,.35)',
+                  boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                   letterSpacing: '-0.2px',
                 }}
@@ -261,9 +243,9 @@ export default function PriorScore() {
                   width: '100%',
                   padding: '16px 22px',
                   fontSize: 15, fontWeight: 700, fontFamily: sf,
-                  border: '2px solid #e2e8f0', borderRadius: 16,
-                  background: '#fafbfc',
-                  color: '#334155',
+                  border: '2px solid #e4e0d5', borderRadius: 12,
+                  background: '#faf9f6',
+                  color: '#3f434b',
                   cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                 }}
@@ -276,7 +258,7 @@ export default function PriorScore() {
                 onClick={handleSkipToPretest}
                 style={{
                   background: 'none', border: 'none',
-                  fontSize: 13, color: '#94a3b8', cursor: 'pointer',
+                  fontSize: 13, color: '#8a8f98', cursor: 'pointer',
                   fontFamily: sf, fontWeight: 600,
                   padding: '8px 0', textAlign: 'center',
                 }}
@@ -295,8 +277,8 @@ export default function PriorScore() {
             >
               {/* Important note */}
               <div style={{
-                background: 'rgba(14,165,233,.06)',
-                border: '1.5px solid rgba(14,165,233,.18)',
+                background: 'rgba(2,132,199,.06)',
+                border: '1.5px solid rgba(2,132,199,.18)',
                 borderRadius: 12,
                 padding: '14px 18px',
                 marginBottom: 22,
@@ -318,11 +300,11 @@ export default function PriorScore() {
                       onClick={() => setInputMode(opt.id)}
                       style={{
                         flex: 1, padding: '10px 0',
-                        fontSize: 13, fontWeight: 800, fontFamily: sf,
+                        fontSize: 13, fontWeight: 600, fontFamily: sf,
                         borderRadius: 10, cursor: 'pointer',
-                        border: active ? '2px solid #0ea5e9' : '1.5px solid #e2e8f0',
-                        background: active ? 'rgba(14,165,233,.08)' : 'white',
-                        color: active ? '#0369a1' : '#64748b',
+                        border: active ? '2px solid #0284c7' : '1.5px solid #e4e0d5',
+                        background: active ? 'rgba(2,132,199,.08)' : 'white',
+                        color: active ? '#0284c7' : '#565a63',
                         transition: 'all .2s',
                       }}
                     >
@@ -337,7 +319,7 @@ export default function PriorScore() {
                 <div style={{ marginBottom: 24 }}>
                   <label style={{
                     display: 'block', fontFamily: sf, fontSize: 14,
-                    fontWeight: 800, color: '#0f172a', marginBottom: 8,
+                    fontWeight: 600, color: '#16181d', marginBottom: 8,
                   }}>
                     {totalLabel}
                   </label>
@@ -351,9 +333,9 @@ export default function PriorScore() {
                     style={{
                       width: '100%', padding: '14px 16px',
                       border: '2px solid #cbd5e1', borderRadius: 12,
-                      fontSize: 18, fontWeight: 700, fontFamily: sf,
+                      fontSize: 18, fontWeight: 600, fontFamily: sf,
                       background: 'white', boxSizing: 'border-box',
-                      color: '#0f172a', textAlign: 'center',
+                      color: '#16181d', textAlign: 'center',
                     }}
                   />
                 </div>
@@ -361,12 +343,12 @@ export default function PriorScore() {
 
               {/* Section score inputs */}
               {inputMode === 'sections' && (
-                <div style={{ display: 'grid', gridTemplateColumns: exam === 'act' ? '1fr 1fr' : '1fr 1fr', gap: 12, marginBottom: 24 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
                   {sections.map(s => (
                     <div key={s.key}>
                       <label style={{
                         display: 'block', fontFamily: sf, fontSize: 12,
-                        fontWeight: 800, color: '#0f172a', marginBottom: 6,
+                        fontWeight: 600, color: '#16181d', marginBottom: 6,
                       }}>
                         {s.label}
                       </label>
@@ -380,9 +362,9 @@ export default function PriorScore() {
                         style={{
                           width: '100%', padding: '12px 14px',
                           border: '2px solid #cbd5e1', borderRadius: 12,
-                          fontSize: 16, fontWeight: 700, fontFamily: sf,
+                          fontSize: 16, fontWeight: 600, fontFamily: sf,
                           background: 'white', boxSizing: 'border-box',
-                          color: '#0f172a', textAlign: 'center',
+                          color: '#16181d', textAlign: 'center',
                         }}
                       />
                     </div>
@@ -394,12 +376,9 @@ export default function PriorScore() {
               {inputMode === 'sections' && isValidSections() && (
                 <div style={{
                   textAlign: 'center', marginBottom: 20,
-                  fontFamily: sf, fontSize: 14, fontWeight: 700, color: '#0ea5e9',
+                  fontFamily: sf, fontSize: 14, fontWeight: 700, color: '#0284c7',
                 }}>
-                  {exam === 'act'
-                    ? `Composite: ${Math.round(sections.reduce((sum, s) => sum + Number(sectionScores[s.key] || 0), 0) / sections.length)}`
-                    : `Total: ${sections.reduce((sum, s) => sum + Number(sectionScores[s.key] || 0), 0)}`
-                  }
+                  {`Total: ${sections.reduce((sum, s) => sum + Number(sectionScores[s.key] || 0), 0)}`}
                 </div>
               )}
 
@@ -411,12 +390,12 @@ export default function PriorScore() {
                 whileTap={canSubmit ? { scale: 0.98 } : {}}
                 style={{
                   width: '100%', padding: '16px 24px',
-                  fontSize: 16, fontWeight: 900, fontFamily: sf,
-                  border: 'none', borderRadius: 14,
-                  background: canSubmit ? 'linear-gradient(135deg, #0ea5e9, #2563eb)' : '#e2e8f0',
-                  color: canSubmit ? 'white' : '#94a3b8',
+                  fontSize: 16, fontWeight: 600, fontFamily: sf,
+                  border: 'none', borderRadius: 12,
+                  background: canSubmit ? '#0284c7' : '#e4e0d5',
+                  color: canSubmit ? 'white' : '#8a8f98',
                   cursor: canSubmit ? 'pointer' : 'not-allowed',
-                  boxShadow: canSubmit ? '0 6px 20px rgba(14,165,233,.35)' : 'none',
+                  boxShadow: canSubmit ? '0 1px 3px rgba(22,24,29,.06)' : 'none',
                   transition: 'all .3s',
                   marginBottom: 10,
                 }}
@@ -428,7 +407,7 @@ export default function PriorScore() {
                 onClick={() => setMode(null)}
                 style={{
                   width: '100%', background: 'none', border: 'none',
-                  fontSize: 13, color: '#94a3b8', cursor: 'pointer',
+                  fontSize: 13, color: '#8a8f98', cursor: 'pointer',
                   fontFamily: sf, fontWeight: 600, padding: '8px 0',
                   textAlign: 'center',
                 }}
@@ -439,7 +418,7 @@ export default function PriorScore() {
           )}
 
           {/* Helper text */}
-          <div style={{ textAlign: 'center', marginTop: 18, fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>
+          <div style={{ textAlign: 'center', marginTop: 18, fontSize: 12, color: '#8a8f98', lineHeight: 1.6 }}>
             {mode === 'enter'
               ? 'Your score will populate your dashboard tiles and unlock all resources. Your study plan will cover all topics.'
               : 'You can always enter a past score later from your dashboard.'}

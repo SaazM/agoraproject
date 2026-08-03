@@ -4,22 +4,22 @@ import { motion, AnimatePresence } from 'framer-motion'
 /* ─── Constants ────────────────────────────────────────────────────── */
 
 const COLORS = {
-  navy: '#0f172a',
-  heading: '#1a2744',
-  sky: '#0ea5e9',
-  skyLight: 'rgba(14,165,233,.12)',
-  skyBorder: 'rgba(14,165,233,.30)',
+  navy: '#16181d',
+  heading: '#16181d',
+  sky: '#0284c7',
+  skyLight: 'rgba(2,132,199,.12)',
+  skyBorder: 'rgba(2,132,199,.30)',
   green: '#10b981',
   amber: '#f59e0b',
-  slate: '#64748b',
-  slateLight: '#94a3b8',
-  border: '#e2e8f0',
-  bg: '#f8fafc',
+  slate: '#565a63',
+  slateLight: '#8a8f98',
+  border: '#e4e0d5',
+  bg: '#f7f5ef',
   white: '#ffffff',
-  text: '#334155',
+  text: '#3f434b',
 }
 
-const FONT = "Sora, sans-serif"
+const FONT = "Fraunces, Georgia, serif"
 
 /* ─── SVG Tutor Avatar ─────────────────────────────────────────────── */
 
@@ -84,7 +84,7 @@ function TutorAvatar({ isSpeaking }) {
 
         <defs>
           <linearGradient id="headGradient" x1="6" y1="6" x2="58" y2="58">
-            <stop offset="0%" stopColor="#1e3a5f" />
+            <stop offset="0%" stopColor="#16181d" />
             <stop offset="100%" stopColor={COLORS.navy} />
           </linearGradient>
         </defs>
@@ -153,7 +153,7 @@ function SlideIntro({ slide, isPlaying }) {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        style={{ fontFamily: FONT, fontSize: 26, fontWeight: 900, color: COLORS.heading, marginBottom: 16, lineHeight: 1.3 }}
+        style={{ fontFamily: FONT, fontSize: 26, fontWeight: 600, color: COLORS.heading, marginBottom: 16, lineHeight: 1.3 }}
       >
         {slide.title}
       </motion.div>
@@ -172,7 +172,7 @@ function SlideStrategy({ slide, isPlaying }) {
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.35 }}
-        style={{ fontFamily: FONT, fontSize: 20, fontWeight: 900, color: COLORS.heading, marginBottom: 16 }}
+        style={{ fontFamily: FONT, fontSize: 20, fontWeight: 600, color: COLORS.heading, marginBottom: 16 }}
       >
         {slide.title}
       </motion.div>
@@ -188,7 +188,7 @@ function SlideStrategy({ slide, isPlaying }) {
             <span style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               width: 22, height: 22, borderRadius: '50%', background: 'rgba(16,185,129,.12)',
-              color: COLORS.green, fontSize: 13, fontWeight: 900, flexShrink: 0, marginTop: 2,
+              color: COLORS.green, fontSize: 13, fontWeight: 600, flexShrink: 0, marginTop: 2,
             }}>
               &#10003;
             </span>
@@ -222,9 +222,9 @@ function SlideTip({ slide, isPlaying }) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.35 }}
         style={{
-          background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+          background: '#fffbeb',
           border: '1.5px solid rgba(245,158,11,.35)',
-          borderRadius: 14,
+          borderRadius: 12,
           padding: '20px 22px',
         }}
       >
@@ -236,7 +236,7 @@ function SlideTip({ slide, isPlaying }) {
           }}>
             &#128161;
           </span>
-          <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 900, color: '#92400e' }}>
+          <span style={{ fontFamily: FONT, fontSize: 18, fontWeight: 600, color: '#92400e' }}>
             {slide.title}
           </span>
         </div>
@@ -255,7 +255,7 @@ function SlideExample({ slide, isPlaying }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        style={{ fontFamily: FONT, fontSize: 20, fontWeight: 900, color: COLORS.heading, marginBottom: 14 }}
+        style={{ fontFamily: FONT, fontSize: 20, fontWeight: 600, color: COLORS.heading, marginBottom: 14 }}
       >
         {slide.title}
       </motion.div>
@@ -263,7 +263,7 @@ function SlideExample({ slide, isPlaying }) {
         background: COLORS.bg, border: `1.5px solid ${COLORS.border}`, borderRadius: 12,
         padding: '18px 20px',
       }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: 10 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: 10 }}>
           Sample Question &amp; Approach
         </div>
         <div style={{ fontSize: 15, color: COLORS.text, lineHeight: 1.7 }}>
@@ -296,17 +296,17 @@ function SlideRecap({ slide, isPlaying }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        style={{ fontFamily: FONT, fontSize: 20, fontWeight: 900, color: COLORS.heading, marginBottom: 14 }}
+        style={{ fontFamily: FONT, fontSize: 20, fontWeight: 600, color: COLORS.heading, marginBottom: 14 }}
       >
         {slide.title}
       </motion.div>
       <div style={{
-        background: 'linear-gradient(135deg, rgba(14,165,233,.06) 0%, rgba(16,185,129,.06) 100%)',
+        background: '#faf9f6',
         border: `1.5px solid ${COLORS.skyBorder}`,
-        borderRadius: 14,
+        borderRadius: 12,
         padding: '18px 20px',
       }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: 12 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: 12 }}>
           Key Takeaways
         </div>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10 }}>
@@ -321,7 +321,7 @@ function SlideRecap({ slide, isPlaying }) {
               <span style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 width: 22, height: 22, borderRadius: '50%', background: COLORS.skyLight,
-                color: COLORS.sky, fontSize: 12, fontWeight: 900, flexShrink: 0, marginTop: 2,
+                color: COLORS.sky, fontSize: 12, fontWeight: 600, flexShrink: 0, marginTop: 2,
               }}>
                 {i + 1}
               </span>
@@ -499,7 +499,7 @@ export default function LessonPlayer({ title, slides = [], voiceUrl }) {
     <div style={{
       background: COLORS.white,
       border: `1.5px solid ${COLORS.border}`,
-      borderRadius: 16,
+      borderRadius: 12,
       overflow: 'hidden',
       fontFamily: 'system-ui, -apple-system, sans-serif',
     }}>
@@ -512,7 +512,7 @@ export default function LessonPlayer({ title, slides = [], voiceUrl }) {
       }}>
         <TutorAvatar isSpeaking={isSpeaking} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: FONT, fontSize: 15, fontWeight: 900, color: COLORS.heading, lineHeight: 1.3 }}>
+          <div style={{ fontFamily: FONT, fontSize: 15, fontWeight: 600, color: COLORS.heading, lineHeight: 1.3 }}>
             {title}
           </div>
           <div style={{ fontSize: 12, color: COLORS.slateLight, marginTop: 2 }}>
@@ -541,7 +541,7 @@ export default function LessonPlayer({ title, slides = [], voiceUrl }) {
                 ? COLORS.sky
                 : i === currentIndex
                   ? COLORS.heading
-                  : '#e2e8f0',
+                  : '#e4e0d5',
             }}
           />
         ))}
@@ -599,14 +599,14 @@ export default function LessonPlayer({ title, slides = [], voiceUrl }) {
               width: 44, height: 44, borderRadius: 12,
               border: 'none',
               background: isPlaying
-                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-                : `linear-gradient(135deg, ${COLORS.sky} 0%, #0284c7 100%)`,
+                ? '#dc2626'
+                : '#0284c7',
               cursor: 'pointer',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               color: COLORS.white, fontSize: 18,
               boxShadow: isPlaying
-                ? '0 2px 8px rgba(239,68,68,.3)'
-                : '0 2px 8px rgba(14,165,233,.3)',
+                ? '0 1px 3px rgba(22,24,29,.06)'
+                : '0 1px 3px rgba(22,24,29,.06)',
               transition: 'background .25s, box-shadow .25s',
             }}
           >
@@ -653,7 +653,7 @@ export default function LessonPlayer({ title, slides = [], voiceUrl }) {
             background: showScript ? COLORS.skyLight : COLORS.white,
             color: showScript ? COLORS.sky : COLORS.slate,
             fontSize: 12,
-            fontWeight: 800,
+            fontWeight: 600,
             cursor: 'pointer',
             transition: 'all .2s',
           }}
@@ -677,7 +677,7 @@ export default function LessonPlayer({ title, slides = [], voiceUrl }) {
               padding: '14px 20px',
               background: COLORS.bg,
             }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: COLORS.slate, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>
                 Slide {currentIndex + 1} Script
               </div>
               <div style={{ fontSize: 14, color: COLORS.text, lineHeight: 1.7, whiteSpace: 'pre-line' }}>

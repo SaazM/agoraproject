@@ -1,6 +1,5 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
@@ -22,7 +21,6 @@ const loadShare = () => import('./pages/Share.jsx')
 const loadAuthCallback = () => import('./pages/AuthCallback.jsx')
 const loadResetPassword = () => import('./pages/ResetPassword.jsx')
 const loadChooseTest = () => import('./pages/ChooseTest.jsx')
-const loadCompareTests = () => import('./pages/CompareTests.jsx')
 const loadSetupPlan = () => import('./pages/SetupPlan.jsx')
 const loadTutorDashboard = () => import('./pages/TutorDashboard.jsx')
 const loadOverview = () => import('./pages/Overview.jsx')
@@ -53,7 +51,6 @@ const Share = lazy(loadShare)
 const AuthCallback = lazy(loadAuthCallback)
 const ResetPassword = lazy(loadResetPassword)
 const ChooseTest = lazy(loadChooseTest)
-const CompareTests = lazy(loadCompareTests)
 const SetupPlan = lazy(loadSetupPlan)
 const TutorDashboard = lazy(loadTutorDashboard)
 const Overview = lazy(loadOverview)
@@ -73,7 +70,7 @@ const Landing = lazy(loadLanding)
 
 function RouteLoader() {
   return (
-    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Fraunces,Georgia,serif',color:'#565a63'}}>
       Loading…
     </div>
   )
@@ -81,7 +78,7 @@ function RouteLoader() {
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Fraunces,Georgia,serif',color:'#565a63'}}>Loading…</div>
   if (!user) return <Navigate to="/login" replace />
   return children
 }
@@ -106,7 +103,7 @@ where not exists (select 1 from public.profiles p where p.id = u.id);`
     }
   }
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Sora,sans-serif', background: '#f8fafc', padding: 24 }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', fontFamily: 'Fraunces,Georgia,serif', background: '#faf9f6', padding: 24 }}>
       <div style={{ maxWidth: 560, background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, padding: 24, boxShadow: '0 2px 16px rgba(15,31,61,.09)' }}>
         <div style={{ fontSize: 18, fontWeight: 800, color: '#0f1f3d', marginBottom: 10 }}>Account setup incomplete</div>
         <div style={{ color: '#475569', fontSize: 14, lineHeight: 1.65, marginBottom: 14 }}>
@@ -126,7 +123,7 @@ where not exists (select 1 from public.profiles p where p.id = u.id);`
             onClick={handleSignOut}
             disabled={signingOut}
             style={{
-              fontFamily: 'Sora,sans-serif',
+              fontFamily: 'Fraunces,Georgia,serif',
               fontWeight: 700,
               fontSize: 14,
               padding: '10px 18px',
@@ -139,7 +136,7 @@ where not exists (select 1 from public.profiles p where p.id = u.id);`
           >
             {signingOut ? 'Signing out…' : 'Sign out'}
           </button>
-          <span style={{ fontSize: 12, color: '#64748b' }}>Then refresh if needed and sign in again.</span>
+          <span style={{ fontSize: 12, color: '#565a63' }}>Then refresh if needed and sign in again.</span>
         </div>
       </div>
     </div>
@@ -148,10 +145,10 @@ where not exists (select 1 from public.profiles p where p.id = u.id);`
 
 function PublicRoute({ children }) {
   const { user, profile, profileReady, loading } = useAuth()
-  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Fraunces,Georgia,serif',color:'#565a63'}}>Loading…</div>
   if (user) {
     // Wait for profile fetch to finish before redirecting (avoid infinite spinner when profile row is missing)
-    if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+    if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Fraunces,Georgia,serif',color:'#565a63'}}>Loading…</div>
     if (!profile) return <MissingProfileNotice />
     const role = profile?.role
     const isAdminEmail = String(profile?.email || '').toLowerCase() === ADMIN_EMAIL
@@ -167,7 +164,7 @@ function PublicRoute({ children }) {
 
 function RoleRedirect() {
   const { profile, profileReady } = useAuth()
-  if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Sora,sans-serif',color:'#64748b'}}>Loading…</div>
+  if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Fraunces,Georgia,serif',color:'#565a63'}}>Loading…</div>
   if (!profile) return <MissingProfileNotice />
   const role = profile?.role
   const isAdminEmail = String(profile?.email || '').toLowerCase() === ADMIN_EMAIL
@@ -184,7 +181,7 @@ function AppWarmup() {
 
     const preload = () => {
       const loaders = user
-        ? [loadDashboard, loadGuide, loadMistakes, loadResults, loadReport, loadCalendar, loadChooseTest, loadCompareTests, loadOverview]
+        ? [loadDashboard, loadGuide, loadMistakes, loadResults, loadReport, loadCalendar, loadChooseTest, loadOverview]
         : [loadDashboard]
       loaders.forEach((load) => {
         try { load().catch(() => {}) } catch {}
@@ -203,13 +200,6 @@ function AppWarmup() {
   return null
 }
 
-const pageVariants = {
-  initial: { opacity: 0, y: 12 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -8 },
-}
-const pageTransition = { type: 'tween', ease: 'easeInOut', duration: 0.25 }
-
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
@@ -219,8 +209,7 @@ function ScrollToTop() {
 function AnimatedRoutes() {
   const location = useLocation()
   return (
-    <AnimatePresence mode="wait">
-      <motion.div key={location.pathname} initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition} style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: '100vh' }}>
         <Routes location={location}>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
@@ -231,7 +220,6 @@ function AnimatedRoutes() {
               <Route path="/welcome" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
               <Route path="/pick-test-date" element={<ProtectedRoute><PickTestDate /></ProtectedRoute>} />
               <Route path="/prior-score" element={<ProtectedRoute><PriorScore /></ProtectedRoute>} />
-              <Route path="/compare-tests" element={<ProtectedRoute><CompareTests /></ProtectedRoute>} />
               <Route path="/test/:attemptId" element={<ProtectedRoute><TestTaking /></ProtectedRoute>} />
               <Route path="/setup-plan/:attemptId" element={<ProtectedRoute><SetupPlan /></ProtectedRoute>} />
               <Route path="/results/:attemptId" element={<ProtectedRoute><Results /></ProtectedRoute>} />
@@ -255,8 +243,7 @@ function AnimatedRoutes() {
               <Route path="/share" element={<Share />} />
               <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </motion.div>
-    </AnimatePresence>
+    </div>
   )
 }
 

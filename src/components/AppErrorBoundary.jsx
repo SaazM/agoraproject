@@ -24,14 +24,14 @@ export default class AppErrorBoundary extends React.Component {
 
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ maxWidth: 760, width: '100%', background: 'rgba(255,255,255,.94)', border: '1px solid rgba(15,23,42,.10)', borderRadius: 18, padding: 22, boxShadow: '0 20px 50px rgba(0,0,0,.18)' }}>
-          <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 22, fontWeight: 900, color: '#0f172a', marginBottom: 8 }}>
+        <div style={{ maxWidth: 760, width: '100%', background: 'rgba(255,255,255,.94)', border: '1px solid rgba(22,24,29,.10)', borderRadius: 12, padding: 22, boxShadow: '0 1px 3px rgba(22,24,29,.06)' }}>
+          <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 22, fontWeight: 600, color: '#16181d', marginBottom: 8 }}>
             We hit an app error
           </div>
-          <div style={{ color: '#475569', fontSize: 14, lineHeight: 1.65, marginBottom: 14 }}>
+          <div style={{ color: '#3f434b', fontSize: 14, lineHeight: 1.65, marginBottom: 14 }}>
             The page ran into a problem, but your account and data are still safe. Try reloading first. If your browser cached an older version, use the cache reset button.
           </div>
-          <div style={{ fontFamily: 'ui-monospace, Menlo, Monaco, Consolas, monospace', fontSize: 12, color: '#64748b', background: 'rgba(15,23,42,.04)', border: '1px solid rgba(15,23,42,.08)', borderRadius: 12, padding: 12, marginBottom: 14, overflow: 'auto' }}>
+          <div style={{ fontFamily: 'ui-monospace, Menlo, Monaco, Consolas, monospace', fontSize: 12, color: '#565a63', background: 'rgba(22,24,29,.04)', border: '1px solid rgba(22,24,29,.08)', borderRadius: 12, padding: 12, marginBottom: 14, overflow: 'auto' }}>
             {this.state.message}
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>

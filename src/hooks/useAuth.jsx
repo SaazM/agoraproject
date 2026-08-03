@@ -200,9 +200,8 @@ export function AuthProvider({ children }) {
 
   async function setPreferredExam(exam) {
     if (!supabase) return { data: null, error: new Error('Supabase is not configured') }
-    const clean = exam === 'act' ? 'act' : 'sat'
     const { data, error } = await supabase.auth.updateUser({
-      data: { preferred_exam: clean },
+      data: { preferred_exam: 'sat' },
     })
     if (!error && data?.user) setUser(data.user)
     return { data, error }

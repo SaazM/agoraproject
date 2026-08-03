@@ -35,7 +35,7 @@ export default function PasswordInput({
         autoComplete={autoComplete}
         spellCheck={false}
         // When hidden we mask via overlay; keep caret visible for editing.
-        style={{ color: reveal ? '#0f172a' : 'transparent', caretColor: '#0f172a' }}
+        style={{ color: reveal ? '#16181d' : 'transparent', caretColor: '#16181d' }}
       />
 
       <span
@@ -60,7 +60,7 @@ export default function PasswordInput({
           textOverflow: 'ellipsis',
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 14,
-          color: isEmpty ? '#94a3b8' : '#1a2744',
+          color: isEmpty ? '#8a8f98' : '#16181d',
           cursor: 'default',
           opacity: reveal ? 0 : 1,
         }}

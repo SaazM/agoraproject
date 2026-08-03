@@ -17,8 +17,8 @@ function statusColor(status) {
   if (status === 'DONE') return '#10b981'
   if (status === 'IN PROGRESS') return '#f59e0b'
   if (status === 'NOT STARTED') return '#ef4444'
-  if (status === 'LOCKED') return '#94a3b8'
-  return '#94a3b8'
+  if (status === 'LOCKED') return '#8a8f98'
+  return '#8a8f98'
 }
 
 function statusBg(status) {
@@ -33,7 +33,7 @@ function borderColor(status) {
   if (status === 'IN PROGRESS') return '#f59e0b'
   if (status === 'NOT STARTED') return '#ef4444'
   if (status === 'LOCKED') return '#cbd5e1'
-  return '#e2e8f0'
+  return '#e4e0d5'
 }
 
 function statusIcon(status) {
@@ -61,7 +61,7 @@ export default function Journey() {
     () => String(new URLSearchParams(location.search || '').get('exam') || '').toLowerCase(),
     [location.search]
   )
-  const exam = requestedExam === 'act' || requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
+  const exam = requestedExam === 'sat' ? requestedExam : getInitialPreferredExam(user)
   const examConfig = useMemo(() => getExamConfig(exam), [exam])
   const examTests = useMemo(() => getTestsForExam(exam), [exam])
   const chapters = useMemo(() => getChaptersForExam(exam), [exam])
@@ -274,7 +274,7 @@ export default function Journey() {
     return (
       <div className="app-layout has-sidebar">
         <Sidebar currentExam={exam} />
-        <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
+        <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#565a63' }}>
           Loading...
         </div>
       </div>
@@ -295,10 +295,10 @@ export default function Journey() {
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
             <div>
               <h1 style={{
-                fontFamily: 'Sora, sans-serif',
+                fontFamily: 'Fraunces, Georgia, serif',
                 fontSize: 24,
-                fontWeight: 900,
-                color: '#1a2744',
+                fontWeight: 600,
+                color: '#16181d',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
@@ -311,15 +311,15 @@ export default function Journey() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
+                  background: '#0284c7',
                   color: 'white',
-                  boxShadow: '0 3px 10px rgba(14,165,233,.25)',
+                  boxShadow: '0 1px 3px rgba(22,24,29,.06)',
                 }}>
                   <Icon name="calendar" size={18} />
                 </span>
                 Smart Journey
               </h1>
-              <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+              <p style={{ color: '#565a63', fontSize: 14, lineHeight: 1.6, margin: 0 }}>
                 Your personalized {examConfig.label} study plan overview. Complete each step to unlock the Final Test.
               </p>
             </div>
@@ -344,26 +344,26 @@ export default function Journey() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 14 }}>
             <div>
-              <div style={{ fontFamily: 'Sora, sans-serif', fontSize: 16, fontWeight: 900, color: '#1a2744', marginBottom: 4 }}>
+              <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 16, fontWeight: 600, color: '#16181d', marginBottom: 4 }}>
                 Journey Progress
               </div>
-              <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+              <div style={{ fontSize: 13, color: '#565a63', lineHeight: 1.5 }}>
                 {stepsCompleted} of {journeySteps.length} milestones completed
                 {hasTakenPretest && schedule ? ` · ${completedTasks.length} of ${totalTasks} study tasks done` : ''}
               </div>
             </div>
             <div style={{
-              fontFamily: 'Sora, sans-serif',
+              fontFamily: 'Fraunces, Georgia, serif',
               fontSize: 28,
-              fontWeight: 900,
-              color: stepsPct >= 80 ? '#10b981' : stepsPct >= 40 ? '#f59e0b' : '#0ea5e9',
+              fontWeight: 600,
+              color: stepsPct >= 80 ? '#10b981' : stepsPct >= 40 ? '#f59e0b' : '#0284c7',
             }}>
               {stepsPct}%
             </div>
           </div>
           <div style={{
             height: 12,
-            background: '#f1f5f9',
+            background: '#f3f0e9',
             borderRadius: 999,
             overflow: 'hidden',
           }}>
@@ -377,8 +377,8 @@ export default function Journey() {
                 background: stepsPct >= 80
                   ? 'linear-gradient(90deg, #10b981, #059669)'
                   : stepsPct >= 40
-                    ? 'linear-gradient(90deg, #f59e0b, #d97706)'
-                    : 'linear-gradient(90deg, #0ea5e9, #0284c7)',
+                    ? '#d97706'
+                    : '#0284c7',
               }}
             />
           </div>
@@ -386,11 +386,11 @@ export default function Journey() {
           {/* Study guide sub-progress */}
           {hasTakenPretest && (
             <div style={{ marginTop: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b', fontWeight: 800, marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#565a63', fontWeight: 600, marginBottom: 6 }}>
                 <span>Study Guide Chapters</span>
                 <span>{studiedCount}/{examConfig.guideCompletionTarget}</span>
               </div>
-              <div style={{ height: 6, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{ height: 6, background: '#f3f0e9', borderRadius: 999, overflow: 'hidden' }}>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(100, studiedPct)}%` }}
@@ -408,11 +408,11 @@ export default function Journey() {
           {/* Task-level progress when schedule exists */}
           {hasTakenPretest && schedule && totalTasks > 0 && (
             <div style={{ marginTop: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b', fontWeight: 800, marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#565a63', fontWeight: 600, marginBottom: 6 }}>
                 <span>Study Tasks Completed</span>
                 <span>{completedTasks.length}/{totalTasks}</span>
               </div>
-              <div style={{ height: 6, background: '#f1f5f9', borderRadius: 999, overflow: 'hidden' }}>
+              <div style={{ height: 6, background: '#f3f0e9', borderRadius: 999, overflow: 'hidden' }}>
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(100, overallPct)}%` }}
@@ -420,7 +420,7 @@ export default function Journey() {
                   style={{
                     height: '100%',
                     borderRadius: 999,
-                    background: overallPct >= 80 ? '#10b981' : overallPct >= 40 ? '#f59e0b' : '#0ea5e9',
+                    background: overallPct >= 80 ? '#10b981' : overallPct >= 40 ? '#f59e0b' : '#0284c7',
                   }}
                 />
               </div>
@@ -437,10 +437,10 @@ export default function Journey() {
           style={{ marginBottom: 24, padding: '20px 24px' }}
         >
           <h2 style={{
-            fontFamily: 'Sora, sans-serif',
+            fontFamily: 'Fraunces, Georgia, serif',
             fontSize: 17,
-            fontWeight: 900,
-            color: '#1a2744',
+            fontWeight: 600,
+            color: '#16181d',
             marginBottom: 6,
             display: 'flex',
             alignItems: 'center',
@@ -453,15 +453,15 @@ export default function Journey() {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'linear-gradient(135deg, #0ea5e9, #0ea5e9cc)',
+              background: '#0284c7',
               color: 'white',
-              boxShadow: '0 3px 10px rgba(14,165,233,.2)',
+              boxShadow: '0 1px 3px rgba(22,24,29,.06)',
             }}>
               <Icon name="task" size={16} />
             </span>
             Milestones
           </h2>
-          <p style={{ color: '#64748b', fontSize: 13, lineHeight: 1.6, margin: '0 0 18px 0' }}>
+          <p style={{ color: '#565a63', fontSize: 13, lineHeight: 1.6, margin: '0 0 18px 0' }}>
             Complete these steps in order to be fully prepared for the final test.
           </p>
 
@@ -478,7 +478,7 @@ export default function Journey() {
               top: 6,
               bottom: 6,
               width: 2,
-              background: 'linear-gradient(180deg, #0ea5e9, #e2e8f0)',
+              background: 'linear-gradient(180deg, #0284c7, #e4e0d5)',
               borderRadius: 999,
             }} />
 
@@ -495,7 +495,7 @@ export default function Journey() {
                     width: 14,
                     height: 14,
                     borderRadius: '50%',
-                    background: step.status === 'DONE' ? '#10b981' : step.status === 'IN PROGRESS' ? '#f59e0b' : '#e2e8f0',
+                    background: step.status === 'DONE' ? '#10b981' : step.status === 'IN PROGRESS' ? '#f59e0b' : '#e4e0d5',
                     border: `2px solid ${step.status === 'DONE' ? '#10b981' : step.status === 'IN PROGRESS' ? '#f59e0b' : '#cbd5e1'}`,
                     display: 'flex',
                     alignItems: 'center',
@@ -516,21 +516,21 @@ export default function Journey() {
                       display: 'block',
                       textDecoration: 'none',
                       color: 'inherit',
-                      border: '1px solid rgba(14,165,233,.12)',
+                      border: '1px solid rgba(2,132,199,.12)',
                       borderLeft: `4px solid ${borderColor(step.status)}`,
-                      borderRadius: 14,
+                      borderRadius: 12,
                       padding: '16px 18px',
-                      background: disabled ? '#f8fafc' : '#ffffff',
+                      background: disabled ? '#f7f5ef' : '#ffffff',
                       cursor: disabled ? 'not-allowed' : 'pointer',
                       opacity: disabled ? 0.6 : 1,
                       transition: 'box-shadow .2s ease, transform .15s ease',
-                      boxShadow: '0 1px 4px rgba(15,23,42,.04)',
+                      boxShadow: '0 1px 4px rgba(22,24,29,.04)',
                     }}
                     onMouseEnter={(e) => {
-                      if (!disabled) e.currentTarget.style.boxShadow = '0 4px 16px rgba(14,165,233,.12)'
+                      if (!disabled) e.currentTarget.style.boxShadow = '0 1px 3px rgba(22,24,29,.06)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(15,23,42,.04)'
+                      e.currentTarget.style.boxShadow = '0 1px 4px rgba(22,24,29,.04)'
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
@@ -546,17 +546,17 @@ export default function Journey() {
                             ? 'rgba(16,185,129,.15)'
                             : step.status === 'IN PROGRESS'
                               ? 'rgba(245,158,11,.15)'
-                              : 'rgba(148,163,184,.12)',
+                              : 'rgba(138,143,152,.12)',
                           color: color,
                           flexShrink: 0,
                         }}>
                           <Icon name={statusIcon(step.status)} size={15} />
                         </span>
-                        <div style={{ fontWeight: 900, color: '#0f172a', fontSize: 14 }}>{step.title}</div>
+                        <div style={{ fontWeight: 600, color: '#16181d', fontSize: 14 }}>{step.title}</div>
                       </div>
                       <div style={{
                         fontSize: 11,
-                        fontWeight: 900,
+                        fontWeight: 600,
                         color: color,
                         background: statusBg(step.status),
                         padding: '4px 12px',
@@ -567,7 +567,7 @@ export default function Journey() {
                         {step.status}
                       </div>
                     </div>
-                    <div style={{ marginTop: 8, color: '#64748b', fontSize: 13, lineHeight: 1.6, paddingLeft: 40 }}>
+                    <div style={{ marginTop: 8, color: '#565a63', fontSize: 13, lineHeight: 1.6, paddingLeft: 40 }}>
                       {step.desc}
                     </div>
                   </Link>
@@ -588,9 +588,9 @@ export default function Journey() {
                   padding: '8px 16px',
                   borderRadius: 10,
                   fontSize: 12,
-                  fontWeight: 900,
-                  background: unlocked ? 'rgba(16,185,129,.12)' : 'rgba(148,163,184,.10)',
-                  color: unlocked ? '#059669' : '#94a3b8',
+                  fontWeight: 600,
+                  background: unlocked ? 'rgba(16,185,129,.12)' : 'rgba(138,143,152,.10)',
+                  color: unlocked ? '#059669' : '#8a8f98',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 6,
@@ -615,20 +615,20 @@ export default function Journey() {
             <div style={{
               width: 56,
               height: 56,
-              borderRadius: 16,
+              borderRadius: 12,
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: 'linear-gradient(135deg, rgba(14,165,233,.12), rgba(99,102,241,.10))',
-              color: '#0ea5e9',
+              background: '#faf9f6',
+              color: '#0284c7',
               marginBottom: 16,
             }}>
               <Icon name="test" size={26} />
             </div>
-            <h3 style={{ fontFamily: 'Sora, sans-serif', fontSize: 18, fontWeight: 900, color: '#1a2744', marginBottom: 8 }}>
+            <h3 style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 18, fontWeight: 600, color: '#16181d', marginBottom: 8 }}>
               Take the Pre Test to Begin
             </h3>
-            <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.7, maxWidth: 460, margin: '0 auto 20px' }}>
+            <p style={{ color: '#565a63', fontSize: 14, lineHeight: 1.7, maxWidth: 460, margin: '0 auto 20px' }}>
               Your Smart Journey generates a personalized study plan after you complete the {examConfig.label} Pre Test.
               Each chapter and review task is tailored to your weak topics.
             </p>
@@ -636,9 +636,9 @@ export default function Journey() {
               to={viewHref('/dashboard')}
               className="btn"
               style={{
-                background: 'linear-gradient(135deg, #0ea5e9, #0369a1)',
+                background: '#0284c7',
                 color: 'white',
-                fontWeight: 800,
+                fontWeight: 600,
                 padding: '12px 24px',
                 fontSize: 14,
               }}
@@ -655,10 +655,10 @@ export default function Journey() {
             style={{ marginBottom: 24, padding: '20px 24px' }}
           >
             <h2 style={{
-              fontFamily: 'Sora, sans-serif',
+              fontFamily: 'Fraunces, Georgia, serif',
               fontSize: 17,
-              fontWeight: 900,
-              color: '#1a2744',
+              fontWeight: 600,
+              color: '#16181d',
               marginBottom: 6,
               display: 'flex',
               alignItems: 'center',
@@ -671,15 +671,15 @@ export default function Journey() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                background: '#d97706',
                 color: 'white',
-                boxShadow: '0 3px 10px rgba(245,158,11,.2)',
+                boxShadow: '0 1px 3px rgba(22,24,29,.06)',
               }}>
                 <Icon name="guide" size={16} />
               </span>
               Study Tasks
             </h2>
-            <p style={{ color: '#64748b', fontSize: 13, lineHeight: 1.6, margin: '0 0 18px 0' }}>
+            <p style={{ color: '#565a63', fontSize: 13, lineHeight: 1.6, margin: '0 0 18px 0' }}>
               {completedTasks.length} of {totalTasks} tasks completed. Click any task to jump to that chapter or review set.
             </p>
 
@@ -692,7 +692,7 @@ export default function Journey() {
               {allTasks.map((task, idx) => {
                 const isDone = Boolean(task.completed)
                 const isGuide = task.type === 'guide'
-                const accentColor = isDone ? '#10b981' : isGuide ? '#0ea5e9' : '#f59e0b'
+                const accentColor = isDone ? '#10b981' : isGuide ? '#0284c7' : '#f59e0b'
                 const href = isGuide
                   ? viewHref(task.href)
                   : viewHref(task.href || '/mistakes')
@@ -708,7 +708,7 @@ export default function Journey() {
                         padding: '14px 16px',
                         borderRadius: 12,
                         borderLeft: `4px solid ${isDone ? '#10b981' : accentColor}`,
-                        border: isDone ? '1px solid rgba(16,185,129,.25)' : '1px solid #f1f5f9',
+                        border: isDone ? '1px solid rgba(16,185,129,.25)' : '1px solid #f3f0e9',
                         borderLeftWidth: 4,
                         borderLeftStyle: 'solid',
                         borderLeftColor: isDone ? '#10b981' : accentColor,
@@ -716,13 +716,13 @@ export default function Journey() {
                         textDecoration: 'none',
                         color: 'inherit',
                         transition: 'box-shadow .2s ease',
-                        boxShadow: '0 1px 3px rgba(15,23,42,.03)',
+                        boxShadow: '0 1px 3px rgba(22,24,29,.03)',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = '0 3px 12px rgba(14,165,233,.08)'
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(22,24,29,.06)'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(15,23,42,.03)'
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(22,24,29,.03)'
                       }}
                     >
                       <span style={{
@@ -734,25 +734,25 @@ export default function Journey() {
                         justifyContent: 'center',
                         background: isDone
                           ? 'rgba(16,185,129,.15)'
-                          : `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
+                          : accentColor,
                         color: isDone ? '#10b981' : 'white',
                         flexShrink: 0,
-                        boxShadow: isDone ? 'none' : `0 2px 8px ${accentColor}30`,
+                        boxShadow: isDone ? 'none' : '0 1px 3px rgba(22,24,29,.06)',
                       }}>
                         <Icon name={isDone ? 'check' : (isGuide ? 'guide' : 'mistakes')} size={15} />
                       </span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{
-                          fontWeight: 900,
+                          fontWeight: 600,
                           fontSize: 13,
-                          color: isDone ? '#059669' : '#0f172a',
+                          color: isDone ? '#059669' : '#16181d',
                           lineHeight: 1.35,
                         }}>
                           {isDone ? '\u2713 ' : ''}{task.title}
                         </div>
                         <div style={{
                           fontSize: 12,
-                          color: isDone ? '#6ee7b7' : '#64748b',
+                          color: isDone ? '#6ee7b7' : '#565a63',
                           lineHeight: 1.5,
                           marginTop: 2,
                         }}>
@@ -763,8 +763,8 @@ export default function Journey() {
                         {!isDone && task.estimatedMinutes > 0 && (
                           <span style={{
                             fontSize: 11,
-                            fontWeight: 800,
-                            color: '#94a3b8',
+                            fontWeight: 600,
+                            color: '#8a8f98',
                             whiteSpace: 'nowrap',
                           }}>
                             ~{task.estimatedMinutes}m
@@ -772,10 +772,10 @@ export default function Journey() {
                         )}
                         <span style={{
                           fontSize: 11,
-                          fontWeight: 900,
+                          fontWeight: 600,
                           padding: '3px 10px',
                           borderRadius: 999,
-                          background: isDone ? 'rgba(16,185,129,.10)' : isGuide ? 'rgba(14,165,233,.08)' : 'rgba(245,158,11,.08)',
+                          background: isDone ? 'rgba(16,185,129,.10)' : isGuide ? 'rgba(2,132,199,.08)' : 'rgba(245,158,11,.08)',
                           color: isDone ? '#10b981' : accentColor,
                           whiteSpace: 'nowrap',
                         }}>
@@ -796,8 +796,8 @@ export default function Journey() {
             className="card"
             style={{ padding: '24px', textAlign: 'center' }}
           >
-            <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.6 }}>
-              Set your test date on the <Link to={viewHref('/calendar')} style={{ color: '#0ea5e9', fontWeight: 700 }}>Calendar</Link> page to generate your day-by-day study tasks.
+            <p style={{ color: '#565a63', fontSize: 14, lineHeight: 1.6 }}>
+              Set your test date on the <Link to={viewHref('/calendar')} style={{ color: '#0284c7', fontWeight: 700 }}>Calendar</Link> page to generate your day-by-day study tasks.
             </p>
           </motion.div>
         )}

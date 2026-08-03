@@ -10,18 +10,7 @@ import {
 } from './testData.js'
 import { EXTRA_PDF_PAGE_MAPS } from './extraPdfPageMaps.js'
 import { GUIDE_CONTENT } from './guideContent.js'
-import {
-  ACT_ANSWER_KEYS,
-  ACT_CHAPTERS,
-  ACT_MODULES,
-  ACT_MODULE_ORDER,
-  ACT_QUESTION_CHAPTER_MAP,
-  ACT_SECTION_PAGE_RANGES,
-  actScoreToPercentile,
-  rawToActScaled,
-} from './actData.js'
-import { ACT_GUIDE_CONTENT } from './actGuideContent.js'
-import { ACT_TESTS, getExamFromTestId, SAT_TESTS } from './tests.js'
+import { SAT_TESTS } from './tests.js'
 
 // Derive SAT section page ranges from the per-question page maps
 function buildSatSectionRanges() {
@@ -75,25 +64,7 @@ export function satScoreToPercentile(score) {
   return interpolateScore(Number(score || 0), SAT_PERCENTILES)
 }
 
-export function getExamConfig(exam = 'sat') {
-  if (exam === 'act') {
-    return {
-      exam: 'act',
-      label: 'ACT',
-      tests: ACT_TESTS,
-      preTestId: 'act1',
-      finalTestId: 'act10',
-      modules: ACT_MODULES,
-      moduleOrder: ACT_MODULE_ORDER,
-      chapters: ACT_CHAPTERS,
-      questionChapterMap: ACT_QUESTION_CHAPTER_MAP,
-      guideContent: ACT_GUIDE_CONTENT,
-      answerKey: ACT_ANSWER_KEYS,
-      viewerMode: 'stack',
-      sectionPageRanges: ACT_SECTION_PAGE_RANGES,
-      guideCompletionTarget: Object.keys(ACT_CHAPTERS).length,
-    }
-  }
+export function getExamConfig() {
   return {
     exam: 'sat',
     label: 'SAT',
@@ -112,36 +83,32 @@ export function getExamConfig(exam = 'sat') {
   }
 }
 
-export function getExamConfigForTest(testId) {
-  return getExamConfig(getExamFromTestId(testId))
+export function getExamConfigForTest() {
+  return getExamConfig()
 }
 
-export function getGuideContentForExam(exam = 'sat') {
-  return getExamConfig(exam).guideContent
+export function getGuideContentForExam() {
+  return getExamConfig().guideContent
 }
 
-export function getChaptersForExam(exam = 'sat') {
-  return getExamConfig(exam).chapters
+export function getChaptersForExam() {
+  return getExamConfig().chapters
 }
 
-export function getModulesForTest(testId) {
-  return getExamConfigForTest(testId).modules
+export function getModulesForTest() {
+  return getExamConfig().modules
 }
 
-export function getModuleOrderForTest(testId) {
-  return getExamConfigForTest(testId).moduleOrder
+export function getModuleOrderForTest() {
+  return getExamConfig().moduleOrder
 }
 
-export function getQuestionChapterMapForTest(testId) {
-  return getExamConfigForTest(testId).questionChapterMap
-}
-
-export function getPdfViewerModeForTest(testId) {
-  return getExamConfigForTest(testId).viewerMode
+export function getQuestionChapterMapForTest() {
+  return getExamConfig().questionChapterMap
 }
 
 export function getSectionPageRangesForTest(testId) {
-  return getExamConfigForTest(testId).sectionPageRanges?.[String(testId || '')] || null
+  return getExamConfig().sectionPageRanges?.[String(testId || '')] || null
 }
 
 export function getDefaultModuleTimeRemaining(testId) {
@@ -156,13 +123,8 @@ export function getQuestionCountForTest(testId) {
   return (cfg.moduleOrder || []).reduce((sum, moduleId) => sum + Number(cfg.modules?.[moduleId]?.questions || 0), 0)
 }
 
-export function getChoiceOptionsForQuestion(testId, moduleId, questionNumber) {
-  const exam = getExamFromTestId(testId)
-  const qNum = Number(questionNumber || 0)
-  if (exam !== 'act') return ['A', 'B', 'C', 'D']
-  const isEven = qNum % 2 === 0
-  if (moduleId === 'act_math') return isEven ? ['F', 'G', 'H', 'J', 'K'] : ['A', 'B', 'C', 'D', 'E']
-  return isEven ? ['F', 'G', 'H', 'J'] : ['A', 'B', 'C', 'D']
+export function getChoiceOptionsForQuestion() {
+  return ['A', 'B', 'C', 'D']
 }
 
 export function formatDurationMinutes(totalSeconds = 0) {
@@ -174,16 +136,7 @@ export function formatDurationMinutes(totalSeconds = 0) {
   return `${minutes} min`
 }
 
-export function getScoreColumnsForExam(exam = 'sat') {
-  if (exam === 'act') {
-    return [
-      { key: 'english', label: 'English' },
-      { key: 'math', label: 'Math' },
-      { key: 'reading', label: 'Reading' },
-      { key: 'science', label: 'Science' },
-      { key: 'total', label: 'Composite' },
-    ]
-  }
+export function getScoreColumnsForExam() {
   return [
     { key: 'rw', label: 'R&W' },
     { key: 'math', label: 'Math' },
@@ -192,8 +145,7 @@ export function getScoreColumnsForExam(exam = 'sat') {
 }
 
 export function scoreAttemptFromKey(testId, answers, keyBySection) {
-  const exam = getExamFromTestId(testId)
-  const cfg = getExamConfig(exam)
+  const cfg = getExamConfig()
   const modules = cfg.modules
   const order = cfg.moduleOrder
   const result = {}
@@ -211,25 +163,6 @@ export function scoreAttemptFromKey(testId, answers, keyBySection) {
     }
     totalCorrect += correct
     result[section] = { correct, total, wrong: Math.max(0, total - correct) }
-  }
-
-  if (exam === 'act') {
-    const scaled = rawToActScaled(
-      result.act_english?.correct || 0,
-      result.act_math?.correct || 0,
-      result.act_reading?.correct || 0,
-      result.act_science?.correct || 0,
-    )
-    return {
-      ...scaled,
-      sections: {
-        english: scaled.english,
-        math: scaled.math,
-        reading: scaled.reading,
-        science: scaled.science,
-      },
-      raw: totalCorrect,
-    }
   }
 
   const scaled = rawToSatScaled(
@@ -269,5 +202,5 @@ export function calcWeakTopicsForTest(testId, answers, keyBySection) {
 }
 
 export function scoreToPercentile(exam, score) {
-  return exam === 'act' ? actScoreToPercentile(score) : satScoreToPercentile(score)
+  return satScoreToPercentile(score)
 }
