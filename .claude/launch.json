@@ -28,6 +28,19 @@
       "port": 5223
     },
     {
+      "name": "agora-dev-d",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5251",
+        "--strictPort"
+      ],
+      "port": 5251
+    },
+    {
       "name": "agora-dev-c",
       "runtimeExecutable": "npm",
       "runtimeArgs": [

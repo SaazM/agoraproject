@@ -33,10 +33,12 @@ export default function Login() {
     if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       setError('Please enter a valid email address'); setLoading(false); return
     }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters'); setLoading(false); return
-    }
     if (mode === 'signup') {
+      // Length is only our rule for new accounts — on sign-in, let the server
+      // judge, so existing accounts with shorter passwords aren't locked out.
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters'); setLoading(false); return
+      }
       if (!fullName.trim()) { setError('Please enter your full name'); setLoading(false); return }
       if (fullName.trim().length > 100) { setError('Name must be 100 characters or fewer'); setLoading(false); return }
       if (affiliation.trim().length > 100) { setError('Affiliation must be 100 characters or fewer'); setLoading(false); return }
@@ -147,7 +149,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={mode === 'signup' ? 'At least 8 characters' : '••••••••'}
-                  minLength={8}
+                  minLength={mode === 'signup' ? 8 : undefined}
                   required
                   autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, createContext, useContext } from 'react'
+import { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react'
 import Icon from './AppIcons.jsx'
 
 const ToastContext = createContext(null)
@@ -9,13 +9,21 @@ export function useToast() {
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
+  const timersRef = useRef(new Set())
+
+  useEffect(() => {
+    const timers = timersRef.current
+    return () => { for (const t of timers) clearTimeout(t) }
+  }, [])
 
   const addToast = useCallback((message, type = 'success') => {
     const id = Date.now() + Math.random()
     setToasts((prev) => [...prev, { id, message, type }])
-    setTimeout(() => {
+    const timer = setTimeout(() => {
+      timersRef.current.delete(timer)
       setToasts((prev) => prev.filter((t) => t.id !== id))
     }, 3500)
+    timersRef.current.add(timer)
   }, [])
 
   return (

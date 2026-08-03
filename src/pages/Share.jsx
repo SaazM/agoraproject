@@ -32,7 +32,10 @@ export default function Share() {
     }
   }, [report?.series])
 
-  if (!report) {
+  // A hand-edited or truncated `r` param can decode to valid JSON that has no
+  // summary object. Treat that as an invalid link rather than letting the
+  // field reads below throw on a public, unauthenticated page.
+  if (!report || !report.summary || typeof report.summary !== 'object') {
     return (
       <div style={{ minHeight: '100vh', padding: 24, background: '#16181d' }}>
         <div style={{ maxWidth: 860, margin: '0 auto', background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.16)', borderRadius: 12, padding: 18, color: 'white' }}>
@@ -72,7 +75,7 @@ export default function Share() {
             { label: 'Best Pre-Test', val: report.summary.best_pretest || '—' },
             { label: 'Post-Test', val: report.summary.latest_post || '—' },
             { label: 'Improvement', val: report.summary.improvement != null ? `+${report.summary.improvement}` : '—' },
-            { label: 'Streak', val: `${report.summary.streak_current} days` },
+            { label: 'Streak', val: report.summary.streak_current != null ? `${report.summary.streak_current} days` : '—' },
           ].map((s) => (
             <div key={s.label} style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.16)', borderRadius: 12, padding: 14, color: 'white' }}>
               <div style={{ opacity: .7, fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.6px' }}>{s.label}</div>
@@ -84,7 +87,7 @@ export default function Share() {
         <div style={{ marginTop: 14, background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.16)', borderRadius: 12, padding: 14, color: 'white' }}>
           <div style={{ fontWeight: 600, marginBottom: 8 }}>Summary</div>
           <div style={{ opacity: .8, fontSize: 13, lineHeight: 1.6 }}>
-            Due reviews: {report.summary.due_reviews}
+            Due reviews: {report.summary.due_reviews ?? '—'}
           </div>
         </div>
 
@@ -107,7 +110,7 @@ export default function Share() {
 
         <div style={{ marginTop: 14, background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.16)', borderRadius: 12, padding: 14, color: 'white' }}>
           <div style={{ fontWeight: 600, marginBottom: 6 }}>Study Guide</div>
-          <div style={{ opacity: .8, fontSize: 13 }}>Completed chapters: <b>{report.summary.studied_count}/34</b></div>
+          <div style={{ opacity: .8, fontSize: 13 }}>Completed chapters: <b>{report.summary.studied_count ?? 0}/34</b></div>
         </div>
       </div>
     </div>

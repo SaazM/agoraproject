@@ -311,6 +311,29 @@ function buildMathHints(parsed, { qNum, isMC, chapterName, concepts, answerChoic
   return [h1, h2, h3]
 }
 
+function buildWritingHints(parsed, { chapterName, concepts }) {
+  const { rwTask, askTarget, quotedPhrases, questionSentence } = parsed
+  const conceptTitles = (concepts || []).map(c => c?.title).filter(Boolean)
+
+  const taskH1 = {
+    'transition': `This is a transition question. Read the sentence before and the sentence after the blank, then ask: does the second idea continue, contrast, or result from the first? Pick the transition that matches that relationship.`,
+    'punctuation': `This is a punctuation question. Identify whether each side of the punctuation mark is an independent clause (a complete sentence). That determines whether you need a period/semicolon, a comma, or no punctuation at all.`,
+    'sentence-combining': `This question asks you to combine sentences. The best version keeps every original idea, avoids redundancy, and uses correct punctuation — usually the shortest grammatically correct choice.`,
+    'sentence-placement': `This is a sentence-placement question. Look for pronoun and logical links: the sentence must come after whatever it refers to and before anything that depends on it.`,
+    'completion': `This question asks for the choice that completes the text logically. Summarize the passage's point in your own words first, then find the choice that matches your summary.`,
+  }
+  const h1 = taskH1[rwTask]
+    || `${chapterName ? `This is a ${chapterName} question. ` : ''}Read the full sentence${questionSentence ? ` — "${truncate(questionSentence, 90)}"` : ''} and decide what the underlined portion needs to do grammatically and logically.`
+
+  const h2 = quotedPhrases?.length
+    ? `Focus on the phrase ${quotedPhrases.slice(0, 2).map(p => `"${truncate(p, 60)}"`).join(' and ')}. Try each answer choice in place and read the sentence aloud in your head — eliminate any choice that creates a grammar error or changes the meaning.`
+    : `${conceptTitles.length ? `Apply the rule for ${conceptTitles[0]}. ` : ''}Eliminate choices that are grammatically wrong first, then among the survivors pick the clearest, most concise option. The SAT prefers shorter answers when everything else is equal.`
+
+  const h3 = `${askTarget ? `To answer "${truncate(askTarget, 70)}": ` : ''}plug your remaining choice back into the sentence and read the surrounding sentences together. It should sound complete, unambiguous, and consistent in tense and number with the rest of the passage.`
+
+  return [h1, h2, h3]
+}
+
 function buildRWHints(parsed, { qNum, chapterName, concepts, isMC }) {
   const { rwTask, askType, askTarget, quotedPhrases, passageSnippets, references, questionSentence, lower } = parsed
   const conceptTitles = (concepts || []).map(c => c?.title).filter(Boolean)
@@ -320,7 +343,7 @@ function buildRWHints(parsed, { qNum, chapterName, concepts, isMC }) {
     || /underlined|replace|revise|which choice/.test(lower)
 
   if (isWritingFocused) {
-    return buildEnglishHints(parsed, { qNum, chapterName, concepts })
+    return buildWritingHints(parsed, { chapterName, concepts })
   }
 
   // Reading-focused SAT R&W questions

@@ -84,11 +84,17 @@ export default function FinalTest() {
         .eq('user_id', user.id)
         .eq('test_id', finalTestId)
         .is('completed_at', null)
-        .order('created_at', { ascending: false })
+        .order('started_at', { ascending: false })
         .limit(1)
         .maybeSingle()
       if (existing?.data?.id) {
         navigate(`/test/${existing.data.id}`)
+        return
+      }
+      // A failed lookup must not fall through to insert — that would create a
+      // duplicate in-progress attempt on a transient query error.
+      if (existing?.error) {
+        alert('Could not check for an existing attempt. Please try again.')
         return
       }
 

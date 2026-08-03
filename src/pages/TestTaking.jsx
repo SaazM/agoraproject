@@ -18,23 +18,31 @@ import {
 function Timer({ seconds, onExpire, onTick }) {
   const [timeLeft, setTimeLeft] = useState(seconds)
   const [hidden, setHidden] = useState(false)
-  const intervalRef = useRef(null)
+  // Keep callbacks in refs so parent re-renders (new prop identities) never
+  // tear down the interval — otherwise interaction faster than 1/s stalls the clock.
+  const onExpireRef = useRef(onExpire)
+  const onTickRef = useRef(onTick)
+  onExpireRef.current = onExpire
+  onTickRef.current = onTick
 
   useEffect(() => {
+    // Anchor to a wall-clock deadline so render churn and tab throttling can't slow it.
+    const deadline = Date.now() + seconds * 1000
     setTimeLeft(seconds)
-    if (onTick) onTick(seconds)
+    if (onTickRef.current) onTickRef.current(seconds)
+    let expired = false
+    const id = setInterval(() => {
+      const left = Math.max(0, Math.round((deadline - Date.now()) / 1000))
+      setTimeLeft(left)
+      if (onTickRef.current) onTickRef.current(left)
+      if (left <= 0 && !expired) {
+        expired = true
+        clearInterval(id)
+        onExpireRef.current()
+      }
+    }, 250)
+    return () => clearInterval(id)
   }, [seconds])
-
-  useEffect(() => {
-    intervalRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) { clearInterval(intervalRef.current); onExpire(); return 0 }
-        if (onTick) onTick(t - 1)
-        return t - 1
-      })
-    }, 1000)
-    return () => clearInterval(intervalRef.current)
-  }, [onExpire, onTick])
 
   const mins = Math.floor(timeLeft / 60)
   const secs = timeLeft % 60
@@ -172,6 +180,7 @@ export default function TestTaking() {
   const lastSaveAt = useRef(0)
   const pendingSave = useRef(null)
   const saveInFlight = useRef(false)
+  const submittingRef = useRef(false)
 
   // Tutors should not take tests — redirect to dashboard
   useEffect(() => {
@@ -205,6 +214,31 @@ export default function TestTaking() {
     } catch {
       return null
     }
+  }
+
+  // The local draft is written on every answer, while server saves are throttled
+  // (a refresh can drop up to ~8s of them). Merge the draft over the server row.
+  function mergeDraftAnswers(serverAnswers, draft) {
+    if (!draft || draft.attemptId !== attemptId) return serverAnswers || {}
+    const merged = { ...(serverAnswers || {}) }
+    for (const [mod, qs] of Object.entries(draft.answers || {})) {
+      merged[mod] = { ...(merged[mod] || {}), ...(qs || {}) }
+    }
+    return merged
+  }
+
+  // Per-module minimum of server vs draft time remaining — the fresher value is
+  // always the lower one, and min() also avoids granting extra time.
+  function mergeDraftTime(serverTime, draft, fallback) {
+    const base = serverTime || fallback
+    if (!draft || draft.attemptId !== attemptId || !draft.module_time_remaining) return base
+    const merged = { ...(base || {}) }
+    for (const [mod, t] of Object.entries(draft.module_time_remaining)) {
+      const a = Number(merged[mod])
+      const b = Number(t)
+      if (Number.isFinite(b)) merged[mod] = Number.isFinite(a) ? Math.min(a, b) : b
+    }
+    return merged
   }
 
   const currentTestId = attempt?.test_id || testConfig?.id || 'pre_test'
@@ -250,11 +284,12 @@ export default function TestTaking() {
         const defaultModule = getExamConfigForTest(data.test_id || cfg?.id || 'pre_test').moduleOrder[0]
         setTestConfig(cfg)
         const last = readLastOpen()
+        const draft = readDraft()
         const mod = last?.current_section || data.current_section || defaultModule
         setCurrentModule(mod)
         setCurrentQ(Number(last?.current_q) || 1)
-        setAnswers(data.answers || {})
-        setModuleTimeLeft(data.module_time_remaining || getDefaultModuleTimeRemaining(data.test_id || cfg?.id || 'pre_test'))
+        setAnswers(mergeDraftAnswers(data.answers, draft))
+        setModuleTimeLeft(mergeDraftTime(data.module_time_remaining, draft, getDefaultModuleTimeRemaining(data.test_id || cfg?.id || 'pre_test')))
         setLoading(false)
       })
       .catch(() => {
@@ -373,13 +408,29 @@ export default function TestTaking() {
   }
 
   useEffect(() => {
+    // Don't record the position until the attempt has loaded — the initial
+    // (null, 1) state would clobber the stored resume point before it's read.
+    if (loading || !currentModule) return
     writeLastOpen({ current_section: currentModule, current_q: currentQ })
-  }, [currentModule, currentQ])
+  }, [currentModule, currentQ, loading])
+
+  // Keep the latest flushSave reachable from listeners registered once on mount.
+  const flushSaveRef = useRef(null)
+  flushSaveRef.current = flushSave
 
   useEffect(() => {
-    return () => {
+    const flushNow = () => {
       clearTimeout(saveTimer.current)
-      flushSave()
+      flushSaveRef.current?.()
+    }
+    // React unmount cleanups don't run on refresh/tab close — flush there too.
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flushNow() }
+    window.addEventListener('pagehide', flushNow)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('pagehide', flushNow)
+      document.removeEventListener('visibilitychange', onVisibility)
+      flushNow()
     }
   }, [])
 
@@ -424,6 +475,9 @@ export default function TestTaking() {
       } else {
         setCurrentModule(nextMod)
         setCurrentQ(1)
+        // Clear the stale previous-module countdown so a save fired before the new
+        // Timer's first tick can't record the old time under the new module key.
+        setTimerLeft(null)
         const nextTimes = { ...(moduleTimeLeft || {}), [currentModule]: timerLeft ?? moduleTimeLeft?.[currentModule] }
         setModuleTimeLeft(nextTimes)
         await saveProgress(answers, nextMod, nextTimes)
@@ -437,14 +491,19 @@ export default function TestTaking() {
     setShowBreak(false)
     setCurrentModule(nextMod)
     setCurrentQ(1)
+    setTimerLeft(null)
     await saveProgress(answers, nextMod, moduleTimeLeft)
   }
 
   async function submitTest() {
+    // Reentrancy guard: timer expiry and the Submit buttons can fire concurrently,
+    // which would duplicate mistake-notebook rows. State lags, so use a ref.
+    if (submittingRef.current) return
     if (typeof navigator !== 'undefined' && navigator && navigator.onLine === false) {
       alert('You appear to be offline. Reconnect to submit your test. Your answers are saved on this device.')
       return
     }
+    submittingRef.current = true
     setSubmitting(true)
     const testId = attempt?.test_id || testConfig?.id || 'pre_test'
     const scores = scoreAttemptFromKey(testId, answers, keyBySection || {})
@@ -456,9 +515,12 @@ export default function TestTaking() {
       scores,
       // Store the full set so domain/topic charts are accurate (avoid truncating to top N).
       weak_topics: weakTopics.slice(0, 250),
-    }).eq('id', attemptId)
-    if (up.error) {
-      alert(up.error.message || 'Could not submit test. Please try again.')
+    }).eq('id', attemptId).eq('user_id', user.id).select('id')
+    // A 0-row update returns no error (e.g. the offline-fallback attempt never
+    // existed server-side) — treat it as a failed submit instead of losing answers.
+    if (up.error || !up.data?.length) {
+      alert(up.error?.message || 'Could not submit test — your attempt was not found on the server. Your answers are saved on this device; please check your connection and try again.')
+      submittingRef.current = false
       setSubmitting(false)
       return
     }

@@ -40,7 +40,7 @@ function SectionBreakdown({ answers, keyBySection, moduleOrder, modules }) {
           if (ok) correct++
         })
         const answered = Object.keys(sAnswers).length
-        const pct = Math.round((correct / s.total) * 100)
+        const pct = s.total > 0 ? Math.round((correct / s.total) * 100) : 0
         return (
           <div key={s.key} className="card" style={{ padding: 16 }}>
             <div style={{ fontSize: 12, fontWeight: 600, color: '#565a63', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>{s.label}</div>

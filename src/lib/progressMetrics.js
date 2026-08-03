@@ -3,6 +3,9 @@ function pad2(n) {
 }
 
 export function toLocalDateKey(d) {
+  // new Date(null) is the epoch, which passes the finite check — a null
+  // completed_at must not become a phantom 1970 activity day.
+  if (d == null) return null
   const dt = (d instanceof Date) ? d : new Date(d)
   if (!Number.isFinite(dt.getTime())) return null
   return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`
@@ -47,10 +50,12 @@ export function computeStreak(activityKeys, now = new Date()) {
     prev = k
   }
 
-  // Current streak ending today (or yesterday if no activity today)
+  // Current streak ending today (or yesterday if no activity today) — a streak
+  // shouldn't read 0 every morning before the student's first activity.
   let current = 0
   const cursor = new Date(now)
   cursor.setHours(0, 0, 0, 0)
+  if (!set.has(toLocalDateKey(cursor))) cursor.setDate(cursor.getDate() - 1)
 
   for (let i = 0; i < 3650; i++) { // hard cap ~10 years
     const key = toLocalDateKey(cursor)

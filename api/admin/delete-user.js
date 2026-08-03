@@ -50,7 +50,6 @@ export default async function handler(req, res) {
     const { data: u, error: uErr } = await admin.auth.getUser(token)
     if (uErr || !u?.user?.id) return json(res, 401, { error: 'Invalid session' })
     const requesterId = u.user.id
-    const requesterEmail = String(u.user.email || '').toLowerCase()
 
     const { data: prof, error: pErr } = await admin
       .from('profiles')
@@ -59,9 +58,7 @@ export default async function handler(req, res) {
       .maybeSingle()
     if (pErr || !prof) return json(res, 403, { error: 'Not authorized' })
 
-    const isAdmin = String(prof.email || '').toLowerCase() === 'agora@admin.edu'
-      && requesterEmail === 'agora@admin.edu'
-    if (!isAdmin) return json(res, 403, { error: 'Not authorized' })
+    if (prof.role !== 'admin') return json(res, 403, { error: 'Not authorized' })
 
     if (targetUserId === requesterId) {
       return json(res, 400, { error: 'Cannot delete your own admin account' })

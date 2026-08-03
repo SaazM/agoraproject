@@ -30,6 +30,11 @@ export default function ResetPassword() {
         } else if (access_token && refresh_token) {
           const { error } = await supabase.auth.setSession({ access_token, refresh_token })
           if (error) throw error
+        } else {
+          // No recovery token in the URL — do NOT fall back to an existing
+          // session, or anyone at an unlocked browser could change the password.
+          setStatus({ loading: false, msg: 'This reset link is invalid or expired. Please request a new one.' })
+          return
         }
 
         const { data } = await supabase.auth.getSession()

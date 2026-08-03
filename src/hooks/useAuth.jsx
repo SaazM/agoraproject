@@ -2,8 +2,6 @@ import { useState, useEffect, createContext, useContext } from 'react'
 import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
-const ADMIN_EMAIL = 'agora@admin.edu'
-const ADMIN_PASSWORD = '12345678'
 
 function SupabaseNotConfigured() {
   return (
@@ -140,38 +138,7 @@ export function AuthProvider({ children }) {
     const cleanEmail = String(email || '').trim().toLowerCase().slice(0, 254)
     if (!cleanEmail) return { data: null, error: new Error('Email is required') }
     const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
-    if (!error) return { data, error }
-
-    // Bootstrap the fixed admin account on first login if it doesn't exist yet.
-    const wantsBootstrapAdmin = cleanEmail === ADMIN_EMAIL && password === ADMIN_PASSWORD
-    const errorMsg = String(error.message || '').toLowerCase()
-    const canBootstrap = wantsBootstrapAdmin && (
-      errorMsg.includes('invalid login credentials')
-      || errorMsg.includes('invalid credentials')
-      || errorMsg.includes('email not confirmed')
-    )
-    if (!canBootstrap) return { data, error }
-
-    const signUpRes = await supabase.auth.signUp({
-      email: cleanEmail,
-      password,
-      options: {
-        data: { full_name: 'Agora Admin', role: 'student' },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      }
-    })
-    if (signUpRes.error) {
-      const signupMsg = String(signUpRes.error.message || '').toLowerCase()
-      const alreadyExists = signupMsg.includes('already registered') || signupMsg.includes('already exists')
-      if (!alreadyExists) return signUpRes
-    }
-
-    const retry = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
-    if (!retry.error) return retry
-    return {
-      data: retry.data,
-      error: new Error('Admin account created. If email confirmation is enabled, confirm your email and sign in again.')
-    }
+    return { data, error }
   }
 
   async function signOut() {
@@ -201,7 +168,7 @@ export function AuthProvider({ children }) {
   async function setPreferredExam(exam) {
     if (!supabase) return { data: null, error: new Error('Supabase is not configured') }
     const { data, error } = await supabase.auth.updateUser({
-      data: { preferred_exam: 'sat' },
+      data: { preferred_exam: exam === 'act' ? 'act' : 'sat' },
     })
     if (!error && data?.user) setUser(data.user)
     return { data, error }

@@ -43,9 +43,7 @@ export default function Sidebar({ currentExam = 'sat' }) {
   const { profile, signOut } = useAuth()
   const location = useLocation()
   const role = profile?.role || 'student'
-  const isAdmin = String(profile?.email || '').toLowerCase() === 'agora@admin.edu'
-  const effectiveRole = isAdmin ? 'admin' : role
-  const items = navItems[effectiveRole] || navItems.student
+  const items = navItems[role] || navItems.student
   const firstName = profile?.full_name?.split(' ')[0] || ''
 
   function isActive(to) {

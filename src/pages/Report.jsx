@@ -424,8 +424,12 @@ export default function Report() {
               className="btn btn-outline"
               onClick={async () => {
                 if (!shareUrl) return
-                try { await navigator.clipboard.writeText(shareUrl) } catch {}
-                alert('Share link copied.')
+                try {
+                  await navigator.clipboard.writeText(shareUrl)
+                  alert('Share link copied.')
+                } catch {
+                  window.prompt('Copy the share link:', shareUrl)
+                }
               }}
             >
               Copy share link

@@ -3,8 +3,6 @@ import { getAnswerKeyBySection } from '../../src/data/answerKeys.js'
 import { calcWeakTopicsForTest, scoreAttemptFromKey } from '../../src/data/examData.js'
 import { rateLimit } from '../lib/rateLimit.js'
 
-const ADMIN_EMAIL = 'agora@admin.edu'
-
 function json(res, status, body) {
   res.setHeader('Content-Type', 'application/json')
   res.setHeader('X-Content-Type-Options', 'nosniff')
@@ -57,7 +55,6 @@ export default async function handler(req, res) {
     const { data: userData, error: userErr } = await admin.auth.getUser(token)
     if (userErr || !userData?.user?.id) return json(res, 401, { error: 'Invalid session' })
     const requesterId = userData.user.id
-    const requesterEmail = String(userData.user.email || '').toLowerCase()
 
     const { data: profile, error: profileErr } = await admin
       .from('profiles')
@@ -67,9 +64,7 @@ export default async function handler(req, res) {
 
     if (profileErr || !profile) return json(res, 403, { error: 'Not authorized' })
 
-    const isAdmin = String(profile.email || '').toLowerCase() === ADMIN_EMAIL
-      && requesterEmail === ADMIN_EMAIL
-    if (!isAdmin) return json(res, 403, { error: 'Not authorized' })
+    if (profile.role !== 'admin') return json(res, 403, { error: 'Not authorized' })
 
     const { data: attempts, error: attemptsErr } = await admin
       .from('test_attempts')

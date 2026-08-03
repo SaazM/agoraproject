@@ -37,7 +37,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 function Navbar({ viewUserId, isAdminPreview, currentExam, showResources = false }) {
   const { profile, signOut } = useAuth()
   const navigate = useNavigate()
-  const isAdmin = String(profile?.email || '').toLowerCase() === 'agora@admin.edu'
+  const isAdmin = profile?.role === 'admin'
   const isTutor = profile?.role === 'tutor'
   const calendarHref = withViewUser(withExam('/calendar', currentExam), viewUserId, isAdminPreview)
   const guideHref = withViewUser(withExam('/guide', currentExam), viewUserId, isAdminPreview)
@@ -363,6 +363,12 @@ export default function Dashboard() {
         navigate(`/test/${existing.data.id}`)
         return
       }
+      // A failed lookup must not fall through to insert — that would create a
+      // duplicate in-progress attempt on a transient query error.
+      if (existing?.error) {
+        alert('Could not check for an existing attempt. Please try again.')
+        return
+      }
 
       const payload = {
         user_id: user.id,
@@ -531,7 +537,9 @@ export default function Dashboard() {
   }, [journeySchedule])
 
   useEffect(() => {
-    setUnlockedResources(viewUserId, exam, true)
+    // Resources unlock only once the pretest is done — unconditionally setting
+    // this made the gate a no-op after a single dashboard visit.
+    if (hasTakenPretest) setUnlockedResources(viewUserId, exam, true)
   }, [viewUserId, exam, hasTakenPretest])
 
   // Toast notifications for newly completed tasks
@@ -673,11 +681,11 @@ export default function Dashboard() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 28,
-            padding: '56px 32px',
+            gap: 22,
+            padding: '32px 28px',
             background: '#16181d',
             borderRadius: 12,
-            marginBottom: 0,
+            marginBottom: 24,
             overflow: 'hidden',
             flexWrap: 'wrap',
             maxWidth: '100%',
@@ -691,8 +699,8 @@ export default function Dashboard() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             style={{
-              width: 160,
-              height: 160,
+              width: 96,
+              height: 96,
               flexShrink: 0,
               filter: 'drop-shadow(0 8px 24px rgba(0,0,0,.3))',
             }}
@@ -705,7 +713,7 @@ export default function Dashboard() {
           >
             <div style={{
               fontFamily: 'Fraunces, Georgia, serif',
-              fontSize: 'clamp(28px, 5vw, 52px)',
+              fontSize: 'clamp(22px, 3vw, 32px)',
               fontWeight: 600,
               color: 'white',
               letterSpacing: '-0.02em',
@@ -715,54 +723,15 @@ export default function Dashboard() {
               The Agora Project
             </div>
             <div style={{
-              fontSize: 20,
+              fontSize: 16,
               color: 'rgba(255,255,255,.65)',
               fontWeight: 500,
-              marginTop: 10,
+              marginTop: 8,
             }}>
               Built for speed, focus, and results
             </div>
           </motion.div>
         </motion.div>
-
-        {/* Sliding resource marquee */}
-        <div style={{
-          overflow: 'hidden',
-          background: '#f7f5ef',
-          borderRadius: '0 0 12px 12px',
-          padding: '14px 0',
-          marginBottom: 24,
-          position: 'relative',
-        }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 60, background: 'linear-gradient(90deg, #f7f5ef, transparent)', zIndex: 1 }} />
-          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 60, background: 'linear-gradient(270deg, #f7f5ef, transparent)', zIndex: 1 }} />
-          <motion.div
-            animate={{ x: ['0%', '-50%'] }}
-            transition={{ repeat: Infinity, duration: 25, ease: 'linear' }}
-            style={{ display: 'flex', gap: 32, whiteSpace: 'nowrap', width: 'max-content' }}
-          >
-            {[...Array(2)].map((_, dup) => (
-              <div key={dup} style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
-                {[
-                  'Study Guide', 'Test Strategies', 'More Practice', 'Extra Tests',
-                  'Mistake Notebook', 'Progress Report', 'Tasks', 'Journey Planner',
-                  'College Recruiting', 'Calendar', 'About', 'Settings',
-                ].map((label) => (
-                  <span key={`${dup}-${label}`} style={{
-                    fontFamily: 'Fraunces, Georgia, serif',
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: '#565a63',
-                    display: 'flex', alignItems: 'center', gap: 8,
-                  }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0284c7', flexShrink: 0 }} />
-                    {label}
-                  </span>
-                ))}
-              </div>
-            ))}
-          </motion.div>
-        </div>
 
         {/* Score overview — students only */}
         {!isTutor && (

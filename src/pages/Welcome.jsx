@@ -814,9 +814,6 @@ export default function Welcome() {
   const exam = params.get('exam') || 'sat'
   const role = profile?.role || 'student'
 
-  // Admins already know the platform — skip the welcome tour
-  if (role === 'admin') return <Navigate to="/admin" replace />
-
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
 
@@ -853,6 +850,11 @@ export default function Welcome() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [goNext, goPrev])
+
+  // Admins already know the platform — skip the welcome tour.
+  // (Must come after all hooks: the profile loads asynchronously, so this can
+  // flip on a re-render, and an early return above hooks would crash React.)
+  if (role === 'admin') return <Navigate to="/admin" replace />
 
   function renderStepContent() {
     switch (step) {

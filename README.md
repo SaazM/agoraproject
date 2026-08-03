@@ -63,6 +63,50 @@ npm run dev
 
 The app will open at `http://localhost:5173`. Create an account and you should see the landing page, then login, then the dashboard.
 
+### Step 4b: Run the Test Suite (optional but recommended)
+
+End-to-end tests live in `tests/e2e/` and run on Playwright. The first run needs a
+one-time browser download:
+
+```bash
+npx playwright install chromium
+```
+
+Then run the tests. Playwright starts its own dev server on port 5299, so this
+does not collide with `npm run dev`:
+
+```bash
+npm test
+```
+
+Out of the box this covers everything reachable without an account: the landing
+page, the sign-in and sign-up forms, the failed-login path, the catch-all
+redirect, that all 20 protected routes bounce a signed-out visitor to `/login`,
+and mobile layout checks.
+
+To also exercise the signed-in app (dashboard, guide, mistakes, settings, and the
+rest), point the suite at a **throwaway** student account:
+
+```bash
+cp .env.test.example .env.test.local
+```
+
+Fill in `E2E_EMAIL` and `E2E_PASSWORD` in `.env.test.local`. That file is
+gitignored, so the credentials never leave your machine. Use a disposable test
+account, never a real student's login. With it set, `npm test` signs in once,
+reuses the session, and sweeps every protected route for crashes, console
+errors, and dead navigation links.
+
+Useful variants:
+
+```bash
+npm run test:public
+```
+
+```bash
+npm run test:ui
+```
+
 ### Step 5: Deploy to Vercel
 
 1. Push this repo to your own GitHub account (fork it or create a new repo and push).

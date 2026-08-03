@@ -90,6 +90,7 @@ alter table public.test_attempts add column if not exists is_sandbox boolean not
 alter table public.post_scores add column if not exists is_sandbox boolean not null default false;
 alter table public.studied_topics add column if not exists practice jsonb not null default '{}';
 alter table public.profiles add column if not exists affiliation text;
+alter table public.profiles add column if not exists avatar_url text;
 
 -- Helpful indexes for scale
 create index if not exists idx_test_attempts_user_started on public.test_attempts(user_id, started_at desc);
@@ -111,7 +112,9 @@ alter table public.test_answer_keys enable row level security;
 alter table public.mistakes enable row level security;
 alter table public.review_items enable row level security;
 
--- Role helper (admin only) — SECURITY DEFINER to bypass RLS and avoid infinite recursion
+-- Role helper (admin only) — SECURITY DEFINER to bypass RLS and avoid infinite recursion.
+-- Admin is determined by the role column, which users cannot change themselves
+-- (see protect_profile_columns below) — never by email, which signup controls.
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -121,9 +124,57 @@ set search_path = public
 as $$
   select exists (
     select 1 from public.profiles
-    where id = auth.uid() and lower(email) = 'agora@admin.edu'
+    where id = auth.uid() and role = 'admin'
   );
 $$;
+
+-- Block self-escalation: RLS gates rows, not columns, so without this trigger any
+-- user could PATCH their own row to role='admin'/'tutor' or take over an email.
+-- auth.uid() is null for the SQL editor / service role, which stay unrestricted.
+create or replace function public.protect_profile_columns()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is not null and not public.is_admin() then
+    if new.role is distinct from old.role
+       or new.email is distinct from old.email
+       or new.id is distinct from old.id then
+      raise exception 'You are not allowed to change role or email';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_profile_columns on public.profiles;
+create trigger protect_profile_columns
+  before update on public.profiles
+  for each row execute procedure public.protect_profile_columns();
+
+-- A submitted attempt is final: students must not be able to rewrite answers or
+-- scores after completion (scores are computed client-side, so this is the only
+-- server-side line of defense against post-hoc edits).
+create or replace function public.protect_completed_attempts()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is not null and not public.is_admin() and old.completed_at is not null then
+    raise exception 'This attempt was already submitted and can no longer be changed';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists protect_completed_attempts on public.test_attempts;
+create trigger protect_completed_attempts
+  before update on public.test_attempts
+  for each row execute procedure public.protect_completed_attempts();
 
 -- Reset helpers (security definer so the admin can truly clear data even if RLS changes)
 create or replace function public.reset_my_data()
@@ -328,6 +379,9 @@ create policy "Tutors see affiliated review items" on public.review_items for se
 );
 
 -- One-time setup: promote the Agora admin account (safe to run repeatedly).
+-- Sign the admin account up through the normal signup flow first, then run this
+-- in the SQL editor with that account's email. This is the ONLY way an account
+-- becomes admin — there are no built-in admin credentials in the app.
 update public.profiles
 set role = 'admin'
 where lower(email) = 'agora@admin.edu';

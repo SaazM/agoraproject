@@ -76,14 +76,20 @@ function buildQuestions(chapters, exam) {
     const bankQuestions = bank[chId]
     if (!bankQuestions || !bankQuestions.length) continue
 
+    let chIdx = 0
     for (const bq of bankQuestions) {
       const { chId: resolvedId, ch } = resolveChapter(bq, chId, chapters)
       const topicName = ch.name || bq.topic || resolvedId
       const code = ch.code || bq.chapterCode || resolvedId
 
       num += 1
+      chIdx += 1
       questions.push({
-        id: `${exam}-pq-${num}`,
+        // Chapter-scoped ID: a global running number shifts for every later
+        // chapter when the async extra bank loads, attaching saved answered
+        // state to the wrong questions. Extras append per-chapter, so the
+        // chapter + position key is stable.
+        id: `${exam}-pq-${chId}-${chIdx}`,
         num,
         chapterId: resolvedId,
         chapterCode: code,

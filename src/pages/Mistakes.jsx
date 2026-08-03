@@ -308,6 +308,9 @@ export default function Mistakes() {
                       addToast("Good job on Q" + selected.q_num + "! " + remaining + " question" + (remaining === 1 ? "" : "s") + " left in your Mistake Notebook.", 'success')
                     }
                   }
+                } catch (e) {
+                  console.warn('[Mistakes] Failed to save review result:', e?.message)
+                  setRedoFeedback({ ok: true, msg: 'Correct — but saving your progress failed. It may not stick after a reload.' })
                 } finally {
                   setRedoSaving(false)
                 }
@@ -725,9 +728,14 @@ export default function Mistakes() {
                         onClick={async () => {
                           if (isAdminPreview) return
                           setSavingId(selected.id)
-                          await updateMistakeNote(viewUserId, selected.id, selected.note || '')
-                          setItems(prev => (prev || []).map(m => m.id === selected.id ? { ...m, note: selected.note || '' } : m))
-                          setSavingId(null)
+                          try {
+                            await updateMistakeNote(viewUserId, selected.id, selected.note || '')
+                            setItems(prev => (prev || []).map(m => m.id === selected.id ? { ...m, note: selected.note || '' } : m))
+                          } catch (e) {
+                            alert(e?.message || 'Could not save your note. Please try again.')
+                          } finally {
+                            setSavingId(null)
+                          }
                         }}
                       >
                         {isAdminPreview ? 'Preview only' : savingId === selected.id ? 'Saving…' : 'Save note'}

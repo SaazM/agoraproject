@@ -25,7 +25,10 @@ export function rateLimit(req, { maxRequests = 10, windowMs = 60_000 } = {}) {
   const now = Date.now()
   cleanup(windowMs)
 
-  const key = `${req.url || '/'}:${ip}`
+  // Key on the pathname only — including the query string would give
+  // ?x=1, ?x=2, … each their own fresh bucket, defeating the limit.
+  const path = String(req.url || '/').split('?')[0]
+  const key = `${path}:${ip}`
   let entry = buckets.get(key)
 
   if (!entry || now - entry.windowStart > windowMs) {

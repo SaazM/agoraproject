@@ -6,7 +6,6 @@ import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
 import AppErrorBoundary from './components/AppErrorBoundary.jsx'
 import { ToastProvider } from './components/Toast.jsx'
 import Login from './pages/Login.jsx'
-const ADMIN_EMAIL = 'agora@admin.edu'
 
 const loadDashboard = () => import('./pages/Dashboard.jsx')
 const loadTestTaking = () => import('./pages/TestTaking.jsx')
@@ -151,9 +150,8 @@ function PublicRoute({ children }) {
     if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Fraunces,Georgia,serif',color:'#565a63'}}>Loading…</div>
     if (!profile) return <MissingProfileNotice />
     const role = profile?.role
-    const isAdminEmail = String(profile?.email || '').toLowerCase() === ADMIN_EMAIL
     if (role === 'tutor') return <Navigate to="/tutor" replace />
-    if (role === 'admin' || isAdminEmail) return <Navigate to="/admin" replace />
+    if (role === 'admin') return <Navigate to="/admin" replace />
     // New students who haven't chosen an exam go to choose-test
     const hasChosenExam = user?.user_metadata?.preferred_exam
     if (!hasChosenExam) return <Navigate to="/choose-test" replace />
@@ -167,9 +165,8 @@ function RoleRedirect() {
   if (!profileReady) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',fontFamily:'Fraunces,Georgia,serif',color:'#565a63'}}>Loading…</div>
   if (!profile) return <MissingProfileNotice />
   const role = profile?.role
-  const isAdminEmail = String(profile?.email || '').toLowerCase() === ADMIN_EMAIL
   if (role === 'tutor') return <Navigate to="/tutor" replace />
-  if (role === 'admin' || isAdminEmail) return <Navigate to="/admin" replace />
+  if (role === 'admin') return <Navigate to="/admin" replace />
   return <Navigate to="/dashboard" replace />
 }
 
