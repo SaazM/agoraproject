@@ -211,10 +211,14 @@ export default function TutorDashboard() {
     const { data: currentProfile } = await supabase.from('profiles').select('role,affiliation').eq('id', user.id).maybeSingle()
     if (!currentProfile || currentProfile.role !== 'tutor') return { students: [], attempts: [], postScores: [] }
 
-    // Only fetch students that share this tutor's affiliation
-    const tutorAffiliation = currentProfile.affiliation || ''
-    let profileQuery = supabase.from('profiles').select('id,email,full_name,role,affiliation,created_at').eq('role', 'student').order('created_at', { ascending: false })
-    if (tutorAffiliation) profileQuery = profileQuery.eq('affiliation', tutorAffiliation)
+    // Only fetch students in this tutor's program. RLS enforces the same rule
+    // server-side (case-insensitively), so a tutor with no program sees nobody.
+    const tutorAffiliation = String(currentProfile.affiliation || '').trim()
+    if (!tutorAffiliation) return { students: [], attempts: [], postScores: [] }
+    const profileQuery = supabase.from('profiles').select('id,email,full_name,role,affiliation,created_at')
+      .eq('role', 'student')
+      .ilike('affiliation', tutorAffiliation.replace(/[%_\\]/g, '\\$&'))
+      .order('created_at', { ascending: false })
 
     const [p] = await Promise.allSettled([profileQuery])
     const studentList = p.status === 'fulfilled' ? (p.value.data || []) : []
@@ -537,7 +541,7 @@ export default function TutorDashboard() {
             {profile?.affiliation || 'My Students'}
           </h1>
           <p style={{ fontSize: 14, color: '#565a63', marginTop: 6, marginBottom: 0 }}>
-            {students.length} student{students.length !== 1 ? 's' : ''} enrolled
+            {profile?.affiliation ? 'Tutor view · ' : ''}{students.length} student{students.length !== 1 ? 's' : ''} enrolled
             {summaryStats.totalTestsWeek > 0 && <span> &middot; {summaryStats.totalTestsWeek} test{summaryStats.totalTestsWeek !== 1 ? 's' : ''} this week</span>}
           </p>
         </motion.div>
@@ -772,8 +776,14 @@ export default function TutorDashboard() {
               {!students.length && (
                 <motion.div variants={cardVariants} style={{ ...cardBase, padding: 48, textAlign: 'center', color: '#8a8f98', gridColumn: '1 / -1' }}>
                   <Icon name="students" size={32} style={{ marginBottom: 12, opacity: 0.4 }} />
-                  <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 600 }}>No students enrolled yet</div>
-                  <div style={{ fontSize: 13, marginTop: 4 }}>Students with your affiliation will appear here.</div>
+                  <div style={{ fontFamily: 'Fraunces, Georgia, serif', fontSize: 15, fontWeight: 600 }}>
+                    {profile?.affiliation ? 'No students enrolled yet' : 'No program assigned yet'}
+                  </div>
+                  <div style={{ fontSize: 13, marginTop: 4 }}>
+                    {profile?.affiliation
+                      ? `Students who pick “${profile.affiliation}” as their program will appear here.`
+                      : 'Ask your Agora admin to attach this tutor account to a program.'}
+                  </div>
                 </motion.div>
               )}
             </motion.div>

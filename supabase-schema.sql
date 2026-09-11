@@ -144,6 +144,11 @@ begin
        or new.id is distinct from old.id then
       raise exception 'You are not allowed to change role or email';
     end if;
+    -- A tutor's program decides which students they can see, so only an admin
+    -- may change it (otherwise a tutor could switch programs and read other kids).
+    if old.role = 'tutor' and new.affiliation is distinct from old.affiliation then
+      raise exception 'Only an admin can change a tutor''s program';
+    end if;
   end if;
   return new;
 end;
@@ -226,6 +231,12 @@ create policy "Users can update own affiliation" on public.profiles for update
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
+-- Admins manage everyone's role and program from the Admin Panel.
+drop policy if exists "Admins can update profiles" on public.profiles;
+create policy "Admins can update profiles" on public.profiles for update
+  using (public.is_admin())
+  with check (public.is_admin());
+
 drop policy if exists "Users can view own attempts" on public.test_attempts;
 drop policy if exists "Users can insert own attempts" on public.test_attempts;
 drop policy if exists "Users can update own attempts" on public.test_attempts;
@@ -297,24 +308,101 @@ create policy "Users can insert own review items" on public.review_items for ins
 create policy "Users can update own review items" on public.review_items for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "Admins see all review items" on public.review_items for select using (public.is_admin());
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Programs (e.g. "East Orange Public Library", "CitySquash")
+--
+-- A program is the unit tutors are scoped to. Students pick their program at
+-- signup (or an admin assigns it); a tutor is attached to exactly one program
+-- and can only see students whose profiles.affiliation matches it (see the
+-- "Tutors see affiliated …" policies above). The admin sees every program.
+-- profiles.affiliation stores the program's exact display name.
+-- ─────────────────────────────────────────────────────────────────────────────
+create table if not exists public.programs (
+  id uuid default gen_random_uuid() primary key,
+  name text not null check (length(trim(name)) between 1 and 100),
+  created_at timestamptz not null default now()
+);
+create unique index if not exists programs_name_lower_key on public.programs (lower(trim(name)));
+
+alter table public.programs enable row level security;
+
+-- Everyone (including the signup form, which runs before login) can list programs.
+drop policy if exists "Anyone can read programs" on public.programs;
+create policy "Anyone can read programs" on public.programs for select using (true);
+
+drop policy if exists "Admins manage programs" on public.programs;
+create policy "Admins manage programs" on public.programs for all
+  using (public.is_admin())
+  with check (public.is_admin());
+
+-- Map free text to the canonical program name (case/whitespace-insensitive).
+-- Returns the trimmed text unchanged when it matches no program so existing
+-- ad-hoc affiliations keep working; returns null for blank input.
+create or replace function public.canonical_program_name(raw text)
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (select p.name from public.programs p where lower(trim(p.name)) = lower(trim(raw)) limit 1),
+    nullif(trim(coalesce(raw, '')), '')
+  );
+$$;
+
+-- Renaming a program moves everyone attached to it along with the new name.
+create or replace function public.sync_program_rename()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.name is distinct from old.name then
+    update public.profiles
+    set affiliation = new.name
+    where lower(trim(coalesce(affiliation, ''))) = lower(trim(old.name));
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sync_program_rename on public.programs;
+create trigger sync_program_rename
+  after update on public.programs
+  for each row execute procedure public.sync_program_rename();
+
+-- Starter programs (safe to re-run; add more from Admin Panel → Programs).
+insert into public.programs (name) values
+  ('East Orange Public Library'),
+  ('CitySquash')
+on conflict do nothing;
+
+-- Normalize any affiliations typed before the program list existed so that
+-- "city squash" / "CitySquash " all land in the same program.
+update public.profiles
+set affiliation = public.canonical_program_name(affiliation)
+where affiliation is not null
+  and affiliation is distinct from public.canonical_program_name(affiliation);
+
 -- Auto-create profile on signup
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
 as $$
-declare
-  signup_role text;
 begin
-  signup_role := coalesce(new.raw_user_meta_data->>'role', 'student');
-  if signup_role not in ('student', 'tutor') then signup_role := 'student'; end if;
+  -- Every self-service signup is a student. Tutor and admin access are granted
+  -- only by an admin (Admin Panel → Students → Role), never from signup metadata,
+  -- so nobody can sign up as a "tutor" for a program and read its students' data.
   insert into public.profiles (id, email, full_name, role, affiliation)
   values (
     new.id,
     new.email,
     new.raw_user_meta_data->>'full_name',
-    signup_role,
-    nullif(trim(coalesce(new.raw_user_meta_data->>'affiliation', '')), '')
+    'student',
+    public.canonical_program_name(new.raw_user_meta_data->>'affiliation')
   );
   return new;
 end;
@@ -378,10 +466,12 @@ create policy "Tutors see affiliated review items" on public.review_items for se
   )
 );
 
--- One-time setup: promote the Agora admin account (safe to run repeatedly).
--- Sign the admin account up through the normal signup flow first, then run this
--- in the SQL editor with that account's email. This is the ONLY way an account
--- becomes admin — there are no built-in admin credentials in the app.
+-- Master account: promote whichever account should see every program (safe to
+-- run repeatedly). Sign that account up through the normal signup flow first,
+-- then run this with its email. This is the ONLY way an account becomes admin —
+-- there are no built-in admin credentials in the app. Tutors are created the
+-- same way but from the app: Admin Panel → Students → set Role to "tutor" and
+-- pick their Program.
 update public.profiles
 set role = 'admin'
 where lower(email) = 'agora@admin.edu';

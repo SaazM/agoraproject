@@ -14,7 +14,8 @@
       "Bash(grep -l \"TopResourceNav\\\\|ExamSwitcher\\\\|BrandLink\" /Users/hudsonpoirier/Documents/\"Claude AGORA\"/src/pages/*.jsx)",
       "Bash(npx netlify:*)",
       "Bash(brew install:*)",
-      "Bash(pdftotext -f 1 -l 3 '/Users/hudsonpoirier/Documents/Claude AGORA/public/act-tests/ACT_Practice_Test_3_Answer_Key_and_Explanations.pdf' -)"
+      "Bash(pdftotext -f 1 -l 3 '/Users/hudsonpoirier/Documents/Claude AGORA/public/act-tests/ACT_Practice_Test_3_Answer_Key_and_Explanations.pdf' -)",
+      "Bash(/private/tmp/claude-501/-Users-saazmahadkar-dev-projects-agoraproject/0ff3270a-94aa-4501-8a6d-f3ec64f7b948/scratchpad/sbq.sh supabase-schema.sql)"
     ]
   }
 }

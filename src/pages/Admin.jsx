@@ -12,6 +12,8 @@ import { calcWeakTopicsForTest, getExamConfig, getExamConfigForTest, getQuestion
 import { Bar, Line } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend } from 'chart.js'
 import { motion } from 'framer-motion'
+import ProgramSelect from '../components/ProgramSelect.jsx'
+import { fetchPrograms } from '../lib/programs.js'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend)
 
@@ -354,6 +356,11 @@ export default function Admin() {
   const [regrading, setRegrading] = useState(false)
   const [analyticsExam, setAnalyticsExam] = useState('sat')
   const [affiliationFilter, setAffiliationFilter] = useState('')
+  const [programs, setPrograms] = useState([])
+  const [programsAvailable, setProgramsAvailable] = useState(false)
+  const [newProgramName, setNewProgramName] = useState('')
+  const [programBusy, setProgramBusy] = useState(false)
+  const [savingProfileId, setSavingProfileId] = useState(null)
 
   /* ── data fetching ── */
   const fetchAdminSnapshot = useCallback(async () => {
@@ -369,18 +376,22 @@ export default function Admin() {
     if (profileResult.error && !profileResult.data) {
       profileResult = await supabase.from('profiles').select('id,email,full_name,role,created_at').order('created_at', { ascending: false })
     }
-    const [a, ps, ak] = await Promise.allSettled([
+    const [a, ps, ak, pr] = await Promise.allSettled([
       supabase.from('test_attempts').select('id,user_id,test_id,started_at,completed_at,scores,weak_topics,answers').not('completed_at', 'is', null).order('started_at', { ascending: false }).limit(2000),
       supabase.from('post_scores').select('attempt_id,post_score,post_rw,post_math,recorded_at').order('recorded_at', { ascending: false }).limit(5000),
       supabase.from('test_answer_keys').select('*'),
+      fetchPrograms(),
     ])
     const akMap = {}
     for (const row of (ak.status === 'fulfilled' ? (ak.value.data || []) : [])) akMap[row.test_id] = row.answer_key
+    const programsRes = pr.status === 'fulfilled' ? pr.value : { programs: [], available: false }
     return {
       students: profileResult.data || [],
       attempts: a.status === 'fulfilled' ? (a.value.data || []) : [],
       postScores: ps.status === 'fulfilled' ? (ps.value.data || []) : [],
       keysByTest: akMap,
+      programs: programsRes.programs,
+      programsAvailable: programsRes.available,
     }
   }, [])
 
@@ -399,6 +410,8 @@ export default function Admin() {
       setAttempts(snapshot.attempts)
       setPostScores(snapshot.postScores)
       setKeysByTest(snapshot.keysByTest || {})
+      setPrograms(snapshot.programs || [])
+      setProgramsAvailable(Boolean(snapshot.programsAvailable))
       setLoading(false)
     }
     load().catch(() => {
@@ -420,6 +433,8 @@ export default function Admin() {
         setAttempts(snapshot.attempts)
         setPostScores(snapshot.postScores)
         setKeysByTest(snapshot.keysByTest || {})
+        setPrograms(snapshot.programs || [])
+        setProgramsAvailable(Boolean(snapshot.programsAvailable))
       } catch {}
     }
 
@@ -438,6 +453,7 @@ export default function Admin() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'studied_topics' }, queueRefresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'review_items' }, queueRefresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'test_answer_keys' }, queueRefresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'programs' }, queueRefresh)
       .subscribe()
 
     const interval = setInterval(refresh, 15000)
@@ -513,13 +529,134 @@ export default function Admin() {
       const out = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(out?.error || 'Delete failed')
       setResetMsg('Success: student deleted.')
-      const p = await supabase.from('profiles').select('id,email,full_name,role,created_at').order('created_at', { ascending: false })
+      const p = await supabase.from('profiles').select('id,email,full_name,role,affiliation,created_at').order('created_at', { ascending: false })
       setStudents(p.data || [])
     } catch (e) {
       console.error('[Admin] Delete failed:', e?.message)
       setResetMsg('Error: delete failed. Please try again.')
     } finally {
       setResettingUserId(null)
+    }
+  }
+
+  /* ── access management: roles + programs ── */
+  async function updateProfileField(userId, patch, successMsg) {
+    if (!supabase || !isAdmin) return false
+    setSavingProfileId(userId)
+    setResetMsg('')
+    try {
+      const { error } = await supabase.from('profiles').update(patch).eq('id', userId)
+      if (error) throw error
+      setStudents((prev) => prev.map((s) => (s.id === userId ? { ...s, ...patch } : s)))
+      if (successMsg) setResetMsg(`Success: ${successMsg}`)
+      return true
+    } catch (e) {
+      console.error('[Admin] Profile update failed:', e?.message)
+      setResetMsg(`Error: ${e?.message || 'could not update this account.'}`)
+      return false
+    } finally {
+      setSavingProfileId(null)
+    }
+  }
+
+  async function changeUserRole(s, nextRole) {
+    if (!s || s.role === nextRole) return
+    if (s.id === profile?.id) { setResetMsg('Error: you cannot change your own role.'); return }
+    const who = s.full_name || s.email || s.id
+    if (nextRole === 'admin') {
+      const ok = window.confirm(`Make ${who} an ADMIN?\n\nAdmins can see and manage every student in every program.`)
+      if (!ok) return
+    } else if (nextRole === 'tutor') {
+      const program = (s.affiliation || '').trim()
+      const ok = window.confirm(
+        `Make ${who} a TUTOR?\n\n` +
+        (program ? `They will only see students in “${program}”.` : 'They have no program yet — pick one in the Program column or they will see no students.')
+      )
+      if (!ok) return
+    } else {
+      const ok = window.confirm(`Change ${who} back to a STUDENT?\n\nThey will lose tutor/admin access immediately.`)
+      if (!ok) return
+    }
+    await updateProfileField(s.id, { role: nextRole }, `${who} is now a ${nextRole}.`)
+  }
+
+  async function changeUserProgram(s, nextProgram) {
+    if (!s) return
+    const clean = String(nextProgram || '').trim().slice(0, 100)
+    if ((s.affiliation || '') === clean) return
+    const who = s.full_name || s.email || s.id
+    await updateProfileField(s.id, { affiliation: clean || null }, clean ? `${who} moved to “${clean}”.` : `${who} removed from their program.`)
+  }
+
+  async function addProgram(e) {
+    e?.preventDefault?.()
+    if (!supabase || !isAdmin) return
+    const name = newProgramName.replace(/[<>]/g, '').trim().slice(0, 100)
+    if (!name) return
+    if (programs.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+      setResetMsg('Error: that program already exists.')
+      return
+    }
+    setProgramBusy(true)
+    setResetMsg('')
+    try {
+      const { data, error } = await supabase.from('programs').insert({ name }).select('id,name').single()
+      if (error) throw error
+      setPrograms((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
+      setNewProgramName('')
+      setResetMsg(`Success: added program “${name}”.`)
+    } catch (err) {
+      console.error('[Admin] Add program failed:', err?.message)
+      setResetMsg(`Error: ${err?.message || 'could not add program.'}`)
+    } finally {
+      setProgramBusy(false)
+    }
+  }
+
+  async function renameProgram(p) {
+    if (!supabase || !isAdmin || !p) return
+    const raw = window.prompt(`Rename program “${p.name}” to:`, p.name)
+    if (raw == null) return
+    const name = raw.replace(/[<>]/g, '').trim().slice(0, 100)
+    if (!name || name === p.name) return
+    setProgramBusy(true)
+    setResetMsg('')
+    try {
+      const { error } = await supabase.from('programs').update({ name }).eq('id', p.id)
+      if (error) throw error
+      // The DB trigger moves every student/tutor with the old name to the new one.
+      setPrograms((prev) => prev.map((x) => (x.id === p.id ? { ...x, name } : x)).sort((a, b) => a.name.localeCompare(b.name)))
+      setStudents((prev) => prev.map((s) => ((s.affiliation || '').trim().toLowerCase() === p.name.trim().toLowerCase() ? { ...s, affiliation: name } : s)))
+      if (affiliationFilter.toLowerCase() === p.name.toLowerCase()) setAffiliationFilter(name)
+      setResetMsg(`Success: renamed “${p.name}” to “${name}”.`)
+    } catch (err) {
+      console.error('[Admin] Rename program failed:', err?.message)
+      setResetMsg(`Error: ${err?.message || 'could not rename program.'}`)
+    } finally {
+      setProgramBusy(false)
+    }
+  }
+
+  async function deleteProgram(p, memberCount) {
+    if (!supabase || !isAdmin || !p) return
+    if (memberCount > 0) {
+      setResetMsg(`Error: “${p.name}” still has ${memberCount} member(s). Move them to another program first.`)
+      return
+    }
+    const ok = window.confirm(`Delete program “${p.name}”?`)
+    if (!ok) return
+    setProgramBusy(true)
+    setResetMsg('')
+    try {
+      const { error } = await supabase.from('programs').delete().eq('id', p.id)
+      if (error) throw error
+      setPrograms((prev) => prev.filter((x) => x.id !== p.id))
+      setResetMsg(`Success: deleted program “${p.name}”.`)
+    } catch (err) {
+      console.error('[Admin] Delete program failed:', err?.message)
+      setResetMsg(`Error: ${err?.message || 'could not delete program.'}`)
+    } finally {
+      setProgramBusy(false)
     }
   }
 
@@ -701,7 +838,7 @@ export default function Admin() {
     { id: 'students', label: 'Students', icon: 'students' },
     { id: 'results', label: 'Test Results', icon: 'results' },
     { id: 'analytics', label: 'Analytics', icon: 'chart' },
-    { id: 'affiliations', label: 'Affiliations', icon: 'students' },
+    { id: 'affiliations', label: 'Programs', icon: 'students' },
     { id: 'impact', label: 'Proof of Impact', icon: 'report' },
     { id: 'tests', label: 'Tests', icon: 'test' },
   ]
@@ -710,15 +847,23 @@ export default function Admin() {
   const affiliationData = useMemo(() => {
     const affiliations = new Map()
     const unaffiliated = { name: 'Unaffiliated', students: [], studentIds: new Set() }
+    // Every configured program shows up even with zero members.
+    for (const p of programs) {
+      const key = p.name.trim().toLowerCase()
+      if (!affiliations.has(key)) affiliations.set(key, { name: p.name, program: p, students: [], tutors: [], studentIds: new Set() })
+    }
     for (const s of students) {
+      if (s.role === 'admin') continue
       const aff = (s.affiliation || '').trim()
       if (!aff) {
+        if (s.role === 'tutor') { unaffiliated.tutors = unaffiliated.tutors || []; unaffiliated.tutors.push(s); continue }
         unaffiliated.students.push(s)
         unaffiliated.studentIds.add(s.id)
         continue
       }
       const key = aff.toLowerCase()
-      if (!affiliations.has(key)) affiliations.set(key, { name: aff, students: [], studentIds: new Set() })
+      if (!affiliations.has(key)) affiliations.set(key, { name: aff, program: null, students: [], tutors: [], studentIds: new Set() })
+      if (s.role === 'tutor') { affiliations.get(key).tutors.push(s); continue }
       affiliations.get(key).students.push(s)
       affiliations.get(key).studentIds.add(s.id)
     }
@@ -728,7 +873,7 @@ export default function Admin() {
       const totals = groupAttempts.map(a => Number(a.scores?.composite || a.scores?.total || 0)).filter(t => t > 0)
       const sorted = totals.slice().sort((a, b) => a - b)
       const avg = totals.length ? totals.reduce((s, v) => s + v, 0) / totals.length : null
-      result.push({ name: group.name, studentCount: group.students.length, attemptCount: groupAttempts.length, avgScore: avg, median: sorted.length ? quantile(sorted, 0.5) : null, studentIds: group.studentIds })
+      result.push({ name: group.name, program: group.program, tutors: group.tutors, studentCount: group.students.length, attemptCount: groupAttempts.length, avgScore: avg, median: sorted.length ? quantile(sorted, 0.5) : null, studentIds: group.studentIds })
     }
     result.sort((a, b) => b.studentCount - a.studentCount)
     if (unaffiliated.students.length > 0) {
@@ -736,10 +881,10 @@ export default function Admin() {
       const totals = groupAttempts.map(a => Number(a.scores?.composite || a.scores?.total || 0)).filter(t => t > 0)
       const sorted = totals.slice().sort((a, b) => a - b)
       const avg = totals.length ? totals.reduce((s, v) => s + v, 0) / totals.length : null
-      result.push({ name: 'Unaffiliated', studentCount: unaffiliated.students.length, attemptCount: groupAttempts.length, avgScore: avg, median: sorted.length ? quantile(sorted, 0.5) : null, studentIds: unaffiliated.studentIds, isUnaffiliated: true })
+      result.push({ name: 'Unaffiliated', program: null, tutors: unaffiliated.tutors || [], studentCount: unaffiliated.students.length, attemptCount: groupAttempts.length, avgScore: avg, median: sorted.length ? quantile(sorted, 0.5) : null, studentIds: unaffiliated.studentIds, isUnaffiliated: true })
     }
     return result
-  }, [students, attempts])
+  }, [students, attempts, programs])
 
   const affiliationNames = useMemo(() => affiliationData.map(a => a.name), [affiliationData])
 
@@ -1046,7 +1191,7 @@ export default function Admin() {
                   onChange={(e) => setAffiliationFilter(e.target.value)}
                   style={{ padding: '7px 14px', borderRadius: 9, border: '1.5px solid rgba(2,132,199,.15)', fontSize: 12, fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, background: '#fff', color: '#16181d', cursor: 'pointer' }}
                 >
-                  <option value="">All Affiliations</option>
+                  <option value="">All programs</option>
                   {affiliationData.filter(a => !a.isUnaffiliated).map((a) => (
                     <option key={a.name} value={a.name}>{a.name}</option>
                   ))}
@@ -1061,7 +1206,7 @@ export default function Admin() {
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
                 <thead>
                   <tr>
-                    {['Name', 'Email', 'Role', 'Affiliation', 'Joined', 'Tests', 'Best Score', 'Actions'].map(h => (
+                    {['Name', 'Email', 'Role', 'Program', 'Joined', 'Tests', 'Best Score', 'Actions'].map(h => (
                       <th key={h} style={thStyle}>{h}</th>
                     ))}
                   </tr>
@@ -1082,8 +1227,39 @@ export default function Admin() {
                           </Link>
                         </td>
                         <td style={{ ...tdStyle, color: '#565a63' }}>{s.email}</td>
-                        <td style={tdStyle}><span style={rolePill(s.role)}>{s.role}</span></td>
-                        <td style={{ ...tdStyle, color: '#565a63' }}>{s.affiliation || '\u2014'}</td>
+                        <td style={tdStyle}>
+                          {isSelf ? (
+                            <span style={rolePill(s.role)}>{s.role}</span>
+                          ) : (
+                            <select
+                              aria-label={`Role for ${s.email}`}
+                              value={s.role}
+                              disabled={savingProfileId === s.id}
+                              onChange={(e) => changeUserRole(s, e.target.value)}
+                              style={{ ...rolePill(s.role), border: '1.5px solid rgba(2,132,199,.15)', cursor: 'pointer', fontFamily: 'inherit' }}
+                            >
+                              <option value="student">student</option>
+                              <option value="tutor">tutor</option>
+                              <option value="admin">admin</option>
+                            </select>
+                          )}
+                        </td>
+                        <td style={{ ...tdStyle, color: '#565a63' }}>
+                          {s.role === 'admin' ? (
+                            <span style={{ color: '#8a8f98' }}>All programs</span>
+                          ) : !programsAvailable ? (
+                            <span title="Run supabase-schema.sql to enable editing">{s.affiliation || '\u2014'}</span>
+                          ) : (
+                            <ProgramSelect
+                              value={s.affiliation || ''}
+                              onChange={(v) => changeUserProgram(s, v)}
+                              programs={programs}
+                              disabled={savingProfileId === s.id}
+                              noneLabel="— none —"
+                              style={{ padding: '5px 8px', borderRadius: 8, border: '1.5px solid rgba(2,132,199,.15)', fontSize: 12, background: '#fff', color: '#16181d', minWidth: 160, fontFamily: 'inherit' }}
+                            />
+                          )}
+                        </td>
                         <td style={{ ...tdStyle, color: '#565a63' }}>{new Date(s.created_at).toLocaleDateString()}</td>
                         <td style={{ ...tdStyle, fontWeight: 600 }}>{userAttempts.length}</td>
                         <td style={{ ...tdStyle, fontFamily: 'Fraunces, Georgia, serif', fontWeight: 600, color: '#16181d' }} title={best ? `${best.raw}/${best.totalQuestions} correct` : undefined}>
@@ -1322,9 +1498,84 @@ export default function Admin() {
             ══════════════════════════════ */}
         {tab === 'affiliations' && (
           <div style={{ display: 'grid', gap: 20 }}>
+            {/* Program management: this is where tutor logins get scoped */}
+            <motion.div {...fadeCard} transition={{ duration: 0.3 }} style={cardStyle}>
+              <h3 style={sectionHeading}>
+                <span style={iconBadge}><Icon name="students" size={16} /></span>
+                Programs &amp; tutor access
+              </h3>
+              <p style={{ fontSize: 13, color: '#565a63', margin: '0 0 16px', lineHeight: 1.6 }}>
+                Students pick a program when they sign up. Each tutor login is attached to one program and can only see that program's students; this admin account sees everyone.
+                To give someone tutor access: have them sign up normally, then on the <strong>Students</strong> tab set their Role to <strong>tutor</strong> and pick their Program.
+              </p>
+              {!programsAvailable ? (
+                <div style={{ fontSize: 13, color: '#b45309', background: 'rgba(245,158,11,.08)', border: '1px solid rgba(245,158,11,.25)', borderRadius: 10, padding: '10px 14px' }}>
+                  The <code>programs</code> table isn't installed yet. Run <code>supabase-schema.sql</code> in the Supabase SQL Editor to enable the program list.
+                </div>
+              ) : (
+                <>
+                  <form onSubmit={addProgram} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                    <input
+                      aria-label="New program name"
+                      value={newProgramName}
+                      onChange={(e) => setNewProgramName(e.target.value)}
+                      placeholder="New program name (e.g. CitySquash)"
+                      maxLength={100}
+                      style={{ flex: '1 1 260px', padding: '8px 12px', borderRadius: 9, border: '1.5px solid rgba(2,132,199,.15)', fontSize: 13, background: '#fff', color: '#16181d' }}
+                    />
+                    <button type="submit" style={actionBtn} disabled={programBusy || !newProgramName.trim()}>
+                      {programBusy ? 'Saving...' : 'Add program'}
+                    </button>
+                  </form>
+                  <div style={{ overflowX: 'auto', borderRadius: 12, border: '1px solid rgba(2,132,199,.08)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
+                      <thead>
+                        <tr>
+                          {['Program', 'Students', 'Tutors', 'Actions'].map(h => <th key={h} style={thStyle}>{h}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {programs.length === 0 && (
+                          <tr><td colSpan={4} style={{ ...tdStyle, color: '#8a8f98', textAlign: 'center' }}>No programs yet. Add one above.</td></tr>
+                        )}
+                        {programs.map((p) => {
+                          const group = affiliationData.find(a => !a.isUnaffiliated && a.name.trim().toLowerCase() === p.name.trim().toLowerCase())
+                          const tutors = group?.tutors || []
+                          const memberCount = (group?.studentCount || 0) + tutors.length
+                          return (
+                            <tr key={p.id} style={{ borderBottom: '1px solid rgba(2,132,199,.06)' }}>
+                              <td style={{ ...tdStyle, fontWeight: 700, color: '#16181d' }}>{p.name}</td>
+                              <td style={tdStyle}>
+                                <button type="button" style={{ ...actionBtn, padding: '4px 10px' }} onClick={() => { setAffiliationFilter(p.name); setTab('students') }}>
+                                  {group?.studentCount || 0} · view
+                                </button>
+                              </td>
+                              <td style={{ ...tdStyle, color: '#565a63' }}>
+                                {tutors.length === 0
+                                  ? <span style={{ color: '#b45309' }}>No tutor yet</span>
+                                  : tutors.map(t => <div key={t.id}>{t.full_name || t.email}{t.full_name ? <span style={{ color: '#8a8f98' }}> · {t.email}</span> : null}</div>)}
+                              </td>
+                              <td style={tdStyle}>
+                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                  <button type="button" style={{ ...actionBtn, padding: '5px 10px' }} disabled={programBusy} onClick={() => renameProgram(p)}>Rename</button>
+                                  <button type="button" style={{ ...actionBtnDanger, padding: '5px 10px', opacity: memberCount > 0 ? 0.5 : 1 }} disabled={programBusy || memberCount > 0}
+                                    title={memberCount > 0 ? 'Move its students and tutors to another program first' : undefined}
+                                    onClick={() => deleteProgram(p, memberCount)}>Delete</button>
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </motion.div>
+
             {affiliationData.length === 0 ? (
               <motion.div {...fadeCard} transition={{ duration: 0.3 }} style={{ ...cardStyle, textAlign: 'center', padding: 48, color: '#565a63' }}>
-                No affiliations found. Students and tutors can set their affiliation on signup.
+                No students have joined a program yet.
               </motion.div>
             ) : (
               <>
@@ -1332,7 +1583,7 @@ export default function Admin() {
                 <motion.div {...fadeCard} transition={{ duration: 0.3 }} style={cardStyle}>
                   <h3 style={sectionHeading}>
                     <span style={iconBadge}><Icon name="students" size={16} /></span>
-                    Affiliation Comparison
+                    Program Comparison
                   </h3>
                   <div style={{ height: 260 }}>
                     <Bar
@@ -1353,7 +1604,7 @@ export default function Admin() {
                   <motion.div {...fadeCard} transition={{ duration: 0.3, delay: 0.05 }} style={cardStyle}>
                     <h3 style={sectionHeading}>
                       <span style={iconBadge}><Icon name="chart" size={16} /></span>
-                      Average Score by Affiliation
+                      Average Score by Program
                     </h3>
                     <div style={{ height: 260 }}>
                       <Bar

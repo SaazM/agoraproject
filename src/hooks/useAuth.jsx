@@ -113,15 +113,16 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  async function signUp(email, password, fullName, role = 'student', affiliation = '') {
+  // Every signup is a student. Tutor/admin access is granted by an admin from
+  // the Admin Panel (and the DB trigger ignores any role in signup metadata).
+  async function signUp(email, password, fullName, affiliation = '') {
     if (!supabase) return { data: null, error: new Error('Supabase is not configured') }
     const cleanEmail = String(email || '').trim().toLowerCase().slice(0, 254)
     const cleanName = String(fullName || '').replace(/[<>]/g, '').trim().slice(0, 100)
-    const cleanRole = role === 'tutor' ? 'tutor' : 'student'
     const cleanAffiliation = String(affiliation || '').replace(/[<>]/g, '').trim().slice(0, 100)
     if (!cleanEmail || !cleanName) return { data: null, error: new Error('Email and name are required') }
     if (String(password || '').length < 8) return { data: null, error: new Error('Password must be at least 8 characters') }
-    const meta = { full_name: cleanName, role: cleanRole }
+    const meta = { full_name: cleanName, role: 'student' }
     if (cleanAffiliation) meta.affiliation = cleanAffiliation
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail, password,

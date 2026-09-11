@@ -122,18 +122,29 @@ npm run test:ui
 
 Every time you push to the `main` branch, Vercel automatically rebuilds and deploys.
 
-### Step 6: (Optional) Create an Admin Account
+### Step 6: Create the Master (Admin) Account
 
-The admin panel lets you manage students, view all test data, and extract answer keys from PDFs.
+The admin panel is the master view: it sees every student in every program, manages tutor access, and manages answer keys.
 
-1. Sign up through the app with the email `agora@admin.edu`
-2. In Supabase SQL Editor, run:
+1. Sign up through the app with the email you want to use as the master account (the schema file uses `agora@admin.edu` as the default).
+2. In Supabase SQL Editor, run (with your email):
 ```sql
 UPDATE public.profiles SET role = 'admin' WHERE email = 'agora@admin.edu';
 ```
 3. Log out and back in. You will now see the admin panel.
 
-### Step 7: (Optional) Custom Domain
+This SQL is the only way an account becomes admin. Signup always creates a student, even if someone tampers with the request.
+
+### Step 7: Set Up Programs and Tutor Logins
+
+Programs (e.g. **East Orange Public Library**, **CitySquash**) are the unit tutors are scoped to. The schema seeds those two; add more from **Admin Panel → Programs**.
+
+1. **Students** pick their program from the dropdown at signup (or later in Settings). The admin can also move a student between programs from the **Students** tab.
+2. **Tutors** sign up through the normal signup form like anyone else. Then, as admin, open **Admin Panel → Students**, set that account's **Role** to `tutor` and its **Program** to the program they teach.
+3. That tutor's login now only sees students whose program matches. This is enforced by Row Level Security in the database, not just hidden in the UI, and tutors cannot change their own program.
+4. Repeat for each program: one tutor login per program, one admin login that sees all of them.
+
+### Step 8: (Optional) Custom Domain
 
 In Vercel, go to **Settings > Domains** and add your custom domain. Follow the DNS instructions Vercel gives you.
 
@@ -154,7 +165,7 @@ The first thing visitors see. Public — no login required. Features:
 
 ### Onboarding Flow
 
-1. **Sign Up** (`/login`) — create an account, pick Student or Tutor role, enter name and school
+1. **Sign Up** (`/login`) — create an account, enter your name, and pick your program from the dropdown
 2. **Pick Test Date** (`/pick-test-date`) — select your upcoming test date from the official schedule
 3. **Prior Score** (`/prior-score`, optional) — enter a previous score. This populates your score tiles but still lets you take the full diagnostic pre-test later
 4. **Dashboard** (`/dashboard`) — your home base
@@ -316,15 +327,16 @@ Feature overview page:
 Full access to all features: tests, study guide, practice, tracking, college recruiting, formula sheet, calendar, journey, tasks.
 
 ### Tutor
-Dashboard showing assigned students' scores, progress, and attempt history. Cannot take tests or modify student data.
+Dashboard showing the scores, progress, and attempt history of the students in the tutor's program only (enforced by database Row Level Security). Cannot take tests or modify student data. Tutor access is granted by an admin from the Admin Panel; there is no self-service tutor signup.
 
-### Admin
-Full system access:
-- View all students and their data
-- Manage test answer keys
-- Extract answer keys from PDFs
+### Admin (master account)
+Full system access across every program:
+- View all students and their data, filter by program
+- Grant or revoke tutor access and assign each tutor to a program
+- Add, rename, and remove programs
+- Manage test answer keys and extract answer keys from PDFs
 - User statistics and data analysis
-- Create admin account with email `agora@admin.edu`, then set role in Supabase SQL
+- Created by signing up normally, then setting `role = 'admin'` in Supabase SQL (see Step 6)
 
 ---
 

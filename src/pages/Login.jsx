@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth.jsx'
 import PasswordInput from '../components/PasswordInput.jsx'
+import ProgramSelect from '../components/ProgramSelect.jsx'
+import { usePrograms } from '../hooks/usePrograms.js'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -15,8 +17,8 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
-  const [signupRole, setSignupRole] = useState('student')
   const [affiliation, setAffiliation] = useState('')
+  const programList = usePrograms()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
@@ -42,21 +44,16 @@ export default function Login() {
       if (!fullName.trim()) { setError('Please enter your full name'); setLoading(false); return }
       if (fullName.trim().length > 100) { setError('Name must be 100 characters or fewer'); setLoading(false); return }
       if (affiliation.trim().length > 100) { setError('Affiliation must be 100 characters or fewer'); setLoading(false); return }
-      const { data, error } = await signUp(trimmedEmail, password, fullName, signupRole, affiliation.trim())
+      const { data, error } = await signUp(trimmedEmail, password, fullName, affiliation.trim())
       if (error) setError(error.message)
       else {
         if (data?.session) {
           setLoading(false)
-          if (signupRole === "tutor") {
-            setSuccess("Account created! Redirecting to your welcome tour...")
-            navigate("/welcome", { replace: true })
-          } else {
-            setSuccess("Account created! Let's choose your first test...")
-            navigate("/choose-test", { replace: true })
-          }
+          setSuccess("Account created! Let's choose your first test...")
+          navigate("/choose-test", { replace: true })
           return
         }
-        setSuccess(signupRole === 'tutor' ? "Account created! Sign in to access your tutor dashboard." : "Account created! Sign in to start your SAT prep.")
+        setSuccess("Account created! Sign in to start your SAT prep.")
         setMode('signin')
         setPassword('')
       }
@@ -120,24 +117,10 @@ export default function Login() {
 
             <form onSubmit={handleSubmit}>
               {mode === 'signup' && (
-                <>
-                  <div className="login-role-toggle">
-                    {['student', 'tutor'].map((r) => (
-                      <button
-                        key={r}
-                        type="button"
-                        className={`login-role-btn ${signupRole === r ? 'active' : ''}`}
-                        onClick={() => setSignupRole(r)}
-                      >
-                        {r === 'student' ? 'Student' : 'Tutor'}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="input-wrap">
-                    <label className="input-label">Full Name</label>
-                    <input className="input-field" type="text" placeholder="Jane Smith" value={fullName} onChange={e => setFullName(e.target.value)} required />
-                  </div>
-                </>
+                <div className="input-wrap">
+                  <label className="input-label">Full Name</label>
+                  <input className="input-field" type="text" placeholder="Jane Smith" value={fullName} onChange={e => setFullName(e.target.value)} required />
+                </div>
               )}
               <div className="input-wrap">
                 <label className="input-label">Email</label>
@@ -156,8 +139,18 @@ export default function Login() {
               </div>
               {mode === 'signup' && (
                 <div className="input-wrap">
-                  <label className="input-label">School / Affiliation <span style={{ opacity: .4, fontWeight: 400 }}>(Optional)</span></label>
-                  <input className="input-field" type="text" placeholder="Your school or organization" value={affiliation} onChange={e => setAffiliation(e.target.value)} />
+                  <label className="input-label" htmlFor="signup-program">Program <span style={{ opacity: .4, fontWeight: 400 }}>(Optional)</span></label>
+                  <ProgramSelect
+                    id="signup-program"
+                    className="input-field"
+                    value={affiliation}
+                    onChange={setAffiliation}
+                    programs={programList.programs}
+                    loading={programList.loading}
+                  />
+                  <div style={{ fontSize: 12, color: '#565a63', marginTop: 6, lineHeight: 1.5 }}>
+                    Pick the program you're enrolled in so your tutor can see your progress. Tutors: create an account here, then your Agora admin will grant tutor access.
+                  </div>
                 </div>
               )}
 

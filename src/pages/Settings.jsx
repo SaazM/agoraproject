@@ -5,6 +5,8 @@ import Sidebar from '../components/Sidebar.jsx'
 import Icon from '../components/AppIcons.jsx'
 import { useToast } from '../components/Toast.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
+import ProgramSelect from '../components/ProgramSelect.jsx'
+import { usePrograms } from '../hooks/usePrograms.js'
 
 const fadeIn = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }
 const scaleIn = { initial: { opacity: 0, scale: 0.85 }, animate: { opacity: 1, scale: 1 } }
@@ -92,6 +94,9 @@ export default function Settings() {
   // --- Affiliation state ---
   const [affiliation, setAffiliation] = useState('')
   const [savingAffiliation, setSavingAffiliation] = useState(false)
+  const programList = usePrograms()
+  // A tutor's program decides which students they see, so only an admin can change it.
+  const programLocked = profile?.role === 'tutor' || profile?.role === 'admin'
 
   useEffect(() => {
     if (profile) {
@@ -188,14 +193,14 @@ export default function Settings() {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ affiliation: affiliation.trim() })
+        .update({ affiliation: affiliation.trim() || null })
         .eq('id', user.id)
 
       if (error) throw error
-      addToast('School / affiliation updated!', 'success')
+      addToast('Program updated!', 'success')
     } catch (err) {
-      console.error('Affiliation update error:', err)
-      addToast(err.message || 'Failed to update affiliation', 'error')
+      console.error('Program update error:', err)
+      addToast(err.message || 'Failed to update program', 'error')
     } finally {
       setSavingAffiliation(false)
     }
@@ -471,39 +476,51 @@ export default function Settings() {
               >
                 <Icon name="info" size={18} />
               </div>
-              <h2 style={{ ...sectionTitle, marginBottom: 0 }}>School / Affiliation</h2>
+              <h2 style={{ ...sectionTitle, marginBottom: 0 }}>Program</h2>
             </div>
 
-            <form onSubmit={handleSaveAffiliation} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {programLocked ? (
               <div>
-                <label style={labelStyle}>School or Organization</label>
-                <input
-                  type="text"
-                  value={affiliation}
-                  onChange={(e) => setAffiliation(e.target.value)}
-                  placeholder="e.g. Lincoln High School"
-                  style={inputStyle}
-                  onFocus={(e) => (e.target.style.borderColor = '#0284c7')}
-                  onBlur={(e) => (e.target.style.borderColor = '#e4e0d5')}
-                />
+                <div style={{ ...inputStyle, background: '#f7f5ef', color: '#16181d' }}>
+                  {profile?.affiliation || (profile?.role === 'admin' ? 'All programs (admin)' : 'No program assigned yet')}
+                </div>
                 <p style={{ fontSize: 12, color: '#8a8f98', margin: '6px 0 0', lineHeight: 1.5 }}>
-                  This is used to connect you with your tutor or study group.
+                  {profile?.role === 'admin'
+                    ? 'Admin accounts see every program.'
+                    : 'Your program decides which students you can see. Ask your Agora admin to change it.'}
                 </p>
               </div>
+            ) : (
+              <form onSubmit={handleSaveAffiliation} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={labelStyle} htmlFor="settings-program">Your program</label>
+                  <ProgramSelect
+                    id="settings-program"
+                    value={affiliation}
+                    onChange={setAffiliation}
+                    programs={programList.programs}
+                    loading={programList.loading}
+                    style={inputStyle}
+                  />
+                  <p style={{ fontSize: 12, color: '#8a8f98', margin: '6px 0 0', lineHeight: 1.5 }}>
+                    This connects you with your program's tutor so they can follow your progress.
+                  </p>
+                </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={savingAffiliation}
-                  style={{
-                    ...btnPrimary,
-                    opacity: savingAffiliation ? 0.55 : 1,
-                  }}
-                >
-                  {savingAffiliation ? 'Saving...' : 'Save Affiliation'}
-                </button>
-              </div>
-            </form>
+                <div>
+                  <button
+                    type="submit"
+                    disabled={savingAffiliation}
+                    style={{
+                      ...btnPrimary,
+                      opacity: savingAffiliation ? 0.55 : 1,
+                    }}
+                  >
+                    {savingAffiliation ? 'Saving...' : 'Save Program'}
+                  </button>
+                </div>
+              </form>
+            )}
           </motion.div>
         </div>
 

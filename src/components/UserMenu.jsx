@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 import PasswordInput from './PasswordInput.jsx'
+import ProgramSelect from './ProgramSelect.jsx'
+import { usePrograms } from '../hooks/usePrograms.js'
 
 export default function UserMenu({ profile }) {
   const [open, setOpen] = useState(false)
@@ -11,6 +13,9 @@ export default function UserMenu({ profile }) {
   const [affSaving, setAffSaving] = useState(false)
   const [affStatus, setAffStatus] = useState({ kind: '', msg: '' })
   const wrapRef = useRef(null)
+  const programList = usePrograms()
+  // Tutors/admins can't move themselves between programs (that's what scopes their access).
+  const programLocked = profile?.role === 'tutor' || profile?.role === 'admin'
 
   useEffect(() => {
     if (profile?.affiliation != null) setAffiliation(profile.affiliation || '')
@@ -50,14 +55,10 @@ export default function UserMenu({ profile }) {
         .from('profiles')
         .update({ affiliation: clean || null })
         .eq('id', profile.id)
-      if (error) {
-        // If RLS blocks the update, show a message
-        setAffStatus({ kind: 'ok', msg: 'Saved to your account. It may take a moment to appear everywhere.' })
-      } else {
-        setAffStatus({ kind: 'ok', msg: 'Affiliation updated.' })
-      }
+      if (error) throw error
+      setAffStatus({ kind: 'ok', msg: 'Program updated.' })
     } catch (e) {
-      setAffStatus({ kind: 'err', msg: e?.message || 'Could not update affiliation.' })
+      setAffStatus({ kind: 'err', msg: e?.message || 'Could not update program.' })
     } finally {
       setAffSaving(false)
     }
@@ -108,18 +109,23 @@ export default function UserMenu({ profile }) {
             Signed in as <span style={{ fontWeight: 600, color: '#16181d' }}>{profile?.email || '—'}</span>
           </div>
 
-          {/* School / Affiliation */}
+          {/* Program */}
           <div style={{ borderTop: '1px solid #f3f0e9', paddingTop: 12, marginBottom: 14 }}>
-            <div style={{ fontWeight: 600, fontSize: 13, color: '#16181d', marginBottom: 8 }}>School / Affiliation</div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#16181d', marginBottom: 8 }}>Program</div>
+            {programLocked ? (
+              <div style={{ fontSize: 13, color: '#565a63' }}>
+                {profile?.affiliation || (profile?.role === 'admin' ? 'All programs (admin)' : 'No program assigned yet')}
+              </div>
+            ) : (
             <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                type="text"
+              <ProgramSelect
                 value={affiliation}
-                onChange={(e) => { setAffiliation(e.target.value); setAffStatus({ kind: '', msg: '' }) }}
-                placeholder="Your school or organization"
-                maxLength={100}
+                onChange={(v) => { setAffiliation(v); setAffStatus({ kind: '', msg: '' }) }}
+                programs={programList.programs}
+                loading={programList.loading}
                 style={{
                   flex: 1,
+                  minWidth: 0,
                   padding: '8px 10px',
                   fontSize: 13,
                   border: '1.5px solid #e4e0d5',
@@ -139,6 +145,7 @@ export default function UserMenu({ profile }) {
                 {affSaving ? 'Saving...' : 'Save'}
               </button>
             </div>
+            )}
             {affStatus.msg && (
               <div style={{ fontSize: 11, fontWeight: 700, marginTop: 6, color: affStatus.kind === 'ok' ? '#10b981' : '#ef4444' }}>
                 {affStatus.msg}
