@@ -24,9 +24,10 @@ export default async function handler(req, res) {
     return json(res, 429, { error: 'Too many requests. Try again later.' })
   }
 
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!supabaseUrl || !serviceKey) return json(res, 500, { error: 'Missing server configuration' })
+  if (!supabaseUrl) return json(res, 500, { error: 'Server is missing the Supabase URL (set VITE_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL)' })
+  if (!serviceKey) return json(res, 500, { error: 'Server is missing SUPABASE_SERVICE_ROLE_KEY' })
 
   const authHeader = String(req.headers.authorization || '')
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null

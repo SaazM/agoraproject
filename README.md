@@ -453,8 +453,9 @@ sat-thrive/
 |---|---|---|
 | `VITE_SUPABASE_URL` | `.env.local` + Vercel | Your Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | `.env.local` + Vercel | Your Supabase anonymous/public API key |
+| `SUPABASE_SERVICE_ROLE_KEY` | `.env.local` + Vercel | Server-only key (Project Settings > API > service_role) used by the admin API routes in `api/` — deleting a student and regrading tests. Without it those buttons fail with "Server is missing SUPABASE_SERVICE_ROLE_KEY". Never expose it to the browser. |
 
-These are the only two environment variables needed. Never commit `.env.local` to git.
+The `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` names that `vercel env pull` writes are accepted too. Never commit `.env.local` to git.
 
 ---
 

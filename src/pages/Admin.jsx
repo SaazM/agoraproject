@@ -527,13 +527,13 @@ export default function Admin() {
         body: JSON.stringify({ user_id: userId }),
       })
       const out = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(out?.error || 'Delete failed')
+      if (!res.ok) throw new Error(out?.error || `Delete failed (HTTP ${res.status})`)
       setResetMsg('Success: student deleted.')
       const p = await supabase.from('profiles').select('id,email,full_name,role,affiliation,created_at').order('created_at', { ascending: false })
       setStudents(p.data || [])
     } catch (e) {
       console.error('[Admin] Delete failed:', e?.message)
-      setResetMsg('Error: delete failed. Please try again.')
+      setResetMsg(`Error: delete failed (${e?.message || 'unknown error'}). Please try again.`)
     } finally {
       setResettingUserId(null)
     }
@@ -709,7 +709,7 @@ export default function Admin() {
         headers: { Authorization: `Bearer ${token}` },
       })
       const out = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(out?.error || 'Regrade failed')
+      if (!res.ok) throw new Error(out?.error || `Regrade failed (HTTP ${res.status})`)
       const msg = `Success: regraded ${out.updated || 0} of ${out.scanned || 0} completed attempts.`
       if (!silent) setResetMsg(msg)
       try { localStorage.setItem(`agora_regrader_version:${profile?.id || 'admin'}`, REGRADER_VERSION) } catch {}
@@ -721,7 +721,7 @@ export default function Admin() {
       setPostScores(p.data || [])
     } catch (e) {
       console.error('[Admin] Regrade failed:', e?.message)
-      if (!silent) setResetMsg('Error: regrade failed. Please try again.')
+      if (!silent) setResetMsg(`Error: regrade failed (${e?.message || 'unknown error'}). Please try again.`)
     } finally {
       setRegrading(false)
     }
