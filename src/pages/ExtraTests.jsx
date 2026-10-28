@@ -27,6 +27,8 @@ export default function ExtraTests() {
 
   const [loading, setLoading] = useState(true)
   const [attempts, setAttempts] = useState([])
+  const [loadError, setLoadError] = useState('')
+  const [reloadKey, setReloadKey] = useState(0)
   const [startingTest, setStartingTest] = useState(null)
   const [confirmTestId, setConfirmTestId] = useState(null)
 
@@ -41,21 +43,29 @@ export default function ExtraTests() {
   useEffect(() => {
     if (!viewUserId || !supabase) { setLoading(false); return }
     let cancelled = false
+    setLoading(true)
+    setLoadError('')
     supabase
       .from('test_attempts')
       .select('id, test_id, completed_at, scores, current_section')
       .eq('user_id', viewUserId)
       .order('started_at', { ascending: false })
       .then(({ data, error }) => {
-        if (error) console.error('[ExtraTests] Failed to load attempts:', error.message)
-        if (!cancelled) {
-          setAttempts((data || []).filter(a => getExamFromTestId(a.test_id) === exam))
-          setLoading(false)
+        if (cancelled) return
+        if (error) {
+          console.error('[ExtraTests] Failed to load attempts:', error.message)
+          setLoadError(error.message || 'Could not load your tests.')
         }
+        setAttempts((data || []).filter(a => getExamFromTestId(a.test_id) === exam))
+        setLoading(false)
       })
-      .catch(() => { if (!cancelled) setLoading(false) })
+      .catch((e) => {
+        if (cancelled) return
+        setLoadError(e?.message || 'Could not load your tests.')
+        setLoading(false)
+      })
     return () => { cancelled = true }
-  }, [viewUserId, exam])
+  }, [viewUserId, exam, reloadKey])
 
   const completed = useMemo(() => attempts.filter(a => a.completed_at || a.scores?.total), [attempts])
   const inProgress = useMemo(() => attempts.filter(a => !a.completed_at && !a.scores?.total && a.current_section), [attempts])
@@ -140,7 +150,15 @@ export default function ExtraTests() {
           </div>
         </motion.div>
 
-        {!hasTakenPretest ? (
+        {loadError ? (
+          <div style={{ background: '#fff', border: '1.5px solid rgba(239,68,68,.25)', borderRadius: 16, padding: 24, textAlign: 'center' }}>
+            <div style={{ fontFamily: "Fraunces, Georgia, serif", fontWeight: 600, fontSize: 18, color: '#16181d', marginBottom: 8 }}>
+              Couldn't load your tests
+            </div>
+            <div style={{ color: '#565a63', fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>{loadError}</div>
+            <button type="button" className="btn btn-primary" onClick={() => setReloadKey((k) => k + 1)}>Try again</button>
+          </div>
+        ) : !hasTakenPretest ? (
           <motion.div
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}

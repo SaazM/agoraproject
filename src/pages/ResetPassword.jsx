@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase, initialAuthRedirect } from '../lib/supabase.js'
+import { supabase, getAuthRedirect, clearAuthRedirect } from '../lib/supabase.js'
 import PasswordInput from '../components/PasswordInput.jsx'
 
 export default function ResetPassword() {
@@ -18,42 +18,38 @@ export default function ResetPassword() {
     const INVALID = 'This reset link is invalid or expired. Please request a new one.'
     ;(async () => {
       try {
-        // Only a visit that arrived through an email link may set a password. Never
-        // fall back to an existing session, or anyone at an unlocked browser could
-        // change the password. initialAuthRedirect was captured before the Supabase
-        // client cleared the tokens from the URL.
-        const landing = initialAuthRedirect?.path === '/reset' ? initialAuthRedirect : null
-        if (landing?.error) {
-          setStatus({ loading: false, msg: `${landing.error}. Please request a new reset link.` })
-          return
-        }
-        if (!landing?.hasTokens && !landing?.hasCode) {
+        // Only a visit that arrived through an email link may set a password. The
+        // link's tokens were captured before the Supabase client cleared them from
+        // the URL, and are validated HERE with setSession / exchangeCodeForSession.
+        // Never fall back to whatever session the browser already holds: the client
+        // keeps an existing session when a URL login fails, so a bogus token plus an
+        // unlocked browser must not reach the password form.
+        const landing = getAuthRedirect()
+        if (landing?.path !== '/reset') {
           setStatus({ loading: false, msg: INVALID })
           return
         }
-
-        // getSession waits for the client to finish reading the link.
-        let { data } = await supabase.auth.getSession()
-        if (!data?.session) {
-          // The client may not have handled the link (e.g. it mounted first); do it here.
-          const url = window.location.href
-          const params = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''))
-          const access_token = params.get('access_token')
-          const refresh_token = params.get('refresh_token')
-          if (new URL(url).searchParams.get('code')) {
-            await supabase.auth.exchangeCodeForSession(url)
-          } else if (access_token && refresh_token) {
-            await supabase.auth.setSession({ access_token, refresh_token })
-          }
-          ;({ data } = await supabase.auth.getSession())
+        if (landing.error) {
+          setStatus({ loading: false, msg: `${landing.error}. Please request a new reset link.` })
+          return
         }
-        if (!data?.session) {
+        let session = null
+        if (landing.code) {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(landing.code)
+          if (error) throw error
+          session = data?.session || null
+        } else if (landing.accessToken && landing.refreshToken) {
+          const { data, error } = await supabase.auth.setSession({ access_token: landing.accessToken, refresh_token: landing.refreshToken })
+          if (error) throw error
+          session = data?.session || null
+        }
+        if (!session) {
           setStatus({ loading: false, msg: INVALID })
           return
         }
         setStatus({ loading: false, msg: '' })
       } catch (e) {
-        setStatus({ loading: false, msg: e?.message || 'Could not open reset link.' })
+        setStatus({ loading: false, msg: `${e?.message || 'Could not open reset link'}. Please request a new reset link.` })
       }
     })()
   }, [])
@@ -69,6 +65,7 @@ export default function ResetPassword() {
       setSaving(false)
       return
     }
+    clearAuthRedirect()
     await supabase.auth.signOut()
     alert('Password updated. Please sign in with your new password.')
     navigate('/login', { replace: true })

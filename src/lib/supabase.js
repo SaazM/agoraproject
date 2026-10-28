@@ -60,11 +60,26 @@ function captureAuthRedirect() {
     type: hash.get('type') || search.get('type') || null,
     hasTokens,
     hasCode,
+    // Kept so /reset can validate the link itself (setSession / exchangeCodeForSession)
+    // instead of trusting whatever session the client already holds.
+    accessToken: hash.get('access_token') || null,
+    refreshToken: hash.get('refresh_token') || null,
+    code: search.get('code') || null,
     error: error ? error.replace(/\+/g, ' ') : null,
   }
 }
 
-export const initialAuthRedirect = captureAuthRedirect()
+let authRedirect = captureAuthRedirect()
+
+/** What the page's landing URL said, if it was an auth email link. */
+export function getAuthRedirect() {
+  return authRedirect
+}
+
+/** Forget the landing link once it has been used, so it can't be reused in this tab. */
+export function clearAuthRedirect() {
+  authRedirect = null
+}
 
 export const supabase = supabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {

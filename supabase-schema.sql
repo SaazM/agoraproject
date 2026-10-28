@@ -285,7 +285,8 @@ create policy "Admins see all studied topics" on public.studied_topics for selec
 drop policy if exists "Users can view test answer keys" on public.test_answer_keys;
 drop policy if exists "Admins can upsert test answer keys" on public.test_answer_keys;
 drop policy if exists "Admins can update test answer keys" on public.test_answer_keys;
-create policy "Users can view test answer keys" on public.test_answer_keys for select using (auth.role() = 'authenticated');
+-- Only the Admin Panel reads this table; students must not be able to pull answer keys.
+create policy "Users can view test answer keys" on public.test_answer_keys for select using (public.is_admin());
 create policy "Admins can upsert test answer keys" on public.test_answer_keys for insert with check (public.is_admin());
 create policy "Admins can update test answer keys" on public.test_answer_keys for update using (public.is_admin()) with check (public.is_admin());
 
