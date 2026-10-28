@@ -43,10 +43,11 @@ export default function ExtraTests() {
     let cancelled = false
     supabase
       .from('test_attempts')
-      .select('id, test_id, completed_at, scores, current_module')
+      .select('id, test_id, completed_at, scores, current_section')
       .eq('user_id', viewUserId)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .order('started_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) console.error('[ExtraTests] Failed to load attempts:', error.message)
         if (!cancelled) {
           setAttempts((data || []).filter(a => getExamFromTestId(a.test_id) === exam))
           setLoading(false)
@@ -57,7 +58,7 @@ export default function ExtraTests() {
   }, [viewUserId, exam])
 
   const completed = useMemo(() => attempts.filter(a => a.completed_at || a.scores?.total), [attempts])
-  const inProgress = useMemo(() => attempts.filter(a => !a.completed_at && !a.scores?.total && a.current_module), [attempts])
+  const inProgress = useMemo(() => attempts.filter(a => !a.completed_at && !a.scores?.total && a.current_section), [attempts])
   const completedExtra = completed.filter(a => extraTests.some(t => t.id === a.test_id))
 
   const viewHref = (path) => withViewUser(withExam(path, exam), viewUserId, isAdminPreview)
@@ -72,8 +73,9 @@ export default function ExtraTests() {
         .eq('user_id', user.id)
         .eq('test_id', testId)
         .is('completed_at', null)
-        .order('created_at', { ascending: false })
+        .order('started_at', { ascending: false })
         .limit(1)
+      if (existing.error) throw existing.error
       if (existing.data?.length) {
         navigate(`/test/${existing.data[0].id}`)
         return

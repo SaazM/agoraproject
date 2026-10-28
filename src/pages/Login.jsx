@@ -8,12 +8,15 @@ import { usePrograms } from '../hooks/usePrograms.js'
 export default function Login() {
   const navigate = useNavigate()
   const [, setSearchParams] = useSearchParams()
-  const [startInSignup] = useState(() => {
-    if (typeof window === 'undefined') return false
+  const [initialMode] = useState(() => {
+    if (typeof window === 'undefined') return 'signin'
     const p = new URLSearchParams(window.location.search)
-    return p.get('signup') === '1' || p.get('signup') === 'true'
+    if (p.get('signup') === '1' || p.get('signup') === 'true') return 'signup'
+    if (p.get('reset') === '1' || p.get('reset') === 'true') return 'reset'
+    return 'signin'
   })
-  const [mode, setMode] = useState(startInSignup ? 'signup' : 'signin') // 'signin' | 'signup'
+  const clearModeParam = initialMode !== 'signin' // drop ?signup=1 / ?reset=1 from the URL once read
+  const [mode, setMode] = useState(initialMode) // 'signin' | 'signup' | 'reset'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -22,11 +25,11 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, requestPasswordReset } = useAuth()
 
   useEffect(() => {
-    if (startInSignup) setSearchParams({}, { replace: true })
-  }, [startInSignup, setSearchParams])
+    if (clearModeParam) setSearchParams({}, { replace: true })
+  }, [clearModeParam, setSearchParams])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -34,6 +37,14 @@ export default function Login() {
     const trimmedEmail = email.trim().toLowerCase()
     if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       setError('Please enter a valid email address'); setLoading(false); return
+    }
+    if (mode === 'reset') {
+      const { error } = await requestPasswordReset(trimmedEmail)
+      if (error) setError(error.message)
+      // Same message whether or not the account exists, so this can't be used to probe emails.
+      else setSuccess(`If an account exists for ${trimmedEmail}, a password reset link is on its way. Check your inbox and spam folder.`)
+      setLoading(false)
+      return
     }
     if (mode === 'signup') {
       // Length is only our rule for new accounts — on sign-in, let the server
@@ -109,10 +120,10 @@ export default function Login() {
         <div className="login-auth-col">
           <div className="login-card">
             <div className="login-card-title">
-              {mode === 'signin' ? 'Welcome back' : 'Create your account'}
+              {mode === 'signin' ? 'Welcome back' : mode === 'reset' ? 'Reset your password' : 'Create your account'}
             </div>
             <div className="login-card-subtitle">
-              {mode === 'signin' ? 'Sign in to continue your prep' : 'Join thousands of students'}
+              {mode === 'signin' ? 'Sign in to continue your prep' : mode === 'reset' ? "Enter your email and we'll send you a reset link" : 'Join thousands of students'}
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -126,6 +137,7 @@ export default function Login() {
                 <label className="input-label">Email</label>
                 <input className="input-field" type="email" placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
               </div>
+              {mode !== 'reset' && (
               <div className="input-wrap">
                 <label className="input-label">Password</label>
                 <PasswordInput
@@ -136,7 +148,14 @@ export default function Login() {
                   required
                   autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 />
+                {mode === 'signin' && (
+                  <button type="button" className="login-switch-btn" style={{ marginTop: 8, fontSize: 13 }}
+                    onClick={() => { setMode('reset'); setError(''); setSuccess(''); setPassword('') }}>
+                    Forgot password?
+                  </button>
+                )}
               </div>
+              )}
               {mode === 'signup' && (
                 <div className="input-wrap">
                   <label className="input-label" htmlFor="signup-program">Program <span style={{ opacity: .4, fontWeight: 400 }}>(Optional)</span></label>
@@ -158,13 +177,13 @@ export default function Login() {
               {success && <div style={{color:'#10b981', fontSize:13, marginBottom:14}}>Success: {success}</div>}
 
               <button type="submit" className="btn btn-primary login-submit-btn" disabled={loading}>
-                {loading ? <span className="spinner" /> : mode === 'signin' ? 'Sign In' : 'Create Account'}
+                {loading ? <span className="spinner" /> : mode === 'signin' ? 'Sign In' : mode === 'reset' ? 'Send Reset Link' : 'Create Account'}
               </button>
             </form>
 
             <div className="login-switch">
-              {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-              <button onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setSuccess('') }}
+              {mode === 'reset' ? 'Remembered it? ' : mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+              <button type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setSuccess('') }}
                 className="login-switch-btn">
                 {mode === 'signin' ? 'Sign up' : 'Sign in'}
               </button>

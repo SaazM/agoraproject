@@ -59,7 +59,7 @@ export default function FinalTest() {
       .eq('user_id', user.id)
       .eq('test_id', finalTestId)
       .is('completed_at', null)
-      .order('created_at', { ascending: false })
+      .order('started_at', { ascending: false })
       .limit(1)
       .maybeSingle()
       .then(({ data }) => {
@@ -134,11 +134,6 @@ export default function FinalTest() {
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             {cfg?.cbUrl && (
               <a className="btn btn-outline" href={cfg.cbUrl} target="_blank" rel="noreferrer">Open {cfg.cbLabel || 'test'} on College Board ↗</a>
-            )}
-            {cfg?.akUrl && (
-              <a className="btn btn-outline" href={cfg.akUrl} target="_blank" rel="noreferrer" title="Admin-only hint: students shouldn't use this during the test">
-                Open AK →
-              </a>
             )}
             {inProgress?.id ? (
               <button className="btn" style={{ background: '#16181d', color: 'white', fontWeight: 600 }} onClick={() => navigate(`/test/${inProgress.id}`)} disabled={loading}>

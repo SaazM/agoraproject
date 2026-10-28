@@ -696,6 +696,37 @@ export default function Admin() {
     }
   }
 
+  // Answer keys are served only to admins, by /api/admin/answer-key. The tab is
+  // opened before the request so popup blockers treat it as a user action.
+  async function openAnswerKey(test) {
+    if (!supabase || !isAdmin || !test?.id) return
+    const tab = window.open('', '_blank')
+    if (tab) tab.document.title = 'Loading answer key…'
+    try {
+      const { data: sess } = await supabase.auth.getSession()
+      const token = sess?.session?.access_token
+      if (!token) throw new Error('Missing session token')
+      const res = await fetch('/api/admin/answer-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ test_id: test.id }),
+      })
+      if (!res.ok) {
+        const out = await res.json().catch(() => ({}))
+        throw new Error(out?.error || `HTTP ${res.status}`)
+      }
+      const html = await res.text()
+      const url = URL.createObjectURL(new Blob([html], { type: 'text/html' }))
+      if (tab) tab.location.href = url
+      else window.location.assign(url)
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch (e) {
+      if (tab) tab.close()
+      console.error('[Admin] Open answer key failed:', e?.message)
+      setTestKeyStatus({ loading: false, msg: `Error: could not open the ${test.label} answer key (${e?.message || 'unknown error'}).` })
+    }
+  }
+
   async function runRegrade({ silent = false } = {}) {
     if (!supabase || !isAdmin || regrading) return
     setRegrading(true)
@@ -1819,7 +1850,7 @@ export default function Admin() {
               {TESTS.map((t, idx) => {
                 const builtIn = getAnswerKeyBySection(t.id)
                 const stored = keysByTest?.[t.id] || null
-                const bundledPdf = (!builtIn && !stored && t.akUrl) ? 'Bundled AK PDF (auto)' : null
+                const bundledPdf = (!builtIn && !stored && t.hasAnswerKeyPage) ? 'Bundled AK PDF (auto)' : null
                 const builtInCount = countKey(builtIn)
                 const storedCount = countKey(stored)
                 return (
@@ -1843,10 +1874,10 @@ export default function Admin() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                        {t.akUrl && (
-                          <a style={{ ...actionBtn, textDecoration: 'none', display: 'inline-block' }} href={t.akUrl} target="_blank" rel="noreferrer">
+                        {t.hasAnswerKeyPage && (
+                          <button type="button" style={actionBtn} onClick={() => openAnswerKey(t)}>
                             {t.explanationUrl ? 'AK + Explanations' : 'Open AK'}
-                          </a>
+                          </button>
                         )}
                         {builtIn && storedCount > 0 && storedCount !== builtInCount && (
                           <button style={actionBtn} disabled={testKeyStatus.loading}
@@ -1865,7 +1896,7 @@ export default function Admin() {
                             Fix to {builtInCount}
                           </button>
                         )}
-                        {t.akUrl && (
+                        {t.hasAnswerKeyPage && (
                           <button style={actionBtn} disabled={testKeyStatus.loading}
                             onClick={async () => {
                               setTestKeyStatus({ loading: true, msg: `Importing ${t.label} answer key...` })

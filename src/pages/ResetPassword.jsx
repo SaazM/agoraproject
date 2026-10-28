@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase.js'
+import { Link, useNavigate } from 'react-router-dom'
+import { supabase, initialAuthRedirect } from '../lib/supabase.js'
 import PasswordInput from '../components/PasswordInput.jsx'
 
 export default function ResetPassword() {
@@ -15,31 +15,40 @@ export default function ResetPassword() {
       setStatus({ loading: false, msg: 'Supabase is not configured.' })
       return
     }
+    const INVALID = 'This reset link is invalid or expired. Please request a new one.'
     ;(async () => {
       try {
-        const url = window.location.href
-        const hasCode = new URL(url).searchParams.get('code')
-        const hash = window.location.hash || ''
-        const params = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash)
-        const access_token = params.get('access_token')
-        const refresh_token = params.get('refresh_token')
-
-        if (hasCode) {
-          const { error } = await supabase.auth.exchangeCodeForSession(url)
-          if (error) throw error
-        } else if (access_token && refresh_token) {
-          const { error } = await supabase.auth.setSession({ access_token, refresh_token })
-          if (error) throw error
-        } else {
-          // No recovery token in the URL — do NOT fall back to an existing
-          // session, or anyone at an unlocked browser could change the password.
-          setStatus({ loading: false, msg: 'This reset link is invalid or expired. Please request a new one.' })
+        // Only a visit that arrived through an email link may set a password. Never
+        // fall back to an existing session, or anyone at an unlocked browser could
+        // change the password. initialAuthRedirect was captured before the Supabase
+        // client cleared the tokens from the URL.
+        const landing = initialAuthRedirect?.path === '/reset' ? initialAuthRedirect : null
+        if (landing?.error) {
+          setStatus({ loading: false, msg: `${landing.error}. Please request a new reset link.` })
+          return
+        }
+        if (!landing?.hasTokens && !landing?.hasCode) {
+          setStatus({ loading: false, msg: INVALID })
           return
         }
 
-        const { data } = await supabase.auth.getSession()
+        // getSession waits for the client to finish reading the link.
+        let { data } = await supabase.auth.getSession()
         if (!data?.session) {
-          setStatus({ loading: false, msg: 'This reset link is invalid or expired. Please request a new one.' })
+          // The client may not have handled the link (e.g. it mounted first); do it here.
+          const url = window.location.href
+          const params = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''))
+          const access_token = params.get('access_token')
+          const refresh_token = params.get('refresh_token')
+          if (new URL(url).searchParams.get('code')) {
+            await supabase.auth.exchangeCodeForSession(url)
+          } else if (access_token && refresh_token) {
+            await supabase.auth.setSession({ access_token, refresh_token })
+          }
+          ;({ data } = await supabase.auth.getSession())
+        }
+        if (!data?.session) {
+          setStatus({ loading: false, msg: INVALID })
           return
         }
         setStatus({ loading: false, msg: '' })
@@ -74,7 +83,12 @@ export default function ResetPassword() {
         {status.loading ? (
           <div style={{ color: '#565a63' }}>{status.msg}</div>
         ) : status.msg ? (
-          <div style={{ color: '#ef4444', fontWeight: 800 }}>{status.msg}</div>
+          <>
+            <div style={{ color: '#ef4444', fontWeight: 800 }}>{status.msg}</div>
+            <Link to="/login?reset=1" className="btn btn-primary" style={{ display: 'inline-block', marginTop: 14, textDecoration: 'none' }}>
+              Send a new reset link
+            </Link>
+          </>
         ) : (
           <>
             <div style={{ color: '#565a63', fontSize: 13, lineHeight: 1.6, marginBottom: 14 }}>

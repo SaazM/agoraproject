@@ -5,7 +5,7 @@
 */
 
 // Bump this to force clients to refresh caches after deploys.
-const VERSION = 'v6'
+const VERSION = 'v7' // v7: purge answer-key files cached before they left public/
 const STATIC_CACHE = `agora-static-${VERSION}`
 const RUNTIME_CACHE = `agora-runtime-${VERSION}`
 

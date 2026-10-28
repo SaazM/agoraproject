@@ -12,3 +12,6 @@ dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Generated answer key pages (scripts/generateAnswerKeyPages.mjs). Never serve these.
+/private/

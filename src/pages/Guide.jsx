@@ -476,6 +476,7 @@ export default function Guide() {
   const [selectedId, setSelectedId] = useState(null)
   const [completedMap, setCompletedMap] = useState({})
   const [practiceByChapter, setPracticeByChapter] = useState({})
+  const [progressLoaded, setProgressLoaded] = useState(false)
   const [lessonChapter, setLessonChapter] = useState(null)
   const lessonData = SAT_LESSON_CONTENT
   const viewHref = (path) => withViewUser(withExam(path, exam), viewUserId, isAdminPreview)
@@ -490,24 +491,32 @@ export default function Guide() {
 
   useEffect(() => {
     if (!viewUserId) return
-    getStudiedTopics(viewUserId).then(({ map, practiceByChapter }) => {
-      setCompletedMap(map || {})
-      setPracticeByChapter(practiceByChapter || {})
-    })
+    let cancelled = false
+    setProgressLoaded(false)
+    getStudiedTopics(viewUserId)
+      .then(({ map, practiceByChapter }) => {
+        if (cancelled) return
+        setCompletedMap(map || {})
+        setPracticeByChapter(practiceByChapter || {})
+      })
+      .catch((e) => console.error('[Guide] Failed to load progress:', e?.message))
+      .finally(() => { if (!cancelled) setProgressLoaded(true) })
+    return () => { cancelled = true }
   }, [viewUserId])
 
   useEffect(() => {
-    if (!viewUserId || !selectedId || isAdminPreview) return
-    const existingPractice = practiceByChapter?.[selectedId] || {}
-    if (existingPractice?.meta?.guide_started_at) return
+    // Wait for saved progress first: this used to fire on a /guide?chapter= link before
+    // progress loaded and overwrite the chapter's saved answers with an empty record.
+    if (!viewUserId || !selectedId || isAdminPreview || !progressLoaded) return
+    if (practiceByChapter?.[selectedId]?.meta?.guide_started_at) return
     // Mark the chapter as "started" so the dashboard list reflects In progress only after opening it.
-    markChapterGuideStarted(viewUserId, selectedId, existingPractice).catch(() => {})
+    markChapterGuideStarted(viewUserId, selectedId).catch((e) => console.error('[Guide] Failed to mark chapter started:', e?.message))
     setPracticeByChapter(prev => {
       const base = prev?.[selectedId] && typeof prev[selectedId] === 'object' ? prev[selectedId] : {}
       const meta = base.meta && typeof base.meta === 'object' ? base.meta : {}
       return { ...(prev || {}), [selectedId]: { ...base, meta: { ...meta, guide_started_at: new Date().toISOString() } } }
     })
-  }, [viewUserId, selectedId, isAdminPreview])
+  }, [viewUserId, selectedId, isAdminPreview, progressLoaded])
 
   const domains = useMemo(() => {
     const grouped = {}
@@ -736,7 +745,12 @@ export default function Guide() {
 	                        const nextGuide = { ...existingGuide, [idx]: true }
 	                        const nextPractice = { ...(existingPractice && typeof existingPractice === 'object' ? existingPractice : {}), guide: nextGuide }
 	                        setPracticeByChapter(prev => ({ ...prev, [selectedId]: nextPractice }))
-	                        await setChapterGuidePractice(viewUserId, selectedId, nextGuide, existingPractice)
+	                        try {
+                          await setChapterGuidePractice(viewUserId, selectedId, nextGuide, existingPractice)
+                        } catch (e) {
+                          console.error('[Guide] Failed to save practice answer:', e?.message)
+                          addToast('Could not save that answer. Check your connection and try again.', 'error')
+                        }
 	                      }}
 	                    />
 	                  ))}

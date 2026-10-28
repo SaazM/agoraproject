@@ -44,6 +44,28 @@ async function fetchWithRetry(input, init) {
   throw lastErr || new Error('Network error')
 }
 
+// The client (detectSessionInUrl) reads tokens from an email link and then clears
+// them from the URL. Lazily loaded pages like /reset can mount after that, so record
+// what the landing URL said first, before createClient runs.
+function captureAuthRedirect() {
+  if (typeof window === 'undefined') return null
+  const hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''))
+  const search = new URLSearchParams(window.location.search || '')
+  const hasTokens = Boolean(hash.get('access_token'))
+  const hasCode = Boolean(search.get('code'))
+  const error = hash.get('error_description') || search.get('error_description') || hash.get('error') || search.get('error')
+  if (!hasTokens && !hasCode && !error) return null
+  return {
+    path: window.location.pathname,
+    type: hash.get('type') || search.get('type') || null,
+    hasTokens,
+    hasCode,
+    error: error ? error.replace(/\+/g, ' ') : null,
+  }
+}
+
+export const initialAuthRedirect = captureAuthRedirect()
+
 export const supabase = supabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {
       global: { fetch: fetchWithRetry },

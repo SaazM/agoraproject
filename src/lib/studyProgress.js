@@ -55,15 +55,49 @@ export async function setStudiedTopic(userId, chapterId, completed) {
     })
 }
 
+function asObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v) ? v : {}
+}
+
+// Guide answers live under practice.guide; very old rows stored them at the top level.
+function guideMapOf(practice) {
+  const p = asObject(practice)
+  if (p.guide && typeof p.guide === 'object') return asObject(p.guide)
+  const keys = Object.keys(p)
+  if (keys.length > 0 && keys.every((k) => /^\d+$/.test(k))) return p
+  return {}
+}
+
+// Read the chapter's practice JSON as the database has it right now. Writers merge
+// into this instead of trusting the page's copy, which may not have loaded yet —
+// upserting a stale copy replaces the whole column and erases saved answers.
+async function readServerPractice(userId, chapterId) {
+  const { data, error } = await supabase
+    .from('studied_topics')
+    .select('practice')
+    .eq('user_id', userId)
+    .eq('chapter_id', chapterId)
+    .maybeSingle()
+  if (error) throw error
+  return asObject(data?.practice)
+}
+
 export async function setChapterGuidePractice(userId, chapterId, guideMap, existingPractice) {
   if (!userId || !chapterId || typeof chapterId !== 'string' || chapterId.length > 60) return
   if (!guideMap || typeof guideMap !== 'object' || Array.isArray(guideMap)) return
-  const nextPractice = {
-    ...(existingPractice && typeof existingPractice === 'object' ? existingPractice : {}),
-    guide: guideMap,
-  }
   if (!supabase) return
-  await supabase
+  const server = await readServerPractice(userId, chapterId)
+  const local = asObject(existingPractice)
+  const legacyKeys = (p) => Object.fromEntries(Object.entries(p).filter(([k]) => !/^\d+$/.test(k)))
+  const nextPractice = {
+    ...legacyKeys(local),
+    ...legacyKeys(server),
+    meta: { ...asObject(local.meta), ...asObject(server.meta) },
+    // Answers only ever flip to "correct", so the union never loses progress.
+    guide: { ...guideMapOf(server), ...guideMapOf(local), ...guideMap },
+  }
+  if (!Object.keys(nextPractice.meta).length) delete nextPractice.meta
+  const { error } = await supabase
     .from('studied_topics')
     .upsert({
       user_id: userId,
@@ -71,24 +105,25 @@ export async function setChapterGuidePractice(userId, chapterId, guideMap, exist
       practice: nextPractice,
       updated_at: new Date().toISOString(),
     })
+  if (error) throw error
 }
 
-export async function markChapterGuideStarted(userId, chapterId, existingPractice) {
+export async function markChapterGuideStarted(userId, chapterId) {
   if (!userId || !chapterId || typeof chapterId !== 'string' || chapterId.length > 60) return
-  const nowIso = new Date().toISOString()
-  const base = (existingPractice && typeof existingPractice === 'object') ? existingPractice : {}
-  const meta = (base.meta && typeof base.meta === 'object') ? base.meta : {}
-  if (meta.guide_started_at) return
-  const nextPractice = { ...base, meta: { ...meta, guide_started_at: nowIso } }
   if (!supabase) return
-  await supabase
+  const server = await readServerPractice(userId, chapterId)
+  const meta = asObject(server.meta)
+  if (meta.guide_started_at) return
+  const nowIso = new Date().toISOString()
+  const { error } = await supabase
     .from('studied_topics')
     .upsert({
       user_id: userId,
       chapter_id: chapterId,
-      practice: nextPractice,
+      practice: { ...server, meta: { ...meta, guide_started_at: nowIso } },
       updated_at: nowIso,
     })
+  if (error) throw error
 }
 
 export async function clearAdminTestingData(userId) {

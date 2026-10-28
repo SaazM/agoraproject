@@ -3,7 +3,7 @@ import path from 'node:path'
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
 
 const ROOT = path.resolve(process.cwd())
-const AK_PATH = path.join(ROOT, 'public', 'final-test-answer-key.pdf')
+const AK_PATH = path.join(ROOT, 'scripts', 'sources', 'final-test-answer-key.pdf') // kept out of public/ so students can't download it
 const OUT_PATH = path.join(ROOT, 'src', 'data', 'finalAnswerKey.js')
 
 function sumCounts(key) {
