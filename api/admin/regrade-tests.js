@@ -42,9 +42,19 @@ export default async function handler(req, res) {
   }
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  // SUPABASE_SECRET_KEY is the newer "sb_secret_…" key, which the Supabase ↔ Vercel
+  // integration may set instead of the legacy service_role JWT. Both work here.
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY
   if (!supabaseUrl) return json(res, 500, { error: 'Server is missing the Supabase URL (set VITE_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL)' })
-  if (!serviceKey) return json(res, 500, { error: 'Server is missing SUPABASE_SERVICE_ROLE_KEY' })
+  if (!serviceKey) {
+    // Names only (never values), so a misnamed or mis-scoped variable can be spotted from the error.
+    const seen = Object.keys(process.env).filter((k) => /SUPABASE/i.test(k)).sort()
+    return json(res, 500, {
+      error: 'Server is missing SUPABASE_SERVICE_ROLE_KEY',
+      vercel_env: process.env.VERCEL_ENV || null,
+      supabase_vars_present: seen,
+    })
+  }
 
   const authHeader = String(req.headers.authorization || '')
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null
