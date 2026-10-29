@@ -21,6 +21,16 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 const FINAL_TEST_ID = 'final_test'
 const REGRADER_VERSION = '2026-03-18-01'
 
+// fetch() rejects with a browser-specific phrase ("Failed to fetch" in Chrome,
+// "Load failed" in Safari, "NetworkError…" in Firefox) only when no response came
+// back at all. Spell that out, since the raw text reads like a server bug.
+function describeRequestError(e) {
+  const msg = String(e?.message || 'unknown error')
+  const noResponse = e instanceof TypeError && /failed to fetch|load failed|networkerror/i.test(msg)
+  if (!noResponse) return msg
+  return 'the request never reached the server — check your internet connection, and try with VPN or ad blockers off'
+}
+
 /* ── style tokens ── */
 const cardStyle = {
   background: '#fff',
@@ -533,7 +543,7 @@ export default function Admin() {
       setStudents(p.data || [])
     } catch (e) {
       console.error('[Admin] Delete failed:', e?.message)
-      setResetMsg(`Error: delete failed (${e?.message || 'unknown error'}). Please try again.`)
+      setResetMsg(`Error: delete failed (${describeRequestError(e)}). Please try again.`)
     } finally {
       setResettingUserId(null)
     }
@@ -723,7 +733,7 @@ export default function Admin() {
     } catch (e) {
       if (tab) tab.close()
       console.error('[Admin] Open answer key failed:', e?.message)
-      setTestKeyStatus({ loading: false, msg: `Error: could not open the ${test.label} answer key (${e?.message || 'unknown error'}).` })
+      setTestKeyStatus({ loading: false, msg: `Error: could not open the ${test.label} answer key (${describeRequestError(e)}).` })
     }
   }
 
@@ -752,7 +762,7 @@ export default function Admin() {
       setPostScores(p.data || [])
     } catch (e) {
       console.error('[Admin] Regrade failed:', e?.message)
-      if (!silent) setResetMsg(`Error: regrade failed (${e?.message || 'unknown error'}). Please try again.`)
+      if (!silent) setResetMsg(`Error: regrade failed (${describeRequestError(e)}). Please try again.`)
     } finally {
       setRegrading(false)
     }
