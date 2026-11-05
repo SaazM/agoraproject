@@ -95,6 +95,25 @@ test.describe('public pages', () => {
     await expect(page.locator('body')).not.toBeEmpty()
   })
 
+  test('a recovery link that lands on the homepage is routed to /reset', async ({ page }) => {
+    // Supabase falls back to the Site URL (the homepage) when the app's redirectTo
+    // isn't on its allow-list, keeping the tokens in the hash. The app must still
+    // take the student to the new-password page rather than signing them in on /.
+    await page.goto('/#access_token=not-a-real-token&refresh_token=not-a-real-token&type=recovery')
+    await page.waitForURL(/\/reset/, { timeout: 15_000 })
+    await expect(page.getByText('Reset password', { exact: true })).toBeVisible()
+    // Wait for validation to finish (error branch), then confirm bogus tokens never reached the form.
+    await expect(page.getByRole('link', { name: /send a new reset link/i })).toBeVisible()
+    await expect(page.getByPlaceholder('New password (min 8)')).toHaveCount(0)
+  })
+
+  test('visiting /reset without an email link does not show the password form', async ({ page }) => {
+    await page.goto('/reset')
+    await expect(page.getByText('Reset password', { exact: true })).toBeVisible()
+    await expect(page.getByPlaceholder('New password (min 8)')).toHaveCount(0)
+    await expect(page.getByRole('link', { name: /send a new reset link/i })).toBeVisible()
+  })
+
   test('a valid share link renders the report card', async ({ page }) => {
     const errors = collectErrors(page)
     const payload = {

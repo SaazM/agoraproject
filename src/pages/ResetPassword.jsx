@@ -24,8 +24,11 @@ export default function ResetPassword() {
         // Never fall back to whatever session the browser already holds: the client
         // keeps an existing session when a URL login fails, so a bogus token plus an
         // unlocked browser must not reach the password form.
+        // A recovery link may land on the homepage instead of /reset when Supabase's
+        // Redirect URL allow-list doesn't include this origin (it then falls back to
+        // the Site URL); AuthLinkRouter brings it here, so accept it by type too.
         const landing = getAuthRedirect()
-        if (landing?.path !== '/reset') {
+        if (!landing || (landing.path !== '/reset' && landing.type !== 'recovery')) {
           setStatus({ loading: false, msg: INVALID })
           return
         }

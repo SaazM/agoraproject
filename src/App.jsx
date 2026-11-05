@@ -1,8 +1,9 @@
 import React, { Suspense, lazy, useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx'
+import { getAuthRedirect } from './lib/supabase.js'
 import AppErrorBoundary from './components/AppErrorBoundary.jsx'
 import { ToastProvider } from './components/Toast.jsx'
 import Login from './pages/Login.jsx'
@@ -202,6 +203,26 @@ function ScrollToTop() {
   return null
 }
 
+/**
+ * Send a password-recovery email link to /reset wherever it lands.
+ *
+ * Supabase only honours `redirectTo` when the URL is on the project's Redirect URL
+ * allow-list; otherwise it drops the user on the Site URL (usually the homepage)
+ * with the recovery tokens still in the hash. Without this, the student would be
+ * signed in on the landing page and never see the new-password form.
+ */
+function AuthLinkRouter() {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  useEffect(() => {
+    const landing = getAuthRedirect()
+    if (landing?.type === 'recovery' && pathname !== '/reset') navigate('/reset', { replace: true })
+    // Only the landing URL matters, so run once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return null
+}
+
 function AnimatedRoutes() {
   const location = useLocation()
   return (
@@ -251,6 +272,7 @@ export default function App() {
           <AppErrorBoundary>
             <AppWarmup />
             <ScrollToTop />
+            <AuthLinkRouter />
             <Suspense fallback={<RouteLoader />}>
               <AnimatedRoutes />
             </Suspense>

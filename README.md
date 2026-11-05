@@ -42,6 +42,11 @@ cd agoraproject
 6. Go to **Authentication > Settings > Email** and set:
    - **Enable email confirmations**: ON or OFF (your choice — if OFF, users can sign in immediately after signup)
    - **Confirm email template**: leave as default
+7. Go to **Authentication > URL Configuration** (this is what makes **password reset** and confirmation emails work):
+   - **Site URL**: your deployed app's origin, e.g. `https://your-app.vercel.app` (not the default `http://localhost:3000`)
+   - **Redirect URLs**: add `https://your-app.vercel.app/**` and, for local dev, `http://localhost:*/**`
+   - If a reset link sends you to `http://localhost:3000`, this step was skipped: Supabase ignores the app's `redirectTo` for any URL not on this list and falls back to the Site URL.
+8. Email delivery: Supabase's built-in mailer only delivers to **members of your Supabase organization** and allows about 2 emails per hour. For real students to receive reset and confirmation emails, set up **Authentication > SMTP Settings** with your own provider (Resend, SendGrid, Postmark, etc.).
 
 ### Step 3: Create a Local Environment File
 
